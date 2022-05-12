@@ -15,6 +15,9 @@ namespace kiosk_solution.Business.DI
         {
 
             services.AddScoped<DbContext, Kiosk_PlatformContext>();
+
+            services.AddScoped<IPartyRepository, PartyRepository>();
+            services.AddScoped<IPartyService, PartyService>();
         }
     }
 }

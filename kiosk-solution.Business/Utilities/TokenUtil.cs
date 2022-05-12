@@ -1,5 +1,6 @@
 ﻿
 using kiosk_solution.Data.Constants;
+using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
 using Microsoft.Extensions.Configuration;
@@ -22,7 +23,7 @@ namespace kiosk_solution.Business.Utilities
             secretKey = configuration.GetSection("Security:SecretKey").Value;
         }
 
-        public static string GenerateAdminJWTWebToken(AdminViewModel adminInfo, IConfiguration configuration)
+        public static string GenerateJWTWebToken(Party partyInfo, IConfiguration configuration)
         {
             setPrivateKey(configuration);
 
@@ -30,56 +31,10 @@ namespace kiosk_solution.Business.Utilities
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new[] {
-                        new Claim(PayloadKeyConstants.ID, adminInfo.Id.ToString()),
-                        new Claim(PayloadKeyConstants.ROLE, "ADMIN"),
-                        new Claim(PayloadKeyConstants.MAIL, adminInfo.Email),
-                        new Claim(PayloadKeyConstants.PHONE_NUMBER, adminInfo.PhoneNumber)
-            };
-
-            var token = new JwtSecurityToken("",
-                "",
-                claims,
-                expires: DateTime.Now.AddHours(2),
-                signingCredentials: credentials);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        public static string GenerateLocationOwnerJWTWebToken(LocationOwnerViewModel locationOwnerInfo, IConfiguration configuration)
-        {
-            setPrivateKey(configuration);
-
-            var securityKey = new SymmetricSecurityKey(Convert.FromBase64String(secretKey));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[] {
-                        new Claim(PayloadKeyConstants.ID, locationOwnerInfo.Id.ToString()),
-                        new Claim(PayloadKeyConstants.ROLE, "LOCATION_OWNER"),
-                        new Claim(PayloadKeyConstants.MAIL, locationOwnerInfo.Email),
-                        new Claim(PayloadKeyConstants.PHONE_NUMBER, locationOwnerInfo.PhoneNumber)
-            };
-
-            var token = new JwtSecurityToken("",
-                "",
-                claims,
-                expires: DateTime.Now.AddHours(2),
-                signingCredentials: credentials);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        public static string GenerateServiceProviderJWTWebToken(ServiceProviderViewModel serviceProviderInfo, IConfiguration configuration)
-        {
-            setPrivateKey(configuration);
-
-            var securityKey = new SymmetricSecurityKey(Convert.FromBase64String(secretKey));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[] {
-                        new Claim(PayloadKeyConstants.ID, serviceProviderInfo.Id.ToString()),
-                        new Claim(PayloadKeyConstants.ROLE, "SERVICE_PROVIDER"),
-                        new Claim(PayloadKeyConstants.MAIL, serviceProviderInfo.Email),
-                        new Claim(PayloadKeyConstants.PHONE_NUMBER, serviceProviderInfo.PhoneNumber)
+                        new Claim(PayloadKeyConstants.ID, partyInfo.Id.ToString()),
+                        new Claim(PayloadKeyConstants.ROLE, partyInfo.Role.Name),
+                        new Claim(PayloadKeyConstants.MAIL, partyInfo.Email),
+                        new Claim(PayloadKeyConstants.PHONE_NUMBER, partyInfo.PhoneNumber)
             };
 
             var token = new JwtSecurityToken("",
