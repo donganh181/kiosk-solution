@@ -21,30 +21,55 @@ namespace kiosk_solution.Business.Services
     public interface IPartyService : IBaseService<Party>
     {
         Task<SuccessResponse<PartyViewModel>> Login(LoginViewModel model);
+        Task<List<PartyViewModel>> GetAll(string token);
     }
     public class PartyService : BaseService<Party>, IPartyService
     {
         private readonly AutoMapper.IConfigurationProvider _mapper;
         private readonly IConfiguration _configuration;
 
-        public PartyService(IPartyRepository repository, IMapper mapper, IConfiguration configuration) : base(repository)
+        private readonly IRoleService _roleService;
+
+        public PartyService(IPartyRepository repository, IMapper mapper, IConfiguration configuration, IRoleService roleService) : base(repository)
         {
             _mapper = mapper.ConfigurationProvider;
             _configuration = configuration;
+            _roleService = roleService;
+        }
+
+        public async Task<List<PartyViewModel>> GetAll(string token)
+        {
+            TokenViewModel tokenModel = TokenUtil.ReadJWTTokenToModel(token, _configuration);
+            if (!tokenModel.Role.Equals(RoleConstants.ADMIN))
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your role cannot use this feature.");
+
+            return await Get().ProjectTo<PartyViewModel>(_mapper).ToListAsync();
         }
 
         public async Task<SuccessResponse<PartyViewModel>> Login(LoginViewModel model)
         {
-            var user = await Get(u => u.Email.Equals(model.email)).FirstOrDefaultAsync();
+            var user = await Get(u => u.Email.Equals(model.email)).ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
 
             if (user == null || !BCryptNet.Verify(model.password, user.Password))
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
-            if(user.Status.Equals(AccountStatusConstants.DEACTIVATE))
+            if (user.Status.Equals(AccountStatusConstants.DEACTIVATE))
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "This user has been banned.");
+
+            var roleName = await _roleService.GetRoleNameById(Guid.Parse(user.RoleId.ToString()));
+            user.RoleName = roleName;
             string token = TokenUtil.GenerateJWTWebToken(user, _configuration);
             var result = _mapper.CreateMapper().Map<PartyViewModel>(user);
 
             result.Token = token;
+
+            if(BCryptNet.Verify(DefaultConstants.DEFAULT_PASSWORD, result.Password))
+            {
+                result.PasswordIsChanged = false;
+            }
+            else
+            {
+                result.PasswordIsChanged = true;
+            }
 
             return new SuccessResponse<PartyViewModel>(200, "Login Success", result)
             {

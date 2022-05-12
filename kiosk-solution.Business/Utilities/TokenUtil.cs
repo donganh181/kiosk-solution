@@ -23,7 +23,7 @@ namespace kiosk_solution.Business.Utilities
             secretKey = configuration.GetSection("Security:SecretKey").Value;
         }
 
-        public static string GenerateJWTWebToken(Party partyInfo, IConfiguration configuration)
+        public static string GenerateJWTWebToken(PartyViewModel partyInfo, IConfiguration configuration)
         {
             setPrivateKey(configuration);
 
@@ -32,7 +32,7 @@ namespace kiosk_solution.Business.Utilities
 
             var claims = new[] {
                         new Claim(PayloadKeyConstants.ID, partyInfo.Id.ToString()),
-                        new Claim(PayloadKeyConstants.ROLE, partyInfo.Role.Name),
+                        new Claim(PayloadKeyConstants.ROLE, partyInfo.RoleName),
                         new Claim(PayloadKeyConstants.MAIL, partyInfo.Email),
                         new Claim(PayloadKeyConstants.PHONE_NUMBER, partyInfo.PhoneNumber)
             };

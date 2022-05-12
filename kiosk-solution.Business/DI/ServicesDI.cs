@@ -18,6 +18,9 @@ namespace kiosk_solution.Business.DI
 
             services.AddScoped<IPartyRepository, PartyRepository>();
             services.AddScoped<IPartyService, PartyService>();
+
+            services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IRoleService, RoleService>();
         }
     }
 }

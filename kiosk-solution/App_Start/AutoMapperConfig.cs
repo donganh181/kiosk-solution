@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-
+using kiosk_solution.Data.AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -14,6 +14,7 @@ namespace kiosk_solution.App_Start
         {
             var mappingConfig = new MapperConfiguration(mc =>
             {
+                mc.ConfigPartyModule();
             });
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);

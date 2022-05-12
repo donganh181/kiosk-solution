@@ -21,6 +21,7 @@ namespace kiosk_solution.Data.ViewModels
         public DateTime? CreateDate { get; set; }
         public string Status { get; set; }
         public string Token { get; set; }
+        public string RoleName { get; set; }
         public bool PasswordIsChanged { get; set; }
     }
 }

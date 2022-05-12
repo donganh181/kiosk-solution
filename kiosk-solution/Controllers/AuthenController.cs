@@ -1,5 +1,7 @@
 ﻿using kiosk_solution.Business.Services;
 using kiosk_solution.Data.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -20,6 +22,11 @@ namespace kiosk_solution.Controllers
             _partyService = partyService;
         }
 
+        /// <summary>
+        /// Login to system with email and password
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost]
         [MapToApiVersion("1")]
         public async Task<IActionResult> Login([FromBody] LoginViewModel request)
@@ -27,5 +34,7 @@ namespace kiosk_solution.Controllers
             return Ok(await _partyService.Login(request));
         }
 
+        
+        
     }
 }
