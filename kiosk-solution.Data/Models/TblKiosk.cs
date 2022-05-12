@@ -15,13 +15,13 @@ namespace kiosk_solution.Data.Models
 
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public DateTime? CreatDate { get; set; }
-        public Guid? LocationOwnerId { get; set; }
+        public DateTime? CreateDate { get; set; }
+        public Guid? PartyId { get; set; }
         public Guid? KioskLocationId { get; set; }
         public string Status { get; set; }
 
         public virtual TblKioskLocation KioskLocation { get; set; }
-        public virtual TblLocationOwner LocationOwner { get; set; }
+        public virtual TblParty Party { get; set; }
         public virtual ICollection<TblOrder> TblOrders { get; set; }
         public virtual ICollection<TblSchedule> TblSchedules { get; set; }
     }

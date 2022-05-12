@@ -20,5 +20,9 @@
     <ProjectReference Include="..\kiosk-solution.Data\kiosk-solution.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
 
 </Project>

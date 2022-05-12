@@ -20,6 +20,9 @@ namespace kiosk_solution.Data.Models
         public string Province { get; set; }
         public string City { get; set; }
         public DateTime? CreateDate { get; set; }
+        public Guid? CreatorId { get; set; }
         public string Status { get; set; }
+
+        public virtual TblParty Creator { get; set; }
     }
 }

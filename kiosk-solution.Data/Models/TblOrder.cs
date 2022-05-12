@@ -13,13 +13,13 @@ namespace kiosk_solution.Data.Models
         public string OrderDetail { get; set; }
         public DateTime? SubmitDate { get; set; }
         public double? CommissionPercentage { get; set; }
-        public Guid? ServiceProviderId { get; set; }
+        public Guid? PartyId { get; set; }
         public Guid? KioskId { get; set; }
         public Guid? ServiceApplicationId { get; set; }
         public string Status { get; set; }
 
         public virtual TblKiosk Kiosk { get; set; }
+        public virtual TblParty Party { get; set; }
         public virtual TblServiceApplication ServiceApplication { get; set; }
-        public virtual TblServiceProvider ServiceProvider { get; set; }
     }
 }

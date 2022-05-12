@@ -13,17 +13,8 @@ namespace kiosk_solution.Business.DI
     {
         public static void ConfigServicesDI(this IServiceCollection services)
         {
-            
+
             services.AddScoped<DbContext, Kiosk_PlatformContext>();
-
-            services.AddScoped<IAdminRepository, AdminRepository>();
-            services.AddScoped<IAdminService, AdminService>();
-
-            services.AddScoped<ILocationOwnerRepository, LocationOwnerRepository>();
-            services.AddScoped<ILocationOwnerService, LocationOwnerService>();
-
-            services.AddScoped<IServiceProviderRepository, ServiceProviderRepository>();
-            services.AddScoped<IServiceProviderService, ServiceProviderService>();
         }
     }
 }

@@ -5,13 +5,13 @@ using System.Collections.Generic;
 
 namespace kiosk_solution.Data.Models
 {
-    public partial class TblLocationOwnerServiceApplication
+    public partial class TblPartyServiceApplication
     {
         public Guid Id { get; set; }
-        public Guid? LocationOwnerId { get; set; }
+        public Guid? PartyId { get; set; }
         public Guid? ServiceApplicationId { get; set; }
 
-        public virtual TblLocationOwner LocationOwner { get; set; }
+        public virtual TblParty Party { get; set; }
         public virtual TblServiceApplication ServiceApplication { get; set; }
     }
 }

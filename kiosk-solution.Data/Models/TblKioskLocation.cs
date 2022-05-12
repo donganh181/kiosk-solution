@@ -10,7 +10,7 @@ namespace kiosk_solution.Data.Models
         public TblKioskLocation()
         {
             TblKiosks = new HashSet<TblKiosk>();
-            TblLocationOwnerKioskLocations = new HashSet<TblLocationOwnerKioskLocation>();
+            TblPartyKioskLocations = new HashSet<TblPartyKioskLocation>();
         }
 
         public Guid Id { get; set; }
@@ -27,6 +27,6 @@ namespace kiosk_solution.Data.Models
         public string Status { get; set; }
 
         public virtual ICollection<TblKiosk> TblKiosks { get; set; }
-        public virtual ICollection<TblLocationOwnerKioskLocation> TblLocationOwnerKioskLocations { get; set; }
+        public virtual ICollection<TblPartyKioskLocation> TblPartyKioskLocations { get; set; }
     }
 }
