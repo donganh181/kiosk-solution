@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace kiosk_solution.Data.Models
 {
-    public partial class TblPosition
+    public partial class Position
     {
         public Guid Id { get; set; }
         public Guid? TemplateId { get; set; }
@@ -14,7 +14,7 @@ namespace kiosk_solution.Data.Models
         public DateTime? CreateDate { get; set; }
         public string Status { get; set; }
 
-        public virtual TblServiceApplication ServiceApplication { get; set; }
-        public virtual TblTemplate Template { get; set; }
+        public virtual ServiceApplication ServiceApplication { get; set; }
+        public virtual ServiceApplication Template { get; set; }
     }
 }

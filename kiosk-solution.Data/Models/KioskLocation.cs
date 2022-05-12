@@ -5,12 +5,12 @@ using System.Collections.Generic;
 
 namespace kiosk_solution.Data.Models
 {
-    public partial class TblKioskLocation
+    public partial class KioskLocation
     {
-        public TblKioskLocation()
+        public KioskLocation()
         {
-            TblKiosks = new HashSet<TblKiosk>();
-            TblPartyKioskLocations = new HashSet<TblPartyKioskLocation>();
+            Kiosks = new HashSet<Kiosk>();
+            PartyKioskLocations = new HashSet<PartyKioskLocation>();
         }
 
         public Guid Id { get; set; }
@@ -26,7 +26,7 @@ namespace kiosk_solution.Data.Models
         public DateTime? CreateDate { get; set; }
         public string Status { get; set; }
 
-        public virtual ICollection<TblKiosk> TblKiosks { get; set; }
-        public virtual ICollection<TblPartyKioskLocation> TblPartyKioskLocations { get; set; }
+        public virtual ICollection<Kiosk> Kiosks { get; set; }
+        public virtual ICollection<PartyKioskLocation> PartyKioskLocations { get; set; }
     }
 }

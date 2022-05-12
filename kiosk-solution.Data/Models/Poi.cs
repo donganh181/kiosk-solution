@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace kiosk_solution.Data.Models
 {
-    public partial class TblPoi
+    public partial class Poi
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -23,6 +23,6 @@ namespace kiosk_solution.Data.Models
         public Guid? CreatorId { get; set; }
         public string Status { get; set; }
 
-        public virtual TblParty Creator { get; set; }
+        public virtual Party Creator { get; set; }
     }
 }

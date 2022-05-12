@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace kiosk_solution.Data.Models
 {
-    public partial class TblOrder
+    public partial class Order
     {
         public Guid Id { get; set; }
         public decimal? Income { get; set; }
@@ -18,8 +18,8 @@ namespace kiosk_solution.Data.Models
         public Guid? ServiceApplicationId { get; set; }
         public string Status { get; set; }
 
-        public virtual TblKiosk Kiosk { get; set; }
-        public virtual TblParty Party { get; set; }
-        public virtual TblServiceApplication ServiceApplication { get; set; }
+        public virtual Kiosk Kiosk { get; set; }
+        public virtual Party Party { get; set; }
+        public virtual ServiceApplication ServiceApplication { get; set; }
     }
 }

@@ -5,11 +5,11 @@ using System.Collections.Generic;
 
 namespace kiosk_solution.Data.Models
 {
-    public partial class TblSchedule
+    public partial class Schedule
     {
-        public TblSchedule()
+        public Schedule()
         {
-            TblScheduleTemplates = new HashSet<TblScheduleTemplate>();
+            ScheduleTemplates = new HashSet<ScheduleTemplate>();
         }
 
         public Guid Id { get; set; }
@@ -21,8 +21,8 @@ namespace kiosk_solution.Data.Models
         public Guid? PartyId { get; set; }
         public string Status { get; set; }
 
-        public virtual TblKiosk Kiosk { get; set; }
-        public virtual TblParty Party { get; set; }
-        public virtual ICollection<TblScheduleTemplate> TblScheduleTemplates { get; set; }
+        public virtual Kiosk Kiosk { get; set; }
+        public virtual Party Party { get; set; }
+        public virtual ICollection<ScheduleTemplate> ScheduleTemplates { get; set; }
     }
 }

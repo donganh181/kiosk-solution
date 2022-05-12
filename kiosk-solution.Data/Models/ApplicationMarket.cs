@@ -5,11 +5,11 @@ using System.Collections.Generic;
 
 namespace kiosk_solution.Data.Models
 {
-    public partial class TblApplicationMarket
+    public partial class ApplicationMarket
     {
-        public TblApplicationMarket()
+        public ApplicationMarket()
         {
-            TblServiceApplications = new HashSet<TblServiceApplication>();
+            ServiceApplications = new HashSet<ServiceApplication>();
         }
 
         public Guid Id { get; set; }
@@ -18,6 +18,6 @@ namespace kiosk_solution.Data.Models
         public string Logo { get; set; }
         public string Status { get; set; }
 
-        public virtual ICollection<TblServiceApplication> TblServiceApplications { get; set; }
+        public virtual ICollection<ServiceApplication> ServiceApplications { get; set; }
     }
 }

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace kiosk_solution.Data.Models
 {
-    public partial class TblImage
+    public partial class Image
     {
         public Guid Id { get; set; }
         public string Link { get; set; }

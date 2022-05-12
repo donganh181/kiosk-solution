@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace kiosk_solution.Data.Models
 {
-    public partial class TblEvent
+    public partial class Event
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -18,7 +18,7 @@ namespace kiosk_solution.Data.Models
         public string Type { get; set; }
         public string Status { get; set; }
 
-        public virtual TblParty Creator { get; set; }
-        public virtual TblTemplate Template { get; set; }
+        public virtual Party Creator { get; set; }
+        public virtual Template Template { get; set; }
     }
 }

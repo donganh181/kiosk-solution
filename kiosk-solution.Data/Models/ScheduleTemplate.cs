@@ -5,13 +5,13 @@ using System.Collections.Generic;
 
 namespace kiosk_solution.Data.Models
 {
-    public partial class TblScheduleTemplate
+    public partial class ScheduleTemplate
     {
         public Guid Id { get; set; }
         public Guid? ScheduleId { get; set; }
         public Guid? TemplateId { get; set; }
 
-        public virtual TblSchedule Schedule { get; set; }
-        public virtual TblTemplate Template { get; set; }
+        public virtual Schedule Schedule { get; set; }
+        public virtual Template Template { get; set; }
     }
 }

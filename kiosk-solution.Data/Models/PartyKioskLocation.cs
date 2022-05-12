@@ -5,14 +5,14 @@ using System.Collections.Generic;
 
 namespace kiosk_solution.Data.Models
 {
-    public partial class TblPartyKioskLocation
+    public partial class PartyKioskLocation
     {
         public Guid Id { get; set; }
         public Guid? PartyId { get; set; }
         public Guid? KioskLocationId { get; set; }
         public DateTime? CreateDate { get; set; }
 
-        public virtual TblKioskLocation KioskLocation { get; set; }
-        public virtual TblParty Party { get; set; }
+        public virtual KioskLocation KioskLocation { get; set; }
+        public virtual Party Party { get; set; }
     }
 }

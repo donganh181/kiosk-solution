@@ -5,16 +5,16 @@ using System.Collections.Generic;
 
 namespace kiosk_solution.Data.Models
 {
-    public partial class TblRole
+    public partial class AppCategory
     {
-        public TblRole()
+        public AppCategory()
         {
-            TblParties = new HashSet<TblParty>();
+            ServiceApplications = new HashSet<ServiceApplication>();
         }
 
         public Guid Id { get; set; }
         public string Name { get; set; }
 
-        public virtual ICollection<TblParty> TblParties { get; set; }
+        public virtual ICollection<ServiceApplication> ServiceApplications { get; set; }
     }
 }

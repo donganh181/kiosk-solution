@@ -17,29 +17,29 @@ namespace kiosk_solution.Data.Models
         {
         }
 
-        public virtual DbSet<TblAppCategory> TblAppCategories { get; set; }
-        public virtual DbSet<TblApplicationMarket> TblApplicationMarkets { get; set; }
-        public virtual DbSet<TblEvent> TblEvents { get; set; }
-        public virtual DbSet<TblImage> TblImages { get; set; }
-        public virtual DbSet<TblKiosk> TblKiosks { get; set; }
-        public virtual DbSet<TblKioskLocation> TblKioskLocations { get; set; }
-        public virtual DbSet<TblOrder> TblOrders { get; set; }
-        public virtual DbSet<TblParty> TblParties { get; set; }
-        public virtual DbSet<TblPartyKioskLocation> TblPartyKioskLocations { get; set; }
-        public virtual DbSet<TblPartyServiceApplication> TblPartyServiceApplications { get; set; }
-        public virtual DbSet<TblPoi> TblPois { get; set; }
-        public virtual DbSet<TblPosition> TblPositions { get; set; }
-        public virtual DbSet<TblRole> TblRoles { get; set; }
-        public virtual DbSet<TblSchedule> TblSchedules { get; set; }
-        public virtual DbSet<TblScheduleTemplate> TblScheduleTemplates { get; set; }
-        public virtual DbSet<TblServiceApplication> TblServiceApplications { get; set; }
-        public virtual DbSet<TblTemplate> TblTemplates { get; set; }
+        public virtual DbSet<AppCategory> AppCategories { get; set; }
+        public virtual DbSet<ApplicationMarket> ApplicationMarkets { get; set; }
+        public virtual DbSet<Event> Events { get; set; }
+        public virtual DbSet<Image> Images { get; set; }
+        public virtual DbSet<Kiosk> Kiosks { get; set; }
+        public virtual DbSet<KioskLocation> KioskLocations { get; set; }
+        public virtual DbSet<Order> Orders { get; set; }
+        public virtual DbSet<Party> Parties { get; set; }
+        public virtual DbSet<PartyKioskLocation> PartyKioskLocations { get; set; }
+        public virtual DbSet<PartyServiceApplication> PartyServiceApplications { get; set; }
+        public virtual DbSet<Poi> Pois { get; set; }
+        public virtual DbSet<Position> Positions { get; set; }
+        public virtual DbSet<Role> Roles { get; set; }
+        public virtual DbSet<Schedule> Schedules { get; set; }
+        public virtual DbSet<ScheduleTemplate> ScheduleTemplates { get; set; }
+        public virtual DbSet<ServiceApplication> ServiceApplications { get; set; }
+        public virtual DbSet<Template> Templates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
 
-            modelBuilder.Entity<TblAppCategory>(entity =>
+            modelBuilder.Entity<AppCategory>(entity =>
             {
                 entity.ToTable("tblAppCategory");
 
@@ -48,7 +48,7 @@ namespace kiosk_solution.Data.Models
                 entity.Property(e => e.Name).HasMaxLength(255);
             });
 
-            modelBuilder.Entity<TblApplicationMarket>(entity =>
+            modelBuilder.Entity<ApplicationMarket>(entity =>
             {
                 entity.ToTable("tblApplicationMarket");
 
@@ -63,7 +63,7 @@ namespace kiosk_solution.Data.Models
                     .IsUnicode(false);
             });
 
-            modelBuilder.Entity<TblEvent>(entity =>
+            modelBuilder.Entity<Event>(entity =>
             {
                 entity.ToTable("tblEvent");
 
@@ -84,17 +84,17 @@ namespace kiosk_solution.Data.Models
                     .IsUnicode(false);
 
                 entity.HasOne(d => d.Creator)
-                    .WithMany(p => p.TblEvents)
+                    .WithMany(p => p.Events)
                     .HasForeignKey(d => d.CreatorId)
                     .HasConstraintName("FK__tblEvent__Creato__628FA481");
 
                 entity.HasOne(d => d.Template)
-                    .WithMany(p => p.TblEvents)
+                    .WithMany(p => p.Events)
                     .HasForeignKey(d => d.TemplateId)
                     .HasConstraintName("FK__tblEvent__Status__619B8048");
             });
 
-            modelBuilder.Entity<TblImage>(entity =>
+            modelBuilder.Entity<Image>(entity =>
             {
                 entity.ToTable("tblImage");
 
@@ -107,7 +107,7 @@ namespace kiosk_solution.Data.Models
                 entity.Property(e => e.Link).IsUnicode(false);
             });
 
-            modelBuilder.Entity<TblKiosk>(entity =>
+            modelBuilder.Entity<Kiosk>(entity =>
             {
                 entity.ToTable("tblKiosk");
 
@@ -122,17 +122,17 @@ namespace kiosk_solution.Data.Models
                     .IsUnicode(false);
 
                 entity.HasOne(d => d.KioskLocation)
-                    .WithMany(p => p.TblKiosks)
+                    .WithMany(p => p.Kiosks)
                     .HasForeignKey(d => d.KioskLocationId)
                     .HasConstraintName("FK__tblKiosk__KioskL__440B1D61");
 
                 entity.HasOne(d => d.Party)
-                    .WithMany(p => p.TblKiosks)
+                    .WithMany(p => p.Kiosks)
                     .HasForeignKey(d => d.PartyId)
                     .HasConstraintName("FK__tblKiosk__PartyI__44FF419A");
             });
 
-            modelBuilder.Entity<TblKioskLocation>(entity =>
+            modelBuilder.Entity<KioskLocation>(entity =>
             {
                 entity.ToTable("tblKioskLocation");
 
@@ -165,7 +165,7 @@ namespace kiosk_solution.Data.Models
                 entity.Property(e => e.Ward).HasMaxLength(100);
             });
 
-            modelBuilder.Entity<TblOrder>(entity =>
+            modelBuilder.Entity<Order>(entity =>
             {
                 entity.ToTable("tblOrder");
 
@@ -184,22 +184,22 @@ namespace kiosk_solution.Data.Models
                 entity.Property(e => e.SubmitDate).HasColumnType("datetime");
 
                 entity.HasOne(d => d.Kiosk)
-                    .WithMany(p => p.TblOrders)
+                    .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.KioskId)
                     .HasConstraintName("FK__tblOrder__KioskI__7D439ABD");
 
                 entity.HasOne(d => d.Party)
-                    .WithMany(p => p.TblOrders)
+                    .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.PartyId)
                     .HasConstraintName("FK__tblOrder__PartyI__7C4F7684");
 
                 entity.HasOne(d => d.ServiceApplication)
-                    .WithMany(p => p.TblOrders)
+                    .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.ServiceApplicationId)
                     .HasConstraintName("FK__tblOrder__Servic__7B5B524B");
             });
 
-            modelBuilder.Entity<TblParty>(entity =>
+            modelBuilder.Entity<Party>(entity =>
             {
                 entity.ToTable("tblParty");
 
@@ -242,12 +242,12 @@ namespace kiosk_solution.Data.Models
                     .HasConstraintName("FK__tblParty__Creato__3C69FB99");
 
                 entity.HasOne(d => d.Role)
-                    .WithMany(p => p.TblParties)
+                    .WithMany(p => p.Parties)
                     .HasForeignKey(d => d.RoleId)
                     .HasConstraintName("FK__tblParty__RoleId__3D5E1FD2");
             });
 
-            modelBuilder.Entity<TblPartyKioskLocation>(entity =>
+            modelBuilder.Entity<PartyKioskLocation>(entity =>
             {
                 entity.ToTable("tblParty_KioskLocation");
 
@@ -256,34 +256,34 @@ namespace kiosk_solution.Data.Models
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
                 entity.HasOne(d => d.KioskLocation)
-                    .WithMany(p => p.TblPartyKioskLocations)
+                    .WithMany(p => p.PartyKioskLocations)
                     .HasForeignKey(d => d.KioskLocationId)
                     .HasConstraintName("FK__tblParty___Kiosk__6B24EA82");
 
                 entity.HasOne(d => d.Party)
-                    .WithMany(p => p.TblPartyKioskLocations)
+                    .WithMany(p => p.PartyKioskLocations)
                     .HasForeignKey(d => d.PartyId)
                     .HasConstraintName("FK__tblParty___Party__6A30C649");
             });
 
-            modelBuilder.Entity<TblPartyServiceApplication>(entity =>
+            modelBuilder.Entity<PartyServiceApplication>(entity =>
             {
                 entity.ToTable("tblParty_ServiceApplication");
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
 
                 entity.HasOne(d => d.Party)
-                    .WithMany(p => p.TblPartyServiceApplications)
+                    .WithMany(p => p.PartyServiceApplications)
                     .HasForeignKey(d => d.PartyId)
                     .HasConstraintName("FK__tblParty___Party__6EF57B66");
 
                 entity.HasOne(d => d.ServiceApplication)
-                    .WithMany(p => p.TblPartyServiceApplications)
+                    .WithMany(p => p.PartyServiceApplications)
                     .HasForeignKey(d => d.ServiceApplicationId)
                     .HasConstraintName("FK__tblParty___Servi__6FE99F9F");
             });
 
-            modelBuilder.Entity<TblPoi>(entity =>
+            modelBuilder.Entity<Poi>(entity =>
             {
                 entity.ToTable("tblPOI");
 
@@ -322,12 +322,12 @@ namespace kiosk_solution.Data.Models
                 entity.Property(e => e.Ward).HasMaxLength(50);
 
                 entity.HasOne(d => d.Creator)
-                    .WithMany(p => p.TblPois)
+                    .WithMany(p => p.Pois)
                     .HasForeignKey(d => d.CreatorId)
                     .HasConstraintName("FK__tblPOI__CreatorI__66603565");
             });
 
-            modelBuilder.Entity<TblPosition>(entity =>
+            modelBuilder.Entity<Position>(entity =>
             {
                 entity.ToTable("tblPosition");
 
@@ -340,17 +340,17 @@ namespace kiosk_solution.Data.Models
                     .IsUnicode(false);
 
                 entity.HasOne(d => d.ServiceApplication)
-                    .WithMany(p => p.TblPositions)
+                    .WithMany(p => p.Positions)
                     .HasForeignKey(d => d.ServiceApplicationId)
                     .HasConstraintName("FK__tblPositi__Servi__5CD6CB2B");
 
                 entity.HasOne(d => d.Template)
-                    .WithMany(p => p.TblPositions)
+                    .WithMany(p => p.Positions)
                     .HasForeignKey(d => d.TemplateId)
                     .HasConstraintName("FK__tblPositi__Templ__5DCAEF64");
             });
 
-            modelBuilder.Entity<TblRole>(entity =>
+            modelBuilder.Entity<Role>(entity =>
             {
                 entity.ToTable("tblRole");
 
@@ -359,7 +359,7 @@ namespace kiosk_solution.Data.Models
                 entity.Property(e => e.Name).HasMaxLength(255);
             });
 
-            modelBuilder.Entity<TblSchedule>(entity =>
+            modelBuilder.Entity<Schedule>(entity =>
             {
                 entity.ToTable("tblSchedule");
 
@@ -380,34 +380,34 @@ namespace kiosk_solution.Data.Models
                 entity.Property(e => e.TimeStart).HasColumnType("datetime");
 
                 entity.HasOne(d => d.Kiosk)
-                    .WithMany(p => p.TblSchedules)
+                    .WithMany(p => p.Schedules)
                     .HasForeignKey(d => d.KioskId)
                     .HasConstraintName("FK__tblSchedu__Kiosk__5441852A");
 
                 entity.HasOne(d => d.Party)
-                    .WithMany(p => p.TblSchedules)
+                    .WithMany(p => p.Schedules)
                     .HasForeignKey(d => d.PartyId)
                     .HasConstraintName("FK__tblSchedu__Party__5535A963");
             });
 
-            modelBuilder.Entity<TblScheduleTemplate>(entity =>
+            modelBuilder.Entity<ScheduleTemplate>(entity =>
             {
                 entity.ToTable("tblSchedule_Template");
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
 
                 entity.HasOne(d => d.Schedule)
-                    .WithMany(p => p.TblScheduleTemplates)
+                    .WithMany(p => p.ScheduleTemplates)
                     .HasForeignKey(d => d.ScheduleId)
                     .HasConstraintName("FK__tblSchedu__Sched__73BA3083");
 
                 entity.HasOne(d => d.Template)
-                    .WithMany(p => p.TblScheduleTemplates)
+                    .WithMany(p => p.ScheduleTemplates)
                     .HasForeignKey(d => d.TemplateId)
                     .HasConstraintName("FK__tblSchedu__Templ__74AE54BC");
             });
 
-            modelBuilder.Entity<TblServiceApplication>(entity =>
+            modelBuilder.Entity<ServiceApplication>(entity =>
             {
                 entity.ToTable("tblServiceApplication");
 
@@ -424,22 +424,22 @@ namespace kiosk_solution.Data.Models
                     .IsUnicode(false);
 
                 entity.HasOne(d => d.AppCategory)
-                    .WithMany(p => p.TblServiceApplications)
+                    .WithMany(p => p.ServiceApplications)
                     .HasForeignKey(d => d.AppCategoryId)
                     .HasConstraintName("FK__tblServic__AppCa__4E88ABD4");
 
                 entity.HasOne(d => d.ApplicationMarket)
-                    .WithMany(p => p.TblServiceApplications)
+                    .WithMany(p => p.ServiceApplications)
                     .HasForeignKey(d => d.ApplicationMarketId)
                     .HasConstraintName("FK__tblServic__Appli__5070F446");
 
                 entity.HasOne(d => d.Party)
-                    .WithMany(p => p.TblServiceApplications)
+                    .WithMany(p => p.ServiceApplications)
                     .HasForeignKey(d => d.PartyId)
                     .HasConstraintName("FK__tblServic__Party__4F7CD00D");
             });
 
-            modelBuilder.Entity<TblTemplate>(entity =>
+            modelBuilder.Entity<Template>(entity =>
             {
                 entity.ToTable("tblTemplate");
 
@@ -454,7 +454,7 @@ namespace kiosk_solution.Data.Models
                     .IsUnicode(false);
 
                 entity.HasOne(d => d.Party)
-                    .WithMany(p => p.TblTemplates)
+                    .WithMany(p => p.Templates)
                     .HasForeignKey(d => d.PartyId)
                     .HasConstraintName("FK__tblTempla__Party__59063A47");
             });
