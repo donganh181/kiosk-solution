@@ -65,7 +65,7 @@ namespace kiosk_solution
 
             app.UseAuthorization();
 
-            app.UseMiddleware<JwtHandler>();
+            //app.UseMiddleware<JwtHandler>();
             app.UseCors(builder =>
             {
                 builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
