@@ -3,7 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
+using kiosk_solution.Business.Utilities;
 using kiosk_solution.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -79,7 +79,7 @@ namespace kiosk_solution.Handler
         {
             try
             {
-                SecurityToken validatedToken = JwtUtil.ValidateJSONWebToken(token, _configuration);
+                SecurityToken validatedToken = TokenUtil.ValidateJSONWebToken(token, _configuration);
                 var jwtToken = (JwtSecurityToken)validatedToken;
                 var accountId = jwtToken.Claims.First(x => x.Type == "id").Value;
                 var role = jwtToken.Claims.First(x => x.Type == "role").Value;

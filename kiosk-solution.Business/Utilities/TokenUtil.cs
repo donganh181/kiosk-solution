@@ -107,5 +107,26 @@ namespace kiosk_solution.Business.Utilities
                 return false;
             }
         }
+        public static SecurityToken ValidateJSONWebToken(string token, IConfiguration _config)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            // lay securityKey từ appsetting json
+            var securityKey = new SymmetricSecurityKey(Convert.FromBase64String(secretKey));
+            // check token so với security
+            try
+            {
+                ClaimsPrincipal claims = handler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = false,
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    IssuerSigningKey = securityKey
+                }, out SecurityToken validatedToken);
+                return validatedToken;
+            } catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
     }
 }

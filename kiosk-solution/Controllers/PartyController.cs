@@ -1,11 +1,8 @@
 ﻿using kiosk_solution.Business.Services;
-using kiosk_solution.Data.ViewModels;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using kiosk_solution.Utils;
 
 namespace kiosk_solution.Controllers
 {
@@ -21,19 +18,15 @@ namespace kiosk_solution.Controllers
             _partyService = partyService;
         }
 
-        [Authorize]
         [HttpGet]
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetAll()
         {
-            string token = null;
-            if (Request.Headers["Authorization"].Count > 0)
-            {
-                token = Request.Headers["Authorization"];
-            }
-
-            return Ok(await _partyService.GetAll(token));
+            var _context = HttpContext;
+            string role = HttpContextUtil.getRoleFromContext(_context);
+            Console.WriteLine(role);
+            //return Ok(await _partyService.GetAll(token));
+            return Ok();
         }
-
     }
 }
