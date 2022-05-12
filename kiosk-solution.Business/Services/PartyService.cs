@@ -21,7 +21,7 @@ namespace kiosk_solution.Business.Services
     public interface IPartyService : IBaseService<Party>
     {
         Task<SuccessResponse<PartyViewModel>> Login(LoginViewModel model);
-        Task<List<PartyViewModel>> GetAll(string token);
+        Task<List<PartyViewModel>> GetAll();
     }
     public class PartyService : BaseService<Party>, IPartyService
     {
@@ -37,12 +37,8 @@ namespace kiosk_solution.Business.Services
             _roleService = roleService;
         }
 
-        public async Task<List<PartyViewModel>> GetAll(string token)
+        public async Task<List<PartyViewModel>> GetAll()
         {
-            TokenViewModel tokenModel = TokenUtil.ReadJWTTokenToModel(token, _configuration);
-            if (!tokenModel.Role.Equals(RoleConstants.ADMIN))
-                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your role cannot use this feature.");
-
             return await Get().ProjectTo<PartyViewModel>(_mapper).ToListAsync();
         }
 

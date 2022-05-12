@@ -3,6 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 using kiosk_solution.Utils;
+using Microsoft.Extensions.Configuration;
+using kiosk_solution.Data.ViewModels;
+using kiosk_solution.Data.Constants;
+using System.Net;
+using kiosk_solution.Data.Responses;
 
 namespace kiosk_solution.Controllers
 {
@@ -12,21 +17,23 @@ namespace kiosk_solution.Controllers
     public class PartyController : Controller
     {
         private readonly IPartyService _partyService;
+        private readonly IConfiguration _configuration;
 
-        public PartyController(IPartyService partyService)
+        public PartyController(IPartyService partyService, IConfiguration configuration)
         {
             _partyService = partyService;
+            _configuration = configuration;
         }
 
         [HttpGet]
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetAll()
         {
-            var _context = HttpContext;
-            string role = HttpContextUtil.getRoleFromContext(_context);
-            Console.WriteLine(role);
-            //return Ok(await _partyService.GetAll(token));
-            return Ok();
+            var tokenModel = HttpContextUtil.getTokenModelFromRequest(Request, _configuration);
+            if (!tokenModel.Role.Equals(RoleConstants.ADMIN))
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your role cannot use this feature.");
+
+            return Ok(await _partyService.GetAll());
         }
     }
 }
