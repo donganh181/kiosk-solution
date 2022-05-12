@@ -15,6 +15,6 @@ namespace kiosk_solution.Data.Models
         public string Status { get; set; }
 
         public virtual ServiceApplication ServiceApplication { get; set; }
-        public virtual ServiceApplication Template { get; set; }
+        public virtual Template Template { get; set; }
     }
 }
