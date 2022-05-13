@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using kiosk_solution.Data.ViewModels;
 using kiosk_solution.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
@@ -26,11 +27,18 @@ namespace kiosk_solution.Controllers
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetAll()
         {
+            return Ok(await _partyService.GetAll());
+        }
+        
+        [Authorize(Roles = "Admin")]
+        [HttpPost("createAccount")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Register([FromBody] CreateAccountViewModel model)
+        {
             var request = Request;
-            string role = HttpContextUtil.getRoleFromRequest(request,_configuration);
-            Console.WriteLine(role);
-            //return Ok(await _partyService.GetAll(token));
-            return Ok();
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            Guid creatorId = token.Id;
+            return Ok(await _partyService.CreateAccount(creatorId, model));
         }
     }
 }

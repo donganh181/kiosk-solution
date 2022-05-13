@@ -14,6 +14,7 @@ namespace kiosk_solution.Business.Services
     public interface IRoleService : IBaseService<Role>
     {
         Task<string> GetRoleNameById(Guid id);
+        Task<Guid> GetIdByRoleName(string roleName);
     }
     public class RoleService : BaseService<Role>, IRoleService
     {
@@ -31,6 +32,12 @@ namespace kiosk_solution.Business.Services
             var role = await Get(r => r.Id.Equals(id)).FirstOrDefaultAsync();
 
             return role.Name;
+        }
+
+        public async Task<Guid> GetIdByRoleName(string roleName)
+        {
+            var role = await Get(r => r.Name == roleName).FirstOrDefaultAsync();
+            return role.Id;
         }
     }
 }
