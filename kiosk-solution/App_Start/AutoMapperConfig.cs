@@ -15,6 +15,7 @@ namespace kiosk_solution.App_Start
             var mappingConfig = new MapperConfiguration(mc =>
             {
                 mc.ConfigPartyModule();
+                mc.ConfigRoleModule();
             });
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);

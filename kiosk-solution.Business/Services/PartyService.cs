@@ -79,7 +79,6 @@ namespace kiosk_solution.Business.Services
             account.Password = BCrypt.Net.BCrypt.HashPassword(DefaultConstants.DEFAULT_PASSWORD);
             account.CreatorId = creatorId;
             account.Status = AccountStatusConstants.ACTIVE;
-            account.RoleId = await _roleService.GetIdByRoleName(model.roleName);
             account.CreateDate = DateTime.Now;
             try
             {
