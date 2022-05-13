@@ -76,7 +76,7 @@ namespace kiosk_solution.Business.Services
         public async Task<SuccessResponse<PartyViewModel>> CreateAccount(Guid creatorId, CreateAccountViewModel model)
         {
             var account = _mapper.CreateMapper().Map<Party>(model);
-            account.Password = DefaultConstants.DEFAULT_PASSWORD;
+            account.Password = BCrypt.Net.BCrypt.HashPassword(DefaultConstants.DEFAULT_PASSWORD);
             account.CreatorId = creatorId;
             account.Status = AccountStatusConstants.ACTIVE;
             account.RoleId = await _roleService.GetIdByRoleName(model.roleName);
@@ -84,6 +84,7 @@ namespace kiosk_solution.Business.Services
             try
             {
                 await CreateAsync(account);
+                await EmailUtil.SendCreateAccountEmail(account.Email);
                 var result = _mapper.CreateMapper().Map<PartyViewModel>(account);
                 return new SuccessResponse<PartyViewModel>(200, "Create success", result);       
             }
