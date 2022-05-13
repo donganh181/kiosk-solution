@@ -21,6 +21,7 @@ namespace kiosk_solution.Business.Services
     public interface IPartyService : IBaseService<Party>
     {
         Task<SuccessResponse<PartyViewModel>> Login(LoginViewModel model);
+        Task<SuccessResponse<PartyViewModel>> CreateAccount(Guid creatorId, CreateAccountViewModel model);
         Task<List<PartyViewModel>> GetAll();
     }
     public class PartyService : BaseService<Party>, IPartyService
@@ -70,7 +71,25 @@ namespace kiosk_solution.Business.Services
             return new SuccessResponse<PartyViewModel>(200, "Login Success", result)
             {
             };
-
+        }
+        
+        public async Task<SuccessResponse<PartyViewModel>> CreateAccount(Guid creatorId, CreateAccountViewModel model)
+        {
+            var account = _mapper.CreateMapper().Map<Party>(model);
+            account.Password = DefaultConstants.DEFAULT_PASSWORD;
+            account.CreatorId = creatorId;
+            account.Status = AccountStatusConstants.ACTIVE;
+            account.RoleId = await _roleService.GetIdByRoleName(model.roleName);
+            account.CreateDate = DateTime.Now;
+            try
+            {
+                await CreateAsync(account);
+                var result = _mapper.CreateMapper().Map<PartyViewModel>(account);
+                return new SuccessResponse<PartyViewModel>(200, "Create success", result);       
+            }
+            catch (Exception) {
+                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data");
+            }
         }
     }
 }

@@ -15,6 +15,9 @@ namespace kiosk_solution.Data.AutoMapper
         {
             mc.CreateMap<Party, PartyViewModel>();
             mc.CreateMap<PartyViewModel, Party>();
+
+            mc.CreateMap<Party, CreateAccountViewModel>();
+            mc.CreateMap<CreateAccountViewModel, Party>();
         }
         
     }
