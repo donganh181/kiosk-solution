@@ -22,7 +22,7 @@ namespace kiosk_solution.Business.Services
     {
         Task<SuccessResponse<PartyViewModel>> Login(LoginViewModel model);
         Task<SuccessResponse<PartyViewModel>> CreateAccount(Guid creatorId, CreateAccountViewModel model);
-        Task<List<PartyViewModel>> GetAll();
+        Task<SuccessResponse<List<PartyViewModel>>> GetAll();
     }
     public class PartyService : BaseService<Party>, IPartyService
     {
@@ -38,9 +38,12 @@ namespace kiosk_solution.Business.Services
             _roleService = roleService;
         }
 
-        public async Task<List<PartyViewModel>> GetAll()
+        public async Task<SuccessResponse<List<PartyViewModel>>> GetAll()
         {
-            return await Get().ProjectTo<PartyViewModel>(_mapper).ToListAsync();
+            var list = await Get().ProjectTo<PartyViewModel>(_mapper).ToListAsync();
+            if(list == null) throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
+
+            return new SuccessResponse<List<PartyViewModel>>(200, "Found.", list);
         }
 
         public async Task<SuccessResponse<PartyViewModel>> Login(LoginViewModel model)
