@@ -14,6 +14,6 @@ namespace kiosk_solution.Data.ViewModels
         public string Email { get; set; }
         public string Address { get; set; }
         public DateTime? DateOfBirth { get; set; }
-        public string roleName { get; set; }
+        public string RoleId { get; set; }
     }
 }

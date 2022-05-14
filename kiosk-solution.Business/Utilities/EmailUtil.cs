@@ -20,11 +20,12 @@ namespace kiosk_solution.Data.ViewModels
             {
                 MailMessage mail = new MailMessage();
                 SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
-                string content = "Chúng tôi chân thành cảm ơn đã hợp tác, bên dưới là tài khoản để đăng nhập vào hệ thống của bạn: <br/>" +
-                          $"username: {sendto}" +
-                          $"<br/>password: {DefaultConstants.DEFAULT_PASSWORD}" +
-                          "<br/><br/>Thanks and best regards," +
-                          "<br/>Tika - Tourist Interact Kiosk Application";
+                string content = "Kính gửi quý đối tác,<br/>" +
+                                 "Chúng tôi chân thành cảm ơn đã hợp tác, bên dưới là tài khoản để đăng nhập vào hệ thống của bạn: <br/>" +
+                                  $"username: {sendto}" +
+                                  $"<br/>password: {DefaultConstants.DEFAULT_PASSWORD}" +
+                                  "<br/><br/>Thanks and Best regards," +
+                                  "<br/>Tika - Tourist Interact Kiosk Application";
                 string subject = "Cấp tài khoản Tika - Tourist Interact Kiosk Application";
                 mail.From = new MailAddress(_email);
                 mail.To.Add(sendto);
