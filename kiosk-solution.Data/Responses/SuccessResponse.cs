@@ -6,21 +6,16 @@ namespace kiosk_solution.Data.Responses
 {
     public class SuccessResponse<TEntity> where TEntity : class
     {
-        public SuccessDetailResponse<TEntity> Success { get; private set; }
-        public SuccessResponse(int code, string message, TEntity data)
-        {
-            Success = new SuccessDetailResponse<TEntity>
-            {
-                Message = message,
-                Data = data,
-                Code = code
-            };
-        }
-    }
-    public class SuccessDetailResponse<TEntity> where TEntity : class
-    {
         public int Code { get; set; }
         public string Message { get; set; }
         public TEntity Data { get; set; }
+
+        public SuccessResponse(int code, string message, TEntity data)
+        {
+            Message = message;
+            Data = data;
+            Code = code;
+        }
     }
+
 }
