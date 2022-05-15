@@ -12,7 +12,7 @@ using System.Net;
 
 namespace kiosk_solution.Controllers
 {
-    [Route("api/v{version:apiVersion}/partys")]
+    [Route("api/v{version:apiVersion}/parties")]
     [ApiController]
     [ApiVersion("1")]
     public class PartyController : Controller
@@ -45,7 +45,7 @@ namespace kiosk_solution.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [Authorize(Roles = "Admin")]
-        [HttpPost("createAccount")]
+        [HttpPost]
         [MapToApiVersion("1")]
         public async Task<IActionResult> Register([FromBody] CreateAccountViewModel model)
         {

@@ -6,14 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace kiosk_solution.Data.Repositories
+namespace kiosk_solution.Data.Repositories.impl
 {
-    public interface IPartyRepository : IBaseRepository<Party>
-    {
-    }
     public class PartyRepository : BaseRepository<Party>, IPartyRepository
     {
-        public PartyRepository(DbContext dbContext) : base(dbContext)
+        public PartyRepository(Kiosk_PlatformContext dbContext) : base(dbContext)
         {
         }
     }
