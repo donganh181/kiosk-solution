@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper.QueryableExtensions;
 using kiosk_solution.Data.ViewModels;
+using kiosk_solution.Data.Responses;
 
 namespace kiosk_solution.Business.Services
 {
@@ -17,7 +18,7 @@ namespace kiosk_solution.Business.Services
     {
         Task<string> GetRoleNameById(Guid id);
         Task<Guid> GetIdByRoleName(string roleName);
-        Task<List<RoleViewModel>> GetAll();
+        Task<SuccessResponse<List<RoleViewModel>>> GetAll();
     }
     public class RoleService : BaseService<Role>, IRoleService
     {
@@ -43,9 +44,10 @@ namespace kiosk_solution.Business.Services
             return role.Id;
         }
 
-        public async Task<List<RoleViewModel>> GetAll()
+        public async Task<SuccessResponse<List<RoleViewModel>>> GetAll()
         {
-            return await Get().ProjectTo<RoleViewModel>(_mapper).ToListAsync();
+            var list = await Get().ProjectTo<RoleViewModel>(_mapper).ToListAsync();
+            return new SuccessResponse<List<RoleViewModel>>(200, "Found.", list);
         }
     }
 }
