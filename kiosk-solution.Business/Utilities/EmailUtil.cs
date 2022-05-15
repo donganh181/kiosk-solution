@@ -34,11 +34,11 @@ namespace kiosk_solution.Data.ViewModels
                 mail.Body = content;
  
                 mail.Priority = MailPriority.High;
- 
+                SmtpServer.Host= "smtp.gmail.com";
                 SmtpServer.Port = 587;
                 SmtpServer.Credentials = new System.Net.NetworkCredential(_email, _pass);
                 SmtpServer.EnableSsl = true;
- 
+                SmtpServer.UseDefaultCredentials = false;
                 await SmtpServer.SendMailAsync(mail);
                 Console.WriteLine("Email sent successfully");
             }
