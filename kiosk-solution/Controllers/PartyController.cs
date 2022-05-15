@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using kiosk_solution.Data.Responses;
 using System.Collections.Generic;
 using System.Net;
+using Microsoft.Extensions.Logging;
 
 namespace kiosk_solution.Controllers
 {
@@ -18,11 +19,13 @@ namespace kiosk_solution.Controllers
     public class PartyController : Controller
     {
         private readonly IPartyService _partyService;
+        private readonly ILogger<PartyController> _logger;
         private IConfiguration _configuration;
-        public PartyController(IPartyService partyService,IConfiguration configuration)
+        public PartyController(IPartyService partyService,IConfiguration configuration, ILogger<PartyController> logger)
         {
             _partyService = partyService;
             _configuration = configuration;
+            _logger = logger;
         }
 
         /// <summary>
@@ -35,7 +38,6 @@ namespace kiosk_solution.Controllers
         public async Task<IActionResult> GetAll()
         {
             var list = await _partyService.GetAll();
-
             return Ok(new SuccessResponse<List<PartyViewModel>> ((int)HttpStatusCode.OK, "Found.", list));
         }
         
@@ -52,8 +54,8 @@ namespace kiosk_solution.Controllers
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             Guid creatorId = token.Id;
-
             var result = await _partyService.CreateAccount(creatorId, model);
+            _logger.LogInformation($"Created party {result.Email} by party {token.Mail}");
             return Ok(new SuccessResponse<PartyViewModel>((int)HttpStatusCode.OK, "Create success", result));
         }
     }

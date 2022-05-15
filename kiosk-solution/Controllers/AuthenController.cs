@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace kiosk_solution.Controllers
 {
@@ -17,23 +18,19 @@ namespace kiosk_solution.Controllers
     public class AuthenController : Controller
     {
         private readonly IPartyService _partyService;
-
-        public AuthenController(IPartyService partyService)
+        private readonly ILogger<AuthenController> _logger;
+        public AuthenController(IPartyService partyService,ILogger<AuthenController> logger)
         {
+            _logger = logger;
             _partyService = partyService;
         }
-
-        /// <summary>
-        /// Login to system with email and password
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
+        
         [HttpPost]
         [MapToApiVersion("1")]
         public async Task<IActionResult> Login([FromBody] LoginViewModel request)
         {
             var result = await _partyService.Login(request);
-
+            _logger.LogInformation($"Login by {request.email}");
             return Ok(new SuccessResponse<PartyViewModel>(200, "Login Success." , result));
         }
 
