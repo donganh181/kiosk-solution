@@ -78,7 +78,8 @@ namespace kiosk_solution.Business.Services.impl
             try
             {
                 await _unitOfWork.PartyRepository.InsertAsync(account);
-                await EmailUtil.SendCreateAccountEmail(account.Email);
+                await _unitOfWork.SaveAsync();
+                EmailUtil.SendCreateAccountEmail(account.Email);
                 var result = _mapper.CreateMapper().Map<PartyViewModel>(account);
                 return result;
             }
