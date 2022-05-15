@@ -1,54 +1,48 @@
-﻿using AutoMapper;
-using BCryptNet = BCrypt.Net.BCrypt;
-using kiosk_solution.Data.Models;
-using kiosk_solution.Data.Repositories;
-using kiosk_solution.Data.ViewModels;
-using Microsoft.Extensions.Configuration;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using kiosk_solution.Data.Responses;
 using System.Net;
-using kiosk_solution.Data.Constants;
-using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using kiosk_solution.Business.Utilities;
+using kiosk_solution.Data.Constants;
+using kiosk_solution.Data.Models;
+using kiosk_solution.Data.Repositories;
+using kiosk_solution.Data.Responses;
+using kiosk_solution.Data.ViewModels;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using BCryptNet = BCrypt.Net.BCrypt;
 
-namespace kiosk_solution.Business.Services
+namespace kiosk_solution.Business.Services.impl
 {
-    public interface IPartyService : IBaseService<Party>
-    {
-        Task<SuccessResponse<PartyViewModel>> Login(LoginViewModel model);
-        Task<SuccessResponse<PartyViewModel>> CreateAccount(Guid creatorId, CreateAccountViewModel model);
-        Task<SuccessResponse<List<PartyViewModel>>> GetAll();
-    }
-    public class PartyService : BaseService<Party>, IPartyService
+    
+    public class PartyService : IPartyService
     {
         private readonly AutoMapper.IConfigurationProvider _mapper;
         private readonly IConfiguration _configuration;
-
         private readonly IRoleService _roleService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public PartyService(IPartyRepository repository, IMapper mapper, IConfiguration configuration, IRoleService roleService) : base(repository)
+        public PartyService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, IRoleService roleService)
         {
             _mapper = mapper.ConfigurationProvider;
             _configuration = configuration;
             _roleService = roleService;
+            _unitOfWork = unitOfWork;
         }
 
-        public async Task<SuccessResponse<List<PartyViewModel>>> GetAll()
+        public async Task<List<PartyViewModel>> GetAll()
         {
-            var list = await Get().ProjectTo<PartyViewModel>(_mapper).ToListAsync();
+            var list = await _unitOfWork.PartyRepository.Get().ProjectTo<PartyViewModel>(_mapper).ToListAsync();
             if(list == null) throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
 
-            return new SuccessResponse<List<PartyViewModel>>(200, "Found.", list);
+            return list;
         }
 
-        public async Task<SuccessResponse<PartyViewModel>> Login(LoginViewModel model)
+        public async Task<PartyViewModel> Login(LoginViewModel model)
         {
-            var user = await Get(u => u.Email.Equals(model.email)).ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
+            var user = await _unitOfWork.PartyRepository.Get(u => u.Email.Equals(model.email)).ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
 
             if (user == null || !BCryptNet.Verify(model.password, user.Password))
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
@@ -71,12 +65,10 @@ namespace kiosk_solution.Business.Services
                 result.PasswordIsChanged = true;
             }
 
-            return new SuccessResponse<PartyViewModel>(200, "Login Success", result)
-            {
-            };
+            return result;
         }
         
-        public async Task<SuccessResponse<PartyViewModel>> CreateAccount(Guid creatorId, CreateAccountViewModel model)
+        public async Task<PartyViewModel> CreateAccount(Guid creatorId, CreateAccountViewModel model)
         {
             var account = _mapper.CreateMapper().Map<Party>(model);
             account.Password = BCrypt.Net.BCrypt.HashPassword(DefaultConstants.DEFAULT_PASSWORD);
@@ -85,10 +77,10 @@ namespace kiosk_solution.Business.Services
             account.CreateDate = DateTime.Now;
             try
             {
-                await CreateAsync(account);
+                await _unitOfWork.PartyRepository.InsertAsync(account);
                 await EmailUtil.SendCreateAccountEmail(account.Email);
                 var result = _mapper.CreateMapper().Map<PartyViewModel>(account);
-                return new SuccessResponse<PartyViewModel>(200, "Create success", result);       
+                return result;
             }
             catch (Exception) {
                 throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data");

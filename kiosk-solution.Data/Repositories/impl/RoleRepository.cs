@@ -6,15 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace kiosk_solution.Data.Repositories
+namespace kiosk_solution.Data.Repositories.impl
 {
-    public interface IRoleRepository : IBaseRepository<Role>
-    {
-    }
     public class RoleRepository : BaseRepository<Role>, IRoleRepository
     {
-        public RoleRepository(DbContext dbContext) : base(dbContext)
+        public RoleRepository(Kiosk_PlatformContext dbContext) : base(dbContext)
         {
+            
         }
     }
 }
