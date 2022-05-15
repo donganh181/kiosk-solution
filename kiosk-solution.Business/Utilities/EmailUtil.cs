@@ -27,18 +27,21 @@ namespace kiosk_solution.Data.ViewModels
                                   "<br/><br/>Thanks and Best regards," +
                                   "<br/>Tika - Tourist Interact Kiosk Application";
                 string subject = "Cấp tài khoản Tika - Tourist Interact Kiosk Application";
+                
                 mail.From = new MailAddress(_email);
                 mail.To.Add(sendto);
                 mail.Subject = subject;
                 mail.IsBodyHtml = true;
                 mail.Body = content;
- 
-                mail.Priority = MailPriority.High;
+                
                 SmtpServer.Host= "smtp.gmail.com";
                 SmtpServer.Port = 587;
+                SmtpServer.DeliveryMethod = SmtpDeliveryMethod.Network;
                 SmtpServer.EnableSsl = true;
                 SmtpServer.UseDefaultCredentials = false;
+                
                 SmtpServer.Credentials = new System.Net.NetworkCredential(_email, _pass);
+                
                 await SmtpServer.SendMailAsync(mail);
                 Console.WriteLine("Email sent successfully");
             }
