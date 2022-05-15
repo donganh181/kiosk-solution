@@ -36,9 +36,9 @@ namespace kiosk_solution.Data.ViewModels
                 mail.Priority = MailPriority.High;
                 SmtpServer.Host= "smtp.gmail.com";
                 SmtpServer.Port = 587;
+                SmtpServer.UseDefaultCredentials = false;
                 SmtpServer.Credentials = new System.Net.NetworkCredential(_email, _pass);
                 SmtpServer.EnableSsl = true;
-                SmtpServer.UseDefaultCredentials = false;
                 await SmtpServer.SendMailAsync(mail);
                 Console.WriteLine("Email sent successfully");
             }
