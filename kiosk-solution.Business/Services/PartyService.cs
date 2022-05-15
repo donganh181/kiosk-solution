@@ -20,9 +20,9 @@ namespace kiosk_solution.Business.Services
 {
     public interface IPartyService : IBaseService<Party>
     {
-        Task<SuccessResponse<PartyViewModel>> Login(LoginViewModel model);
-        Task<SuccessResponse<PartyViewModel>> CreateAccount(Guid creatorId, CreateAccountViewModel model);
-        Task<SuccessResponse<List<PartyViewModel>>> GetAll();
+        Task<PartyViewModel> Login(LoginViewModel model);
+        Task<PartyViewModel> CreateAccount(Guid creatorId, CreateAccountViewModel model);
+        Task<List<PartyViewModel>> GetAll();
     }
     public class PartyService : BaseService<Party>, IPartyService
     {
@@ -38,15 +38,15 @@ namespace kiosk_solution.Business.Services
             _roleService = roleService;
         }
 
-        public async Task<SuccessResponse<List<PartyViewModel>>> GetAll()
+        public async Task<List<PartyViewModel>> GetAll()
         {
             var list = await Get().ProjectTo<PartyViewModel>(_mapper).ToListAsync();
             if(list == null) throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
 
-            return new SuccessResponse<List<PartyViewModel>>(200, "Found.", list);
+            return list;
         }
 
-        public async Task<SuccessResponse<PartyViewModel>> Login(LoginViewModel model)
+        public async Task<PartyViewModel> Login(LoginViewModel model)
         {
             var user = await Get(u => u.Email.Equals(model.email)).ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
 
@@ -71,12 +71,10 @@ namespace kiosk_solution.Business.Services
                 result.PasswordIsChanged = true;
             }
 
-            return new SuccessResponse<PartyViewModel>(200, "Login Success", result)
-            {
-            };
+            return result;
         }
         
-        public async Task<SuccessResponse<PartyViewModel>> CreateAccount(Guid creatorId, CreateAccountViewModel model)
+        public async Task<PartyViewModel> CreateAccount(Guid creatorId, CreateAccountViewModel model)
         {
             var account = _mapper.CreateMapper().Map<Party>(model);
             account.Password = BCrypt.Net.BCrypt.HashPassword(DefaultConstants.DEFAULT_PASSWORD);
@@ -88,7 +86,8 @@ namespace kiosk_solution.Business.Services
                 await CreateAsync(account);
                 await EmailUtil.SendCreateAccountEmail(account.Email);
                 var result = _mapper.CreateMapper().Map<PartyViewModel>(account);
-                return new SuccessResponse<PartyViewModel>(200, "Create success", result);       
+                return result;
+                  
             }
             catch (Exception) {
                 throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data");

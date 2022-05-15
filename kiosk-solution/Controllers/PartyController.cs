@@ -6,6 +6,9 @@ using kiosk_solution.Data.ViewModels;
 using kiosk_solution.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
+using kiosk_solution.Data.Responses;
+using System.Collections.Generic;
+using System.Net;
 
 namespace kiosk_solution.Controllers
 {
@@ -22,14 +25,25 @@ namespace kiosk_solution.Controllers
             _configuration = configuration;
         }
 
+        /// <summary>
+        /// Get all users in system
+        /// </summary>
+        /// <returns></returns>
         [Authorize(Roles = "Admin")]
         [HttpGet]
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await _partyService.GetAll());
+            var list = await _partyService.GetAll();
+
+            return Ok(new SuccessResponse<List<PartyViewModel>> ((int)HttpStatusCode.OK, "Found.", list));
         }
         
+        /// <summary>
+        /// Create new user
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [Authorize(Roles = "Admin")]
         [HttpPost("createAccount")]
         [MapToApiVersion("1")]
@@ -38,7 +52,9 @@ namespace kiosk_solution.Controllers
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             Guid creatorId = token.Id;
-            return Ok(await _partyService.CreateAccount(creatorId, model));
+
+            var result = await _partyService.CreateAccount(creatorId, model);
+            return Ok(new SuccessResponse<PartyViewModel>((int)HttpStatusCode.OK, "Create success", result));
         }
     }
 }

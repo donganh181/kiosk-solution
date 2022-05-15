@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using AutoMapper.QueryableExtensions;
 using kiosk_solution.Data.ViewModels;
 using kiosk_solution.Data.Responses;
+using System.Net;
 
 namespace kiosk_solution.Business.Services
 {
@@ -18,7 +19,7 @@ namespace kiosk_solution.Business.Services
     {
         Task<string> GetRoleNameById(Guid id);
         Task<Guid> GetIdByRoleName(string roleName);
-        Task<SuccessResponse<List<RoleViewModel>>> GetAll();
+        Task<List<RoleViewModel>> GetAll();
     }
     public class RoleService : BaseService<Role>, IRoleService
     {
@@ -44,10 +45,13 @@ namespace kiosk_solution.Business.Services
             return role.Id;
         }
 
-        public async Task<SuccessResponse<List<RoleViewModel>>> GetAll()
+        public async Task<List<RoleViewModel>> GetAll()
         {
             var list = await Get().ProjectTo<RoleViewModel>(_mapper).ToListAsync();
-            return new SuccessResponse<List<RoleViewModel>>(200, "Found.", list);
+            if(list == null)
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
+
+            return list;
         }
     }
 }
