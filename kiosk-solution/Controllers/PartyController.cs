@@ -56,7 +56,21 @@ namespace kiosk_solution.Controllers
             Guid creatorId = token.Id;
             var result = await _partyService.CreateAccount(creatorId, model);
             _logger.LogInformation($"Created party {result.Email} by party {token.Mail}");
-            return Ok(new SuccessResponse<PartyViewModel>((int)HttpStatusCode.OK, "Create success", result));
+            return Ok(new SuccessResponse<PartyViewModel>((int)HttpStatusCode.OK, "Create success.", result));
+        }
+
+        [Authorize(Roles = "Admin, Location Owner, Service Provider")]
+
+        [HttpPut]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Update([FromBody] UpdateAccountViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            Guid updaterId = token.Id;
+            var result = await _partyService.UpdateAccount(updaterId, model);
+            _logger.LogInformation($"Updated party {result.Email} by party {token.Mail}");
+            return Ok(new SuccessResponse<PartyViewModel>((int)HttpStatusCode.OK, "Update success.", result));
         }
     }
 }
