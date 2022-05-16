@@ -87,5 +87,35 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data");
             }
         }
+
+        public async Task<PartyViewModel> UpdateAccount(Guid accountId, UpdateAccountViewModel model)
+        {
+            var updater = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(accountId)).FirstOrDefaultAsync();
+            if (updater == null) throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
+
+            var updaterRoleName = await _roleService.GetRoleNameById(Guid.Parse(updater.RoleId.ToString()));
+            if (updaterRoleName.Equals("Admin") || updater.Id.Equals(model.Id))
+            {
+                var user = await _unitOfWork.PartyRepository.Get(us => us.Id.Equals(model.Id)).FirstOrDefaultAsync();
+
+                if (user == null) throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
+                user.FirstName = model.FirstName;
+                user.LastName = model.LastName;
+                user.PhoneNumber = model.PhoneNumber;
+                user.Address = model.Address;
+                user.DateOfBirth = model.DateOfBirth;
+                try
+                {
+                    _unitOfWork.PartyRepository.Update(user);
+                    await _unitOfWork.SaveAsync();
+                    var result = _mapper.CreateMapper().Map<PartyViewModel>(user);
+                    return result;
+                }
+                catch (Exception)
+                {
+                    throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data");
+                }
+            }else throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+        }
     }
 }
