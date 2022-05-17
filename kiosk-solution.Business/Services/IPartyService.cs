@@ -13,5 +13,6 @@ namespace kiosk_solution.Business.Services
         Task<List<PartyViewModel>> GetAll();
         Task<PartyViewModel> UpdateAccount(Guid accountId, UpdateAccountViewModel model);
         Task<PartyViewModel> UpdatePassword(Guid id, UpdatePasswordViewModel model);
+        Task<PartyViewModel> UpdateStatus(Guid id);
     }
 }

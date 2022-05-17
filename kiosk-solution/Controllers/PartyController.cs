@@ -84,5 +84,17 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Updated password of partty {result.Email}");
             return Ok(new SuccessResponse<PartyViewModel>((int)HttpStatusCode.OK, "Update success.", result));
         }
+        
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("status")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateStatus(Guid id)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _partyService.UpdateStatus(id);
+            _logger.LogInformation($"Updated status of partty {result.Email} by party {token.Mail}");
+            return Ok(new SuccessResponse<PartyViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
     }
 }
