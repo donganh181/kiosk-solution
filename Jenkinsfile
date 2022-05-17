@@ -7,7 +7,7 @@ pipeline {
     stages {
         stage('Cloning git') {
             steps {
-                git url: 'https://github.com/longphamit/demo-cicd-jenkins', credentialsId: 'github'
+                git url: 'https://github.com/donganh181/kiosk-solution', credentialsId: 'github-capstone'
             }
         }
         stage('Build Maven') {
@@ -17,7 +17,7 @@ pipeline {
         }
         stage('Build Image') {
             steps {
-                sh "docker build -t longpc/demo-cicd-spring-pipeline ."
+                sh "docker build -t longpc/kiosk-solution ."
             }
         }
         stage('Test') {
@@ -34,7 +34,7 @@ pipeline {
         }
         stage("Push Image") {
             steps {
-               sh "docker push longpc/demo-cicd-spring-pipeline"
+               sh "docker push longpc/kiosk-solution"
             }
         }
     }
