@@ -16,7 +16,6 @@ using BCryptNet = BCrypt.Net.BCrypt;
 
 namespace kiosk_solution.Business.Services.impl
 {
-    
     public class PartyService : IPartyService
     {
         private readonly AutoMapper.IConfigurationProvider _mapper;
@@ -24,7 +23,8 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IRoleService _roleService;
         private readonly IUnitOfWork _unitOfWork;
 
-        public PartyService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, IRoleService roleService)
+        public PartyService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration,
+            IRoleService roleService)
         {
             _mapper = mapper.ConfigurationProvider;
             _configuration = configuration;
@@ -35,19 +35,20 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<List<PartyViewModel>> GetAll()
         {
             var list = await _unitOfWork.PartyRepository.Get().ProjectTo<PartyViewModel>(_mapper).ToListAsync();
-            if(list == null) throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
+            if (list == null) throw new ErrorResponse((int) HttpStatusCode.NotFound, "Not found.");
 
             return list;
         }
 
         public async Task<PartyViewModel> Login(LoginViewModel model)
         {
-            var user = await _unitOfWork.PartyRepository.Get(u => u.Email.Equals(model.email)).ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
+            var user = await _unitOfWork.PartyRepository.Get(u => u.Email.Equals(model.email))
+                .ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
 
             if (user == null || !BCryptNet.Verify(model.password, user.Password))
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Not found.");
             if (user.Status.Equals(AccountStatusConstants.DEACTIVATE))
-                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "This user has been banned.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "This user has been banned.");
 
             var roleName = await _roleService.GetRoleNameById(Guid.Parse(user.RoleId.ToString()));
             user.RoleName = roleName;
@@ -56,7 +57,7 @@ namespace kiosk_solution.Business.Services.impl
 
             result.Token = token;
 
-            if(BCryptNet.Verify(DefaultConstants.DEFAULT_PASSWORD, result.Password))
+            if (BCryptNet.Verify(DefaultConstants.DEFAULT_PASSWORD, result.Password))
             {
                 result.PasswordIsChanged = false;
             }
@@ -67,7 +68,7 @@ namespace kiosk_solution.Business.Services.impl
 
             return result;
         }
-        
+
         public async Task<PartyViewModel> CreateAccount(Guid creatorId, CreateAccountViewModel model)
         {
             var account = _mapper.CreateMapper().Map<Party>(model);
@@ -83,22 +84,23 @@ namespace kiosk_solution.Business.Services.impl
                 var result = _mapper.CreateMapper().Map<PartyViewModel>(account);
                 return result;
             }
-            catch (DbUpdateException) {
-                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data");
+            catch (DbUpdateException)
+            {
+                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data");
             }
         }
 
         public async Task<PartyViewModel> UpdateAccount(Guid accountId, UpdateAccountViewModel model)
         {
             var updater = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(accountId)).FirstOrDefaultAsync();
-            if (updater == null) throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
+            if (updater == null) throw new ErrorResponse((int) HttpStatusCode.NotFound, "Not found.");
 
             var updaterRoleName = await _roleService.GetRoleNameById(Guid.Parse(updater.RoleId.ToString()));
             if (updaterRoleName.Equals("Admin") || updater.Id.Equals(model.Id))
             {
                 var user = await _unitOfWork.PartyRepository.Get(us => us.Id.Equals(model.Id)).FirstOrDefaultAsync();
 
-                if (user == null) throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
+                if (user == null) throw new ErrorResponse((int) HttpStatusCode.NotFound, "Not found.");
                 user.FirstName = model.FirstName;
                 user.LastName = model.LastName;
                 user.PhoneNumber = model.PhoneNumber;
@@ -113,9 +115,10 @@ namespace kiosk_solution.Business.Services.impl
                 }
                 catch (Exception)
                 {
-                    throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data");
+                    throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data");
                 }
-            }else throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+            }
+            else throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Your account cannot use this feature.");
         }
 
         public async Task<PartyViewModel> UpdatePassword(Guid id, UpdatePasswordViewModel model)
@@ -136,7 +139,33 @@ namespace kiosk_solution.Business.Services.impl
             {
                 throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data");
             }
+        }
 
+        public async Task<PartyViewModel> UpdateStatus(Guid id)
+        {
+            var user = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(id)).FirstOrDefaultAsync();
+            if (user.RoleId != null)
+            {
+                var userRoleName = await _roleService.GetRoleNameById((Guid) user.RoleId);
+                if (userRoleName.Equals(RoleConstants.ADMIN))
+                    throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+            }
+
+            if (user.Status.Equals(AccountStatusConstants.ACTIVE))
+                user.Status = AccountStatusConstants.DEACTIVATE;
+            else
+                user.Status = AccountStatusConstants.ACTIVE;
+            try
+            {
+                _unitOfWork.PartyRepository.Update(user);
+                await _unitOfWork.SaveAsync();
+                var result = _mapper.CreateMapper().Map<PartyViewModel>(user);
+                return result;
+            }
+            catch (DbUpdateException)
+            {
+                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data");
+            }
         }
     }
 }
