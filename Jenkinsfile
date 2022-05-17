@@ -10,11 +10,6 @@ pipeline {
                 git url: 'https://github.com/donganh181/kiosk-solution', credentialsId: 'github-capstone'
             }
         }
-        stage('Build Maven') {
-            steps {
-                sh 'mvn clean install -DskipTests=true '
-            }
-        }
         stage('Build Image') {
             steps {
                 sh "docker build -t longpc/kiosk-solution ."
