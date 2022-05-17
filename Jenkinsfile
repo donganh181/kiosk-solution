@@ -7,12 +7,7 @@ pipeline {
     stages {
         stage('Cloning git') {
             steps {
-                git url: 'https://github.com/donganh181/kiosk-solution', credentialsId: 'github-capstone'
-            }
-        }
-        stage('Build Maven') {
-            steps {
-                sh 'mvn clean install -DskipTests=true '
+                git url: 'https://github.com/donganh181/kiosk-solution', credentialsId: 'github'
             }
         }
         stage('Build Image') {
