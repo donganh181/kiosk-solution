@@ -18,6 +18,10 @@ namespace kiosk_solution.Data.AutoMapper
 
             mc.CreateMap<Party, CreateAccountViewModel>();
             mc.CreateMap<CreateAccountViewModel, Party>();
+
+            mc.CreateMap<Party, PartySearchViewModel>().ForMember(src => src.RoleName, opt => opt.MapFrom(des => des.Role.Name));
+            mc.CreateMap<PartySearchViewModel, Party>();
+            
         }
         
     }

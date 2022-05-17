@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -97,7 +98,6 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<PartyViewModel> UpdateAccount(Guid accountId, UpdateAccountViewModel model)
         {
             var updater = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(accountId)).FirstOrDefaultAsync();
-            if (updater == null) throw new ErrorResponse((int) HttpStatusCode.NotFound, "Not found.");
 
             var updaterRoleName = await _roleService.GetRoleNameById(Guid.Parse(updater.RoleId.ToString()));
             if (updaterRoleName.Equals("Admin") || updater.Id.Equals(model.Id))
@@ -176,6 +176,35 @@ namespace kiosk_solution.Business.Services.impl
             {
                 throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data");
             }
+        }
+
+        public async Task<DynamicModelResponse<PartySearchViewModel>> GetAllWithPaging(Guid id, PartySearchViewModel model, int size, int pageNum)
+        {
+            var user = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(id)).FirstOrDefaultAsync();
+
+            var userRoleName = await _roleService.GetRoleNameById(Guid.Parse(user.RoleId.ToString()));
+            if(!userRoleName.Equals(RoleConstants.ADMIN)) throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+
+            var users = _unitOfWork.PartyRepository.Get().Include(u => u.Role).ProjectTo<PartySearchViewModel>(_mapper);
+            var listUser = users.ToList();
+
+            if(listUser.Count == 0) throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            users = listUser.AsQueryable().OrderByDescending(r => r.LastName).ThenByDescending(r => r.Address);
+            var listPaging = users
+                    .DynamicFilter(model)
+                    .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
+            if (listPaging.Item2.ToList().Count<1) throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            var result = new DynamicModelResponse<PartySearchViewModel>
+            {
+                Metadata = new PagingMetaData
+                {
+                    Page = pageNum,
+                    Size = size,
+                    Total = listPaging.Item1
+                },
+                Data = listPaging.Item2.ToList()
+            };
+            return result;
         }
     }
 }
