@@ -79,11 +79,11 @@ namespace kiosk_solution.Business.Services.impl
             {
                 await _unitOfWork.PartyRepository.InsertAsync(account);
                 await _unitOfWork.SaveAsync();
-                EmailUtil.SendCreateAccountEmail(account.Email);
+                await EmailUtil.SendCreateAccountEmail(account.Email);
                 var result = _mapper.CreateMapper().Map<PartyViewModel>(account);
                 return result;
             }
-            catch (Exception) {
+            catch (DbUpdateException) {
                 throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data");
             }
         }
@@ -116,6 +116,27 @@ namespace kiosk_solution.Business.Services.impl
                     throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data");
                 }
             }else throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+        }
+
+        public async Task<PartyViewModel> UpdatePassword(Guid id, UpdatePasswordViewModel model)
+        {
+            var user = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(id)).FirstOrDefaultAsync();
+            if (!BCrypt.Net.BCrypt.Verify(model.OldPasssword, user.Password))
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Wrong old password");
+            user.Password = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
+            try
+            {
+                _unitOfWork.PartyRepository.Update(user);
+                await _unitOfWork.SaveAsync();
+                var result = _mapper.CreateMapper().Map<PartyViewModel>(user);
+                result.PasswordIsChanged = true;
+                return result;
+            }
+            catch (DbUpdateException)
+            {
+                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data");
+            }
+
         }
     }
 }
