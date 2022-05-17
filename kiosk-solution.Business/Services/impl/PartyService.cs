@@ -80,7 +80,11 @@ namespace kiosk_solution.Business.Services.impl
             {
                 await _unitOfWork.PartyRepository.InsertAsync(account);
                 await _unitOfWork.SaveAsync();
-                await EmailUtil.SendCreateAccountEmail(account.Email);
+
+                string subject = EmailConstants.CREATE_ACCOUNT_SUBJECT;
+                string content = EmailUtil.getCreateAccountContent(account.Email);
+                await EmailUtil.SendEmail(account.Email, subject, content);
+
                 var result = _mapper.CreateMapper().Map<PartyViewModel>(account);
                 return result;
             }
@@ -159,6 +163,12 @@ namespace kiosk_solution.Business.Services.impl
             {
                 _unitOfWork.PartyRepository.Update(user);
                 await _unitOfWork.SaveAsync();
+
+                string subject = EmailUtil.getUpdateStatusSubject(user.Status.Equals(AccountStatusConstants.ACTIVE));
+                string content =
+                    EmailUtil.getUpdateStatusContent(user.Email, user.Status.Equals(AccountStatusConstants.ACTIVE));
+                await EmailUtil.SendEmail(user.Email, subject, content);
+
                 var result = _mapper.CreateMapper().Map<PartyViewModel>(user);
                 return result;
             }
