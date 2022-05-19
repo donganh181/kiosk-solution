@@ -15,10 +15,10 @@ namespace kiosk_solution.Handler
             if (context.Exception is System.Linq.Dynamic.Core.Exceptions.ParseException || context.Exception is ErrorResponse)
             {
                 string message = context.Exception.ToString();
-                if (context.Exception.GetType() == typeof(ErrorResponse)) message = ((ErrorResponse)context.Exception).Error.Message;
-                context.Result = new ObjectResult(new ErrorResponse(((ErrorResponse)context.Exception).Error.Code, message))
+                if (context.Exception.GetType() == typeof(ErrorResponse)) message = ((ErrorResponse)context.Exception).Message;
+                context.Result = new ObjectResult(new ErrorResponse(((ErrorResponse)context.Exception).Code, message))
                 {
-                    StatusCode = ((ErrorResponse)context.Exception).Error.Code
+                    StatusCode = ((ErrorResponse)context.Exception).Code
                 };
                 context.ExceptionHandled = true;
                 return;

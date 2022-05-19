@@ -8,9 +8,9 @@ namespace kiosk_solution.Data.ViewModels
     public class EmailUtil
     {
         private static readonly string _email = "capstoneprojectfu2021@gmail.com";
-        private static readonly string _pass = "capstone123"; 
-        
-        public static async Task SendCreateAccountEmail(string sendto)
+        private static readonly string _pass = "capstone123";
+
+        public static async Task SendEmail(string sendto, string subject, string content)
         {
             //sendto: Email receiver (người nhận)
             //subject: Tiêu đề email
@@ -19,33 +19,57 @@ namespace kiosk_solution.Data.ViewModels
             try
             {
                 MailMessage mail = new MailMessage();
-                SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
-                string content = "Kính gửi quý đối tác,<br/>" +
-                                 "Chúng tôi chân thành cảm ơn đã hợp tác, bên dưới là tài khoản để đăng nhập vào hệ thống của bạn: <br/>" +
-                                  $"username: {sendto}" +
-                                  $"<br/>password: {DefaultConstants.DEFAULT_PASSWORD}" +
-                                  "<br/><br/>Thanks and Best regards," +
-                                  "<br/>Tika - Tourist Interact Kiosk Application";
-                string subject = "Cấp tài khoản Tika - Tourist Interact Kiosk Application";
+                SmtpClient smtpServer = new SmtpClient("smtp.gmail.com");
+
                 mail.From = new MailAddress(_email);
                 mail.To.Add(sendto);
                 mail.Subject = subject;
                 mail.IsBodyHtml = true;
                 mail.Body = content;
- 
-                mail.Priority = MailPriority.High;
- 
-                SmtpServer.Port = 587;
-                SmtpServer.Credentials = new System.Net.NetworkCredential(_email, _pass);
-                SmtpServer.EnableSsl = true;
- 
-                await SmtpServer.SendMailAsync(mail);
+
+                smtpServer.Host = "smtp.gmail.com";
+                smtpServer.Port = 587;
+                smtpServer.DeliveryMethod = SmtpDeliveryMethod.Network;
+                smtpServer.EnableSsl = true;
+                smtpServer.UseDefaultCredentials = false;
+                smtpServer.Credentials = new System.Net.NetworkCredential(_email, _pass);
+
+                await smtpServer.SendMailAsync(mail);
                 Console.WriteLine("Email sent successfully");
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex);
                 Console.WriteLine("Email sending failed");
             }
+        }
+
+        public static string getCreateAccountContent(string email)
+        {
+            string result = EmailConstants.CREATE_ACCOUNT_CONTENT_BASE.Replace("EMAIL", email)
+                .Replace("PASSWORD", DefaultConstants.DEFAULT_PASSWORD);
+            return result;
+        }
+
+        public static string getUpdateStatusSubject(bool isActive)
+        {
+            string status;
+            if (isActive)
+                status = "Mở";
+            else
+                status = "Khóa";
+            string result = EmailConstants.UPATE_STATUS_SUBJECT_BASE.Replace("STATUS", status);
+            return result;
+        }
+
+        public static string getUpdateStatusContent(string email, bool isActive)
+        {
+            string result;
+            if (isActive)
+                result = EmailConstants.UPATE_STATUS_TO_ACTIVE_CONTENT_BASE.Replace("EMAIL", email);
+            else
+                result = EmailConstants.UPATE_STATUS_TO_DEACTIVE_CONTENT_BASE.Replace("EMAIL", email);
+            return result;
         }
     }
 }

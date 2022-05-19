@@ -6,39 +6,118 @@ using kiosk_solution.Data.ViewModels;
 using kiosk_solution.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
+using kiosk_solution.Data.Responses;
+using System.Collections.Generic;
+using System.Net;
+using Microsoft.Extensions.Logging;
+using kiosk_solution.Data.Constants;
 
 namespace kiosk_solution.Controllers
 {
-    [Route("api/v{version:apiVersion}/partys")]
+    [Route("api/v{version:apiVersion}/parties")]
     [ApiController]
     [ApiVersion("1")]
     public class PartyController : Controller
     {
         private readonly IPartyService _partyService;
+        private readonly ILogger<PartyController> _logger;
         private IConfiguration _configuration;
-        public PartyController(IPartyService partyService,IConfiguration configuration)
+        public PartyController(IPartyService partyService,IConfiguration configuration, ILogger<PartyController> logger)
         {
             _partyService = partyService;
             _configuration = configuration;
-        }
-
-        [Authorize(Roles = "Admin")]
-        [HttpGet]
-        [MapToApiVersion("1")]
-        public async Task<IActionResult> GetAll()
-        {
-            return Ok(await _partyService.GetAll());
+            _logger = logger;
         }
         
+        /// <summary>
+        /// Create new user
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [Authorize(Roles = "Admin")]
-        [HttpPost("createAccount")]
+        [HttpPost]
         [MapToApiVersion("1")]
         public async Task<IActionResult> Register([FromBody] CreateAccountViewModel model)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             Guid creatorId = token.Id;
-            return Ok(await _partyService.CreateAccount(creatorId, model));
+            var result = await _partyService.CreateAccount(creatorId, model);
+            _logger.LogInformation($"Created party {result.Email} by party {token.Mail}");
+            return Ok(new SuccessResponse<PartyViewModel>((int)HttpStatusCode.OK, "Create success.", result));
+        }
+
+        /// <summary>
+        /// Admin can update information of other users. Other can update their own information.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Location Owner, Service Provider")]
+        [HttpPut]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Update([FromBody] UpdateAccountViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            Guid updaterId = token.Id;
+            var result = await _partyService.UpdateAccount(updaterId, model);
+            _logger.LogInformation($"Updated party {result.Email} by party {token.Mail}");
+            return Ok(new SuccessResponse<PartyViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+        
+        /// <summary>
+        /// User can update their own password
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Location Owner, Service Provider")]
+        [HttpPatch("password")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            Guid id = token.Id;
+            var result = await _partyService.UpdatePassword(id, model);
+            _logger.LogInformation($"Updated password of party {result.Email}");
+            return Ok(new SuccessResponse<PartyViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+        
+        /// <summary>
+        /// Admin can change the status of user account
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("status")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateStatus(Guid id)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _partyService.UpdateStatus(id);
+            _logger.LogInformation($"Updated status of party {result.Email} by party {token.Mail}");
+            return Ok(new SuccessResponse<PartyViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+
+        /// <summary>
+        /// Search user
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="size"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Get([FromQuery] PartySearchViewModel model, int size, int page = CommonConstants.DefaultPage)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            Guid id = token.Id;
+            var result = await _partyService.GetAllWithPaging(id,model,size,page);
+            _logger.LogInformation($"Get all parties by party {token.Mail}");
+            return Ok(new SuccessResponse<DynamicModelResponse<PartySearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
     }
 }
