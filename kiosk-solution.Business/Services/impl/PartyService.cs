@@ -13,6 +13,7 @@ using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using BCryptNet = BCrypt.Net.BCrypt;
 
 namespace kiosk_solution.Business.Services.impl
@@ -21,38 +22,32 @@ namespace kiosk_solution.Business.Services.impl
     {
         private readonly AutoMapper.IConfigurationProvider _mapper;
         private readonly IConfiguration _configuration;
-        private readonly IRoleService _roleService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<IPartyService> _logger;
 
-        public PartyService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration,
-            IRoleService roleService)
+        public PartyService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration,ILogger<IPartyService> logger)
         {
             _mapper = mapper.ConfigurationProvider;
             _configuration = configuration;
-            _roleService = roleService;
             _unitOfWork = unitOfWork;
-        }
-
-        public async Task<List<PartyViewModel>> GetAll()
-        {
-            var list = await _unitOfWork.PartyRepository.Get().ProjectTo<PartyViewModel>(_mapper).ToListAsync();
-            if (list == null) throw new ErrorResponse((int) HttpStatusCode.NotFound, "Not found.");
-
-            return list;
+            _logger = logger;
         }
 
         public async Task<PartyViewModel> Login(LoginViewModel model)
         {
-            var user = await _unitOfWork.PartyRepository.Get(u => u.Email.Equals(model.email))
-                .ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
+            var user = await _unitOfWork.PartyRepository.Get(u => u.Email.Equals(model.email)).Include(u => u.Role).ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
 
             if (user == null || !BCryptNet.Verify(model.password, user.Password))
-                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Not found.");
+            {
+                _logger.LogInformation("Not Found");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
+            }
+                
             if (user.Status.Equals(AccountStatusConstants.DEACTIVATE))
-                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "This user has been banned.");
-
-            var roleName = await _roleService.GetRoleNameById(Guid.Parse(user.RoleId.ToString()));
-            user.RoleName = roleName;
+            {
+                _logger.LogInformation($"{model.email} has been banned.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "This user has been banned.");
+            }
             string token = TokenUtil.GenerateJWTWebToken(user, _configuration);
             var result = _mapper.CreateMapper().Map<PartyViewModel>(user);
 
@@ -91,20 +86,20 @@ namespace kiosk_solution.Business.Services.impl
             }
             catch (DbUpdateException)
             {
-                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data");
+                _logger.LogInformation("Invalid Data.");
+                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data.");
             }
         }
 
         public async Task<PartyViewModel> UpdateAccount(Guid accountId, UpdateAccountViewModel model)
         {
-            var updater = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(accountId)).FirstOrDefaultAsync();
+            var updater = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(accountId)).Include(u => u.Role).FirstOrDefaultAsync();
 
-            var updaterRoleName = await _roleService.GetRoleNameById(Guid.Parse(updater.RoleId.ToString()));
-            if (updaterRoleName.Equals("Admin") || updater.Id.Equals(model.Id))
+            if (updater.Role.Name.Equals("Admin") || updater.Id.Equals(model.Id))
             {
                 var user = await _unitOfWork.PartyRepository.Get(us => us.Id.Equals(model.Id)).FirstOrDefaultAsync();
 
-                if (user == null) throw new ErrorResponse((int) HttpStatusCode.NotFound, "Not found.");
+                if (user == null) throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
                 user.FirstName = model.FirstName;
                 user.LastName = model.LastName;
                 user.PhoneNumber = model.PhoneNumber;
@@ -119,17 +114,27 @@ namespace kiosk_solution.Business.Services.impl
                 }
                 catch (Exception)
                 {
-                    throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data");
+                    _logger.LogInformation("Invalid Data.");
+                    throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
                 }
             }
-            else throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+            else
+            {
+                _logger.LogInformation($"account {updater.Email} cannot use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+            }
+            
         }
 
         public async Task<PartyViewModel> UpdatePassword(Guid id, UpdatePasswordViewModel model)
         {
             var user = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(id)).FirstOrDefaultAsync();
             if (!BCrypt.Net.BCrypt.Verify(model.OldPasssword, user.Password))
-                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Wrong old password");
+            {
+                _logger.LogInformation("Wrong old password");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Wrong old password");
+            }
+                
             user.Password = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
             try
             {
@@ -141,18 +146,25 @@ namespace kiosk_solution.Business.Services.impl
             }
             catch (DbUpdateException)
             {
+                _logger.LogInformation("Invalid Data");
                 throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data");
             }
         }
 
         public async Task<PartyViewModel> UpdateStatus(Guid id)
         {
-            var user = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(id)).FirstOrDefaultAsync();
-            if (user.RoleId != null)
+            var user = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(id)).Include(u => u.Role).FirstOrDefaultAsync();
+
+            if (user == null)
             {
-                var userRoleName = await _roleService.GetRoleNameById((Guid) user.RoleId);
-                if (userRoleName.Equals(RoleConstants.ADMIN))
-                    throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+                _logger.LogInformation("Not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
+            }
+
+            if (user.Role.Name.Equals(RoleConstants.ADMIN))
+            {
+                _logger.LogInformation($"{user.Email} cannot change status of admin.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Your account cannot use this feature.");
             }
 
             if (user.Status.Equals(AccountStatusConstants.ACTIVE))
@@ -174,16 +186,19 @@ namespace kiosk_solution.Business.Services.impl
             }
             catch (DbUpdateException)
             {
-                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data");
+                _logger.LogInformation("Invalid Data.");
+                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data.");
             }
         }
 
         public async Task<DynamicModelResponse<PartySearchViewModel>> GetAllWithPaging(Guid id, PartySearchViewModel model, int size, int pageNum)
         {
-            var user = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(id)).FirstOrDefaultAsync();
-
-            var userRoleName = await _roleService.GetRoleNameById(Guid.Parse(user.RoleId.ToString()));
-            if(!userRoleName.Equals(RoleConstants.ADMIN)) throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+            var user = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(id)).Include(u => u.Role).FirstOrDefaultAsync();
+            if (!user.Role.Name.Equals(RoleConstants.ADMIN))
+            {
+                _logger.LogInformation($"{user.Email} cannot use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+            }
 
             var users = _unitOfWork.PartyRepository.Get().Include(u => u.Role).ProjectTo<PartySearchViewModel>(_mapper);
             var listUser = users.ToList();
