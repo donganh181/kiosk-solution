@@ -13,7 +13,7 @@ namespace kiosk_solution.Data.AutoMapper
     {
         public static void ConfigPartyModule(this IMapperConfigurationExpression mc)
         {
-            mc.CreateMap<Party, PartyViewModel>();
+            mc.CreateMap<Party, PartyViewModel>().ForMember(src => src.RoleName, opt => opt.MapFrom(des => des.Role.Name));
             mc.CreateMap<PartyViewModel, Party>();
 
             mc.CreateMap<Party, CreateAccountViewModel>();
