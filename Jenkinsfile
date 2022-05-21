@@ -1,7 +1,6 @@
 pipeline {
     agent any
     tools {
-        maven 'maven 3.8.4'
         dockerTool 'docker'
     }
     stages {
@@ -12,7 +11,7 @@ pipeline {
         }
         stage('Build Image') {
             steps {
-                sh "docker build kiosk-solution --no-cache -t longpc/kiosk-solution ."
+                sh "docker build -t longpc/kiosk-solution . --no-cache"
             }
         }
         stage('Test') {
