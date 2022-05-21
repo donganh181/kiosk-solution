@@ -129,7 +129,7 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<PartyViewModel> UpdatePassword(Guid id, UpdatePasswordViewModel model)
         {
             var user = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(id)).FirstOrDefaultAsync();
-            if (!BCrypt.Net.BCrypt.Verify(model.OldPasssword, user.Password))
+            if (!BCrypt.Net.BCrypt.Verify(model.OldPassword, user.Password))
             {
                 _logger.LogInformation("Wrong old password");
                 throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Wrong old password");
