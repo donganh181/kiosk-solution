@@ -33,9 +33,9 @@ namespace kiosk_solution.Data.ViewModels
         public Guid? RoleId { get; set; }
         [BindNever]
         public DateTime? CreateDate { get; set; }
-        [BindNever]
+        [String]
         public string Status { get; set; }
-        [BindNever]
+        [String]
         public string RoleName { get; set; }
     }
 }
