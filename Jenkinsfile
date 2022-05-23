@@ -1,7 +1,7 @@
 def remote = [:]
 remote.name = 'remote-server'
-remote.host = '103.125.170.20'
-remote.port = 10037
+remote.host = '172.168.2.5'
+remote.port = 22
 remote.user = 'root'
 remote.password = 'Goboi123'
 remote.allowAnyHosts = true
@@ -12,11 +12,11 @@ pipeline {
         dockerTool 'docker'
     }
     stages {
-        stage('Cloning git') {
-            steps {
-                git url: 'https://github.com/donganh181/kiosk-solution', branch: 'production', credentialsId: 'github'
-            }
-        }
+        // stage('Cloning git') {
+        //     steps {
+        //         git url: 'https://github.com/donganh181/kiosk-solution', branch: 'production', credentialsId: 'github'
+        //     }
+        // }
         // stage('Build Image') {
         //     steps {
         //         sh "docker build -t longpc/kiosk-solution ."
