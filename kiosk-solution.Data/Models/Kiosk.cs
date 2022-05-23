@@ -10,7 +10,7 @@ namespace kiosk_solution.Data.Models
         public Kiosk()
         {
             Orders = new HashSet<Order>();
-            Schedules = new HashSet<Schedule>();
+            KioskSchedules = new HashSet<KioskSchedule>();
         }
 
         public Guid Id { get; set; }
@@ -23,6 +23,11 @@ namespace kiosk_solution.Data.Models
         public virtual KioskLocation KioskLocation { get; set; }
         public virtual Party Party { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
-        public virtual ICollection<Schedule> Schedules { get; set; }
+
+        public virtual ICollection<KioskSchedule> KioskSchedules { get; set; }
+
+        public string Longtitude { get; set; }
+
+        public string Latitude { get; set; }
     }
 }
