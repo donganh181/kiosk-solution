@@ -41,10 +41,8 @@ pipeline {
         // }
         stage('Remote SSH') {
             steps {
-                sshCommand remote: remote, command: "cd /opt/capstone"
-                sshCommand remote: remote, command: "docker-compose down --rmi all"
-                sshCommand remote: remote, command: "docker pull longpc/kiosk-solution"
-                sshCommand remote: remote, command: "docker-compose up"
+                sshCommand remote: remote, command: "ls -lrt"
+                sshCommand remote: remote, command: "for i in {1..5}; do echo -n \"Loop \$i \"; date ; sleep 1; done"
             }
         }
     }
