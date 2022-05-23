@@ -23,6 +23,7 @@ namespace kiosk_solution.Data.Models
         public virtual DbSet<Image> Images { get; set; }
         public virtual DbSet<Kiosk> Kiosks { get; set; }
         public virtual DbSet<KioskLocation> KioskLocations { get; set; }
+        public virtual DbSet<KioskSchedule> KioskSchedules { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<Party> Parties { get; set; }
         public virtual DbSet<PartyKioskLocation> PartyKioskLocations { get; set; }
