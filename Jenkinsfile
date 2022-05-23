@@ -1,3 +1,4 @@
+def remote = [:]
 pipeline {
     agent any
     tools {
@@ -31,7 +32,6 @@ pipeline {
                sh "docker push longpc/kiosk-solution"
             }
         }
-        def remote = [:]
         remote.name = 'remote-server'
         remote.host = '103.125.170.20'
         remote.user = 'root'
