@@ -31,5 +31,16 @@ pipeline {
                sh "docker push longpc/kiosk-solution"
             }
         }
+        def remote = [:]
+        remote.name = 'remote-server'
+        remote.host = '103.125.170.20'
+        remote.user = 'root'
+        remote.password = 'Goboi123'
+        remote.allowAnyHosts = true
+        stage('Remote SSH') {
+            sshCommand remote: remote, command: "cd /opt/capstone"
+            sshCommand remote: remote, command: "docker pull longpc/kiosk-solution"
+            sshCommand remote: remote, command: "docker-compose up"
+        }
     }
 }
