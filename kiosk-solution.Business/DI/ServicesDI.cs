@@ -19,6 +19,13 @@ namespace kiosk_solution.Business.DI
             
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IRoleService, RoleService>();
+
+            services.AddScoped<IKioskRepository, KioskRepository>();
+            services.AddScoped<IKioskService, KioskService>();
+
+            services.AddScoped<IScheduleRepository, ScheduleRepository>();
+            services.AddScoped<IScheduleService, ScheduleService>();
+            
             services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
     }
