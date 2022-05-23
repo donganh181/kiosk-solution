@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using AutoMapper;
 using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Repositories;
 using kiosk_solution.Data.Responses;
@@ -8,7 +9,7 @@ using kiosk_solution.Data.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using IConfigurationProvider = AutoMapper.IConfigurationProvider;
+
 
 namespace kiosk_solution.Business.Services.impl
 {
@@ -19,9 +20,9 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<IKioskService> _logger;
 
-        public KioskService(IConfigurationProvider mapper, IConfiguration configuration, IUnitOfWork unitOfWork, ILogger<IKioskService> logger)
+        public KioskService(IMapper mapper, IConfiguration configuration, IUnitOfWork unitOfWork, ILogger<IKioskService> logger)
         {
-            _mapper = mapper;
+            _mapper = mapper.ConfigurationProvider;
             _configuration = configuration;
             _unitOfWork = unitOfWork;
             _logger = logger;
