@@ -41,9 +41,8 @@ pipeline {
         // }
         stage('Remote SSH') {
             steps {
-                sshCommand remote: remote, command: "cd /opt/capstone"
                 sshCommand remote: remote, command: "docker pull longpc/kiosk-solution"
-                sshCommand remote: remote, command: "docker-compose up"
+                sshCommand remote: remote, command: "cd /opt/capstone docker-compose up"
             }
         }
     }
