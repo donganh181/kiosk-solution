@@ -1,7 +1,7 @@
 def remote = [:]
 remote.name = 'remote-server'
 remote.host = '103.125.170.20'
-remote.port = '10037'
+remote.port = 10037
 remote.user = 'root'
 remote.password = 'Goboi123'
 remote.allowAnyHosts = true
