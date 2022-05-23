@@ -11,7 +11,7 @@ pipeline {
         }
         stage('Build Image') {
             steps {
-                sh "docker build -t longpc/kiosk-solution . --no-cache"
+                sh "docker build -t longpc/kiosk-solution ."
             }
         }
         stage('Test') {

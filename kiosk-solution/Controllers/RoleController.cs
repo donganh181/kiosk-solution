@@ -31,5 +31,13 @@ namespace kiosk_solution.Controllers
             var list = await _roleService.GetAll();
             return Ok(new SuccessResponse<List<RoleViewModel>>((int)HttpStatusCode.OK, "Found.", list));
         }
+        
+        [HttpGet("test")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Test()
+        {
+            var list = await _roleService.GetAll();
+            return Ok(new SuccessResponse<List<RoleViewModel>>((int)HttpStatusCode.OK, "Found.", list));
+        }
     }
 }
