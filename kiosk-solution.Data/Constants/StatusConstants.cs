@@ -4,7 +4,7 @@ using System.Text;
 
 namespace kiosk_solution.Data.Constants
 {
-    public class AccountStatusConstants
+    public class StatusConstants
     {
         public static string ACTIVE = "active";
         public static string DEACTIVATE = "deactivate";

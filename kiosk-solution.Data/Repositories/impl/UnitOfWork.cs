@@ -9,6 +9,7 @@ namespace kiosk_solution.Data.Repositories.impl
     {
         public Kiosk_PlatformContext _context { get; set; }
         public IRoleRepository RoleRepository { get; set; }
+        public IKioskRepository KioskRepository { get; }
         public IPartyRepository PartyRepository { get; set; }
         
         
