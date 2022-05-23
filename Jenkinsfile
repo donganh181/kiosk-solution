@@ -1,13 +1,12 @@
 pipeline {
     agent any
     tools {
-        maven 'maven 3.8.4'
         dockerTool 'docker'
     }
     stages {
         stage('Cloning git') {
             steps {
-                git url: 'https://github.com/donganh181/kiosk-solution', credentialsId: 'github'
+                git url: 'https://github.com/donganh181/kiosk-solution', branch: 'production', credentialsId: 'github'
             }
         }
         stage('Build Image') {
