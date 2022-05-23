@@ -43,7 +43,7 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
             }
                 
-            if (user.Status.Equals(AccountStatusConstants.DEACTIVATE))
+            if (user.Status.Equals(StatusConstants.DEACTIVATE))
             {
                 _logger.LogInformation($"{model.email} has been banned.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "This user has been banned.");
@@ -70,7 +70,7 @@ namespace kiosk_solution.Business.Services.impl
             var account = _mapper.CreateMapper().Map<Party>(model);
             account.Password = BCrypt.Net.BCrypt.HashPassword(DefaultConstants.DEFAULT_PASSWORD);
             account.CreatorId = creatorId;
-            account.Status = AccountStatusConstants.ACTIVE;
+            account.Status = StatusConstants.ACTIVE;
             account.CreateDate = DateTime.Now;
             try
             {
@@ -167,18 +167,18 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Your account cannot use this feature.");
             }
 
-            if (user.Status.Equals(AccountStatusConstants.ACTIVE))
-                user.Status = AccountStatusConstants.DEACTIVATE;
+            if (user.Status.Equals(StatusConstants.ACTIVE))
+                user.Status = StatusConstants.DEACTIVATE;
             else
-                user.Status = AccountStatusConstants.ACTIVE;
+                user.Status = StatusConstants.ACTIVE;
             try
             {
                 _unitOfWork.PartyRepository.Update(user);
                 await _unitOfWork.SaveAsync();
 
-                string subject = EmailUtil.getUpdateStatusSubject(user.Status.Equals(AccountStatusConstants.ACTIVE));
+                string subject = EmailUtil.getUpdateStatusSubject(user.Status.Equals(StatusConstants.ACTIVE));
                 string content =
-                    EmailUtil.getUpdateStatusContent(user.Email, user.Status.Equals(AccountStatusConstants.ACTIVE));
+                    EmailUtil.getUpdateStatusContent(user.Email, user.Status.Equals(StatusConstants.ACTIVE));
                 await EmailUtil.SendEmail(user.Email, subject, content);
 
                 var result = _mapper.CreateMapper().Map<PartyViewModel>(user);
