@@ -39,9 +39,11 @@ pipeline {
             }
         }
         stage('Remote SSH') {
-            sshCommand remote: remote, command: "cd /opt/capstone"
-            sshCommand remote: remote, command: "docker pull longpc/kiosk-solution"
-            sshCommand remote: remote, command: "docker-compose up"
+            steps {
+                sshCommand remote: remote, command: "cd /opt/capstone"
+                sshCommand remote: remote, command: "docker pull longpc/kiosk-solution"
+                sshCommand remote: remote, command: "docker-compose up"
+            }
         }
     }
 }
