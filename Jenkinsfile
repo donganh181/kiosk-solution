@@ -43,7 +43,8 @@ pipeline {
             steps {
                 sshCommand remote: remote, command: "docker pull longpc/kiosk-solution"
                 sshCommand remote: remote, command: "cd /opt/capstone && docker-compose down --rmi all"
-                sshCommand remote: remote, command: "cd /opt/capstone && docker-compose up && > /dev/null 2>&1 &"
+                sshCommand remote: remote, command: "cd /opt/capstone && docker-compose up"
+                sshCommand remote: remote, command: "> /dev/null 2>&1 &"
             }
         }
     }
