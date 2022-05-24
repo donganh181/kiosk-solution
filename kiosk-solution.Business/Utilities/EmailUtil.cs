@@ -50,6 +50,11 @@ namespace kiosk_solution.Data.ViewModels
                 .Replace("PASSWORD", DefaultConstants.DEFAULT_PASSWORD);
             return result;
         }
+        public static string getCreateKioskContent(string email)
+        {
+            string result = EmailConstants.CREATE_KIOSK_CONTENT.Replace("EMAIL", email);
+            return result;
+        }
 
         public static string getUpdateStatusSubject(bool isActive)
         {

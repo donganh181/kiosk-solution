@@ -6,6 +6,7 @@ namespace kiosk_solution.Business.Services
 {
     public interface IKioskService
     {
-        Task<KioskViewModel> UpdateStatus(Guid id);
+        Task<KioskViewModel> UpdateStatus(Guid updaterId, Guid kioskId);
+        Task<KioskViewModel> CreateNewKiosk(CreateKioskViewModel model);
     }
 }

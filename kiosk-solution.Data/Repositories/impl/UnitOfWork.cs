@@ -9,15 +9,20 @@ namespace kiosk_solution.Data.Repositories.impl
     {
         public Kiosk_PlatformContext _context { get; set; }
         public IRoleRepository RoleRepository { get; set; }
-        public IKioskRepository KioskRepository { get; }
+        public IKioskRepository KioskRepository { get; set; }
         public IPartyRepository PartyRepository { get; set; }
+        public IKioskLocationRepository KioskLocationRepository { get; set; }
         
         
-        public UnitOfWork(Kiosk_PlatformContext context, IPartyRepository PartyRepository, IRoleRepository RoleRepository)
+        public UnitOfWork(Kiosk_PlatformContext context, IPartyRepository PartyRepository, 
+            IRoleRepository RoleRepository, IKioskRepository KioskRepository, 
+            IKioskLocationRepository KioskLocationRepository)
         {
             _context = context;
             this.PartyRepository = PartyRepository;
             this.RoleRepository = RoleRepository;
+            this.KioskRepository = KioskRepository;
+            this.KioskLocationRepository = KioskLocationRepository;
         }
         
         public void Save()
