@@ -9,9 +9,9 @@ namespace kiosk_solution.Data.Models
     {
         public ServiceApplication()
         {
-            Orders = new HashSet<Order>();
             PartyServiceApplications = new HashSet<PartyServiceApplication>();
             Positions = new HashSet<Position>();
+            ServiceOrders = new HashSet<ServiceOrder>();
         }
 
         public Guid Id { get; set; }
@@ -27,8 +27,8 @@ namespace kiosk_solution.Data.Models
         public virtual AppCategory AppCategory { get; set; }
         public virtual ApplicationMarket ApplicationMarket { get; set; }
         public virtual Party Party { get; set; }
-        public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<PartyServiceApplication> PartyServiceApplications { get; set; }
         public virtual ICollection<Position> Positions { get; set; }
+        public virtual ICollection<ServiceOrder> ServiceOrders { get; set; }
     }
 }
