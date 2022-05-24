@@ -41,7 +41,9 @@ pipeline {
         }
         stage('Remote SSH') {
             steps {
-                git url: 'https://github.com/donganh181/kiosk-solution', branch: 'production', credentialsId: 'github'
+                sshCommand remote: remote, command: "docker pull longpc/kiosk-solution"
+                sshCommand remote: remote, command: "cd /opt/capstone && docker-compose down --rmi all"
+                sshCommand remote: remote, command: "cd /opt/capstone && docker-compose up -d"
             }
         }
     }
