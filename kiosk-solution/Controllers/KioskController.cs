@@ -28,16 +28,38 @@ namespace kiosk_solution.Controllers
             _logger = logger;
         }
 
-        [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Update status Kiosk by its location owner
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Location Owner")]
         [HttpPatch("status")]
         [MapToApiVersion("1")]
         public async Task<IActionResult> UpdateStatus(Guid id)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _kioskService.UpdateStatus(id);
+            var result = await _kioskService.UpdateStatus(token.Id,id);
             _logger.LogInformation($"Update status of kiosk [{result.Id}] by party {token.Mail}");
             return Ok(new SuccessResponse<KioskViewModel>((int) HttpStatusCode.OK, "Update success.", result));
+        }
+
+        /// <summary>
+        /// Create new Kiosk
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> CreateNewKiosk([FromBody] CreateKioskViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _kioskService.CreateNewKiosk(model);
+            _logger.LogInformation($"Create new Kiosk to [{result.PartyId}] by party {token.Mail}");
+            return Ok(new SuccessResponse<KioskViewModel>((int)HttpStatusCode.OK, "Create success.", result));
         }
     }
 }

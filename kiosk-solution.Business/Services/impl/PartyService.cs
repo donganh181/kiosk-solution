@@ -200,15 +200,25 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
             }
 
-            var users = _unitOfWork.PartyRepository.Get().Include(u => u.Role).ProjectTo<PartySearchViewModel>(_mapper);
-            var listUser = users.ToList();
+            var users =  _unitOfWork.PartyRepository.Get().Include(u => u.Role).ProjectTo<PartySearchViewModel>(_mapper);
+            var listUser = await users.ToListAsync();
 
-            if(listUser.Count == 0) throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            if (listUser.Count == 0)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+            
             users = listUser.AsQueryable().OrderByDescending(r => r.LastName).ThenByDescending(r => r.Address);
             var listPaging = users
                     .DynamicFilter(model)
                     .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
-            if (listPaging.Item2.ToList().Count<1) throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            if (listPaging.Item2.ToList().Count < 1)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+            
             var result = new DynamicModelResponse<PartySearchViewModel>
             {
                 Metadata = new PagingMetaData
