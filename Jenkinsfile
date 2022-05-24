@@ -1,3 +1,11 @@
+def remote = [:]
+remote.name = 'remote-server'
+remote.host = '172.168.2.5'
+remote.port = 22
+remote.user = 'root'
+remote.password = 'Goboi123'
+remote.allowAnyHosts = true
+
 pipeline {
     agent any
     tools {
@@ -29,6 +37,13 @@ pipeline {
         stage("Push Image") {
             steps {
                sh "docker push longpc/kiosk-solution"
+            }
+        }
+        stage('Remote SSH') {
+            steps {
+                sshCommand remote: remote, command: "docker pull longpc/kiosk-solution"
+                sshCommand remote: remote, command: "cd /opt/capstone && docker-compose down --rmi all"
+                sshCommand remote: remote, command: "cd /opt/capstone && docker-compose up -d"
             }
         }
     }
