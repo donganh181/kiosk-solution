@@ -14,6 +14,8 @@ namespace kiosk_solution.Business.DI
         {
 
             services.AddScoped<DbContext, Kiosk_PlatformContext>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             services.AddScoped<IPartyRepository, PartyRepository>();
             services.AddScoped<IPartyService, PartyService>();
             
@@ -26,7 +28,9 @@ namespace kiosk_solution.Business.DI
             services.AddScoped<IScheduleRepository, ScheduleRepository>();
             services.AddScoped<IScheduleService, ScheduleService>();
             
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IKioskLocationRepository, KioskLocationRepository>();
+            services.AddScoped<IKioskLocationService, KioskLocationService>();
+            
         }
     }
 }
