@@ -8,5 +8,6 @@ namespace kiosk_solution.Business.Services
     {
         Task<KioskViewModel> UpdateStatus(Guid updaterId, Guid kioskId);
         Task<KioskViewModel> CreateNewKiosk(CreateKioskViewModel model);
+        Task<KioskViewModel> UpdateInformation(Guid updaterId, UpdateKioskViewModel model);
     }
 }
