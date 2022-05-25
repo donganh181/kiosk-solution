@@ -2,6 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
@@ -48,6 +49,33 @@ namespace kiosk_solution.Business.Services.impl
                 string content = EmailConstants.CREATE_KIOSK_CONTENT;
                 await EmailUtil.SendEmail(user.Email, subject, content);
 
+                var result = _mapper.CreateMapper().Map<KioskViewModel>(kiosk);
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid Data.");
+                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
+            }
+        }
+
+        public async Task<KioskViewModel> UpdateInformation(Guid updaterId, UpdateKioskViewModel model)
+        {
+            var kiosk = await _unitOfWork.KioskRepository.Get(k => k.Id.Equals(model.Id)).FirstOrDefaultAsync();
+
+            if (!kiosk.PartyId.Equals(updaterId))
+            {
+                _logger.LogInformation("Your cannot use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+            }
+
+            kiosk.Name = model.Name;
+            kiosk.Longtitude = model.Longtitude;
+            kiosk.Latitude = model.Latitude;
+            try
+            {
+                _unitOfWork.KioskRepository.Update(kiosk);
+                await _unitOfWork.SaveAsync();
                 var result = _mapper.CreateMapper().Map<KioskViewModel>(kiosk);
                 return result;
             }

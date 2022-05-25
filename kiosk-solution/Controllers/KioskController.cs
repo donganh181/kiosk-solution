@@ -61,5 +61,23 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Create new Kiosk to [{result.PartyId}] by party {token.Mail}");
             return Ok(new SuccessResponse<KioskViewModel>((int)HttpStatusCode.OK, "Create success.", result));
         }
+
+        /// <summary>
+        /// Update information of kiosk by its location owner
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Location Owner")]
+        [HttpPut]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Update([FromBody] UpdateKioskViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            Guid updaterId = token.Id;
+            var result = await _kioskService.UpdateInformation(updaterId, model);
+            _logger.LogInformation($"Updated kiosk {result.Name} by party {token.Mail}");
+            return Ok(new SuccessResponse<KioskViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
     }
 }
