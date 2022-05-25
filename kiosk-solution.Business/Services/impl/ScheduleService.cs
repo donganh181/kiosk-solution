@@ -29,13 +29,13 @@ namespace kiosk_solution.Business.Services.impl
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
-        public async Task<ScheduleViewModel> CreateSchedule(Guid id, CreateScheduleViewModel model)
+        public async Task<ScheduleViewModel> CreateSchedule(CreateScheduleViewModel model)
         {
             var schedule = _mapper.CreateMapper().Map<Schedule>(model);
-            schedule.PartyId = id;
+            schedule.PartyId = model.PartyId;
             schedule.Status = StatusConstants.OFF;
-            schedule.TimeStart=TimeSpan.Parse(model.StringTimeStart);
-            schedule.TimeEnd=TimeSpan.Parse(model.StringTimeEnd);
+            schedule.TimeStart=TimeSpan.Parse(model.TimeStart);
+            schedule.TimeEnd=TimeSpan.Parse(model.TimeEnd);
             try
             {
                 await _unitOfWork.ScheduleRepository.InsertAsync(schedule);

@@ -34,7 +34,7 @@ namespace kiosk_solution.Controllers
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _scheduleService.CreateSchedule(token.Id, model);
+            var result = await _scheduleService.CreateSchedule(model);
             _logger.LogInformation($"Create schedule {result.Name} by party {token.Mail}.");
             return Ok(new SuccessResponse<ScheduleViewModel>((int) HttpStatusCode.OK, "Create success.", result));
         }

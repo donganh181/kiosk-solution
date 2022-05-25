@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,9 +9,9 @@ namespace kiosk_solution.Data.ViewModels
 {
     public class CreateKioskViewModel
     {
-        public string Name { get; set; }
+        [Required] public string Name { get; set; }
         public DateTime? CreateDate { get; set; }
-        public Guid? PartyId { get; set; }
-        public Guid? KioskLocationId { get; set; }
+        [Required] public Guid? PartyId { get; set; }
+        [Required] public Guid? KioskLocationId { get; set; }
     }
 }

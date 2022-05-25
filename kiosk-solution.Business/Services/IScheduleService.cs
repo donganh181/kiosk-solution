@@ -7,7 +7,7 @@ namespace kiosk_solution.Business.Services
 {
     public interface IScheduleService
     {
-        Task<ScheduleViewModel> CreateSchedule(Guid id, CreateScheduleViewModel model);
-        Task<List<ScheduleViewModel>> GetAll(Guid id);
+        Task<ScheduleViewModel> CreateSchedule(CreateScheduleViewModel model);
+        Task<List<ScheduleViewModel>> GetAll(Guid partyId);
     }
 }
