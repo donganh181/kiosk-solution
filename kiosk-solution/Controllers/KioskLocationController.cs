@@ -49,6 +49,13 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<KioskLocationViewModel>((int)HttpStatusCode.OK, "Create success.", result));
         }
 
+        /// <summary>
+        /// Search Location by admin
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="size"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
         [Authorize(Roles = "Admin")]
         [HttpGet]
         [MapToApiVersion("1")]

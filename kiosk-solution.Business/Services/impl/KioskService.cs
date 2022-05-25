@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using kiosk_solution.Business.Utilities;
 using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
@@ -57,6 +59,47 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Invalid Data.");
                 throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
             }
+        }
+
+        public async Task<DynamicModelResponse<KioskSearchViewModel>> GetAllWithPaging(string role, Guid id, KioskSearchViewModel model, int size, int pageNum)
+        {
+            var kiosks = _unitOfWork.KioskRepository.Get().ProjectTo<KioskSearchViewModel>(_mapper);
+
+            if (role.Equals(RoleConstants.LOCATION_OWNER))
+            {
+                kiosks = _unitOfWork.KioskRepository.Get(k => k.PartyId.Equals(id)).ProjectTo<KioskSearchViewModel>(_mapper);
+            }
+
+            var listKiosk = await kiosks.ToListAsync();
+
+            if(listKiosk.Count == 0)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            kiosks = listKiosk.AsQueryable().OrderByDescending(k => k.Name);
+            var listPaging = kiosks
+                .DynamicFilter(model)
+                .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
+
+            if (listPaging.Item2.ToList().Count < 1)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+
+            var result = new DynamicModelResponse<KioskSearchViewModel>
+            {
+                Metadata = new PagingMetaData
+                {
+                    Page = pageNum,
+                    Size = size,
+                    Total = listPaging.Item1
+                },
+                Data = listPaging.Item2.ToList()
+            };
+            return result;
         }
 
         public async Task<KioskViewModel> UpdateInformation(Guid updaterId, UpdateKioskViewModel model)
