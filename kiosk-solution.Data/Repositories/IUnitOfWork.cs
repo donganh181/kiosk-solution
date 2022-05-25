@@ -9,6 +9,7 @@ namespace kiosk_solution.Data.Repositories
         IRoleRepository RoleRepository { get; }
         IKioskRepository KioskRepository { get; }
         IKioskLocationRepository KioskLocationRepository { get; }
+        IScheduleRepository ScheduleRepository { get; }
         void Save();
         Task SaveAsync();
     }
