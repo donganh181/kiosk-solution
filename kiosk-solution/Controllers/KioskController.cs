@@ -2,6 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using kiosk_solution.Business.Services;
+using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
 using kiosk_solution.Utils;
@@ -78,6 +79,27 @@ namespace kiosk_solution.Controllers
             var result = await _kioskService.UpdateInformation(updaterId, model);
             _logger.LogInformation($"Updated kiosk {result.Name} by party {token.Mail}");
             return Ok(new SuccessResponse<KioskViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+
+        /// <summary>
+        /// Search Kiosk by admin or location owner(only kiosk that belong to them)
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="size"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Location Owner")]
+        [HttpGet]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Get([FromQuery] KioskSearchViewModel model, int size, int page = CommonConstants.DefaultPage)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            Guid id = token.Id;
+            string role = token.Role;
+            var result = await _kioskService.GetAllWithPaging(role, id, model, size, page);
+            _logger.LogInformation($"Get all Kiosks by party {token.Mail}");
+            return Ok(new SuccessResponse<DynamicModelResponse<KioskSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
     }
 }
