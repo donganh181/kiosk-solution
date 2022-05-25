@@ -10,6 +10,9 @@ namespace kiosk_solution.Data.AutoMapper
         {
             mc.CreateMap<Schedule, CreateScheduleViewModel>();
             mc.CreateMap<CreateScheduleViewModel, Schedule>();
+            
+            mc.CreateMap<Schedule, ScheduleViewModel>();
+            mc.CreateMap<ScheduleViewModel, Schedule>();
         }
     }
 }

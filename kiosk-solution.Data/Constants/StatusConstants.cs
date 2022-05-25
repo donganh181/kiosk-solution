@@ -8,5 +8,8 @@ namespace kiosk_solution.Data.Constants
     {
         public static string ACTIVE = "active";
         public static string DEACTIVATE = "deactivate";
+        
+        public static string ON = "on";
+        public static string OFF = "off";
     }
 }
