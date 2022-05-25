@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using kiosk_solution.Business.Services;
@@ -36,6 +37,18 @@ namespace kiosk_solution.Controllers
             var result = await _scheduleService.CreateSchedule(token.Id, model);
             _logger.LogInformation($"Create schedule {result.Name} by party {token.Mail}.");
             return Ok(new SuccessResponse<ScheduleViewModel>((int) HttpStatusCode.OK, "Create success.", result));
+        }
+        
+        [Authorize(Roles = "Location Owner")]
+        [HttpGet]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetAll()
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _scheduleService.GetAll(token.Id);
+            _logger.LogInformation($"Get all schedule of party {token.Mail}.");
+            return Ok(new SuccessResponse<List<ScheduleViewModel>>((int) HttpStatusCode.OK, "Create success.", result));
         }
     }
 }
