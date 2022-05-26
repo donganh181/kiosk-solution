@@ -22,13 +22,13 @@ namespace kiosk_solution.Controllers
         private readonly IPartyService _partyService;
         private readonly ILogger<PartyController> _logger;
         private IConfiguration _configuration;
-        public PartyController(IPartyService partyService,IConfiguration configuration, ILogger<PartyController> logger)
+        public PartyController(IPartyService partyService, IConfiguration configuration, ILogger<PartyController> logger)
         {
             _partyService = partyService;
             _configuration = configuration;
             _logger = logger;
         }
-        
+
         /// <summary>
         /// Create new user
         /// </summary>
@@ -64,7 +64,7 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Updated party {result.Email} by party {token.Mail}");
             return Ok(new SuccessResponse<PartyViewModel>((int)HttpStatusCode.OK, "Update success.", result));
         }
-        
+
         /// <summary>
         /// User can update their own password
         /// </summary>
@@ -82,7 +82,7 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Updated password of party {result.Email}");
             return Ok(new SuccessResponse<PartyViewModel>((int)HttpStatusCode.OK, "Update success.", result));
         }
-        
+
         /// <summary>
         /// Admin can change the status of user account
         /// </summary>
@@ -115,9 +115,21 @@ namespace kiosk_solution.Controllers
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             Guid id = token.Id;
-            var result = await _partyService.GetAllWithPaging(id,model,size,page);
+            var result = await _partyService.GetAllWithPaging(model, size, page);
             _logger.LogInformation($"Get all parties by party {token.Mail}");
             return Ok(new SuccessResponse<DynamicModelResponse<PartySearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("{id}")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetPartyById(Guid id)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _partyService.GetPartyById(id);
+            _logger.LogInformation($"Get all parties by party {token.Mail}");
+            return Ok(new SuccessResponse<PartyViewModel>((int)HttpStatusCode.OK, "Search success.", result));
         }
     }
 }

@@ -194,15 +194,8 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<DynamicModelResponse<PartySearchViewModel>> GetAllWithPaging(Guid id, PartySearchViewModel model, int size, int pageNum)
+        public async Task<DynamicModelResponse<PartySearchViewModel>> GetAllWithPaging(PartySearchViewModel model, int size, int pageNum)
         {
-            var user = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(id)).Include(u => u.Role).FirstOrDefaultAsync();
-            if (!user.Role.Name.Equals(RoleConstants.ADMIN))
-            {
-                _logger.LogInformation($"{user.Email} cannot use this feature.");
-                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
-            }
-
             var users =  _unitOfWork.PartyRepository.Get().Include(u => u.Role).ProjectTo<PartySearchViewModel>(_mapper);
             var listUser = await users.ToListAsync();
 
@@ -233,6 +226,26 @@ namespace kiosk_solution.Business.Services.impl
                 Data = listPaging.Item2.ToList()
             };
             return result;
+        }
+
+        public async Task<PartyViewModel> GetPartyById(Guid id)
+        {
+            var party = await _unitOfWork.PartyRepository.Get(p => p.Id.Equals(id)).Include(p => p.Role).ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
+
+            if(party == null)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+            if (BCryptNet.Verify(DefaultConstants.DEFAULT_PASSWORD, party.Password))
+            {
+                party.PasswordIsChanged = false;
+            }
+            else
+            {
+                party.PasswordIsChanged = true;
+            }
+            return party;
         }
     }
 }
