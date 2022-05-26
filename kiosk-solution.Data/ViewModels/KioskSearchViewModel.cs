@@ -10,7 +10,7 @@ namespace kiosk_solution.Data.ViewModels
 {
     public class KioskSearchViewModel
     {
-        [BindNever]
+        [Guid]
         public Guid? Id { get; set; }
         [String]
         public string Name { get; set; }

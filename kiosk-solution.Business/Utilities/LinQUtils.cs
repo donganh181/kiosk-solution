@@ -38,7 +38,7 @@ namespace kiosk_solution.Business.Utilities
                 {
                     source = source.Where($"{item.Name} = \"{((string)propertyVal).Trim()}\"");
                 }
-                else if(item.PropertyType == typeof(Guid))
+                else if(item.CustomAttributes.Any(a => a.AttributeType == typeof(GuidAttribute)))
                 {
                     source = source.Where($"{item.Name} == \"{((Guid)propertyVal)}\"");
                 }
