@@ -39,7 +39,6 @@ namespace kiosk_solution
             services.AddControllers();
 
             services.ConfigureDI();
-
             services.AddSwaggerGenNewtonsoftSupport();
             services.ConfigureSwagger();
             services.AddCors();
@@ -56,21 +55,14 @@ namespace kiosk_solution
             {
                 app.UseDeveloperExceptionPage();
             }
-
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
-            app.UseAuthentication();
-
-            app.UseAuthorization();
-
-            //app.UseMiddleware<JwtHandler>();
             app.UseCors(builder =>
             {
                 builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
             });
-            app.UseOptions();
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
