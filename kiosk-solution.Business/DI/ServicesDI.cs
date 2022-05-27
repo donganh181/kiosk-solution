@@ -30,7 +30,10 @@ namespace kiosk_solution.Business.DI
             
             services.AddScoped<IKioskLocationRepository, KioskLocationRepository>();
             services.AddScoped<IKioskLocationService, KioskLocationService>();
-            
+
+            services.AddScoped<ITemplateRepository, TemplateRepsitory>();
+
+            services.AddScoped<IScheduleTemplateRepository, ScheduleTemplateRepository>();
         }
     }
 }

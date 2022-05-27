@@ -19,6 +19,7 @@ namespace kiosk_solution.App_Start
                 mc.ConfigKioskModule();
                 mc.ConfigKioskLocationModule();
                 mc.ConfigScheduleModule();
+                mc.ConfigScheduleTemplateModule();
             });
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
