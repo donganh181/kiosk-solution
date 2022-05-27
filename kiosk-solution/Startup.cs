@@ -70,7 +70,7 @@ namespace kiosk_solution
             {
                 builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
             });
-
+            app.UseOptions();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
