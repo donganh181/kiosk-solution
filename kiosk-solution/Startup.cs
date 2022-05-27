@@ -55,7 +55,6 @@ namespace kiosk_solution
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseMiddleware<OptionMethodHandler>();
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseCors(builder =>
