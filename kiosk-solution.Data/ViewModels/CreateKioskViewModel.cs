@@ -10,7 +10,7 @@ namespace kiosk_solution.Data.ViewModels
     public class CreateKioskViewModel
     {
         [Required] public string Name { get; set; }
-        public Guid? PartyId { get; set; }
+        [Required] public Guid? PartyId { get; set; }
         public Guid? KioskLocationId { get; set; }
     }
 }
