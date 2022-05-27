@@ -53,19 +53,11 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<DynamicModelResponse<KioskLocationSearchViewModel>> GetAllWithPaging(KioskLocationSearchViewModel model, int size, int pageNum)
         {
-            var kioskLocations = _unitOfWork.KioskLocationRepository.Get().ProjectTo<KioskLocationSearchViewModel>(_mapper);
-
-            var listKioskLocation = await kioskLocations.ToListAsync();
-
-            if(listKioskLocation.Count == 0)
-            {
-                _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
-            }
-
-            kioskLocations = listKioskLocation.AsQueryable().OrderByDescending(l => l.Name);
-            var listPaging = kioskLocations
+            var kioskLocations = _unitOfWork.KioskLocationRepository.Get().ProjectTo<KioskLocationSearchViewModel>(_mapper)
                 .DynamicFilter(model)
+                .AsQueryable().OrderByDescending(l => l.Name);
+
+            var listPaging = kioskLocations
                 .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
 
             if(listPaging.Item2.ToList().Count < 1)
