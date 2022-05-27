@@ -38,7 +38,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<PartyViewModel> Login(LoginViewModel model)
         {
-            var user = await _unitOfWork.PartyRepository.Get(u => u.Email.Equals(model.email)).Include(u => u.Role).ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
+            var user = await _unitOfWork.PartyRepository.Get(u => u.Email.Equals(model.email)).Include(u => u.Role).Include(u => u.Creator).ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
 
             if (user == null || !BCryptNet.Verify(model.password, user.Password))
             {
@@ -196,19 +196,13 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<DynamicModelResponse<PartySearchViewModel>> GetAllWithPaging(PartySearchViewModel model, int size, int pageNum)
         {
-            var users =  _unitOfWork.PartyRepository.Get().Include(u => u.Role).ProjectTo<PartySearchViewModel>(_mapper);
-            var listUser = await users.ToListAsync();
+            var users =  _unitOfWork.PartyRepository.Get().Include(u => u.Role).Include(u => u.Creator).ProjectTo<PartySearchViewModel>(_mapper)
+                .DynamicFilter(model)
+                .AsQueryable().OrderByDescending(r => r.LastName).ThenByDescending(r => r.Address);
 
-            if (listUser.Count == 0)
-            {
-                _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
-            }
-            
-            users = listUser.AsQueryable().OrderByDescending(r => r.LastName).ThenByDescending(r => r.Address);
             var listPaging = users
-                    .DynamicFilter(model)
-                    .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
+                .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
+
             if (listPaging.Item2.ToList().Count < 1)
             {
                 _logger.LogInformation("Can not Found.");
@@ -230,7 +224,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<PartyViewModel> GetPartyById(Guid id)
         {
-            var party = await _unitOfWork.PartyRepository.Get(p => p.Id.Equals(id)).Include(p => p.Role).ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
+            var party = await _unitOfWork.PartyRepository.Get(p => p.Id.Equals(id)).Include(p => p.Role).Include(p => p.Creator).ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
 
             if(party == null)
             {

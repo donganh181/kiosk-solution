@@ -63,24 +63,18 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<DynamicModelResponse<KioskSearchViewModel>> GetAllWithPaging(string role, Guid id, KioskSearchViewModel model, int size, int pageNum)
         {
-            var kiosks = _unitOfWork.KioskRepository.Get().ProjectTo<KioskSearchViewModel>(_mapper);
+            var kiosks = _unitOfWork.KioskRepository.Get().ProjectTo<KioskSearchViewModel>(_mapper)
+                .DynamicFilter(model)
+                .AsQueryable().OrderByDescending(k => k.Name);
 
             if (role.Equals(RoleConstants.LOCATION_OWNER))
             {
-                kiosks = _unitOfWork.KioskRepository.Get(k => k.PartyId.Equals(id)).ProjectTo<KioskSearchViewModel>(_mapper);
+                kiosks = _unitOfWork.KioskRepository.Get(k => k.PartyId.Equals(id)).ProjectTo<KioskSearchViewModel>(_mapper)
+                    .DynamicFilter(model)
+                    .AsQueryable().OrderByDescending(k => k.Name); 
             }
-
-            var listKiosk = await kiosks.ToListAsync();
-
-            if(listKiosk.Count == 0)
-            {
-                _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
-            }
-
-            kiosks = listKiosk.AsQueryable().OrderByDescending(k => k.Name);
+          
             var listPaging = kiosks
-                .DynamicFilter(model)
                 .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
 
             if (listPaging.Item2.ToList().Count < 1)

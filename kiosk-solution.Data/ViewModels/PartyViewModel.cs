@@ -17,6 +17,7 @@ namespace kiosk_solution.Data.ViewModels
         public DateTime? DateOfBirth { get; set; }
         public string Password { get; set; }
         public Guid? CreatorId { get; set; }
+        public string CreatorMail { get; set; }
         public Guid? RoleId { get; set; }
         public DateTime? CreateDate { get; set; }
         public string Status { get; set; }
