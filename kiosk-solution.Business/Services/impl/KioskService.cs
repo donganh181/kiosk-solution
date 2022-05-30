@@ -109,6 +109,7 @@ namespace kiosk_solution.Business.Services.impl
             kiosk.Name = model.Name;
             kiosk.Longtitude = model.Longtitude;
             kiosk.Latitude = model.Latitude;
+            kiosk.KioskLocationId = model.KioskLocationId;
             try
             {
                 _unitOfWork.KioskRepository.Update(kiosk);

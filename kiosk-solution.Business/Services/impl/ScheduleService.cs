@@ -5,34 +5,30 @@ using System.Threading.Tasks;
 using kiosk_solution.Data.ViewModels;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using kiosk_solution.Business.Utilities;
 using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
 using kiosk_solution.Data.Responses;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 namespace kiosk_solution.Business.Services.impl
 {
     public class ScheduleService : IScheduleService
     {
         private readonly AutoMapper.IConfigurationProvider _mapper;
-        private readonly IConfiguration _configuration;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<IScheduleService> _logger;
 
-        public ScheduleService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, ILogger<IScheduleService> logger)
+        public ScheduleService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IScheduleService> logger)
         {
             _mapper = mapper.ConfigurationProvider;
-            _configuration = configuration;
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
-        public async Task<ScheduleViewModel> CreateSchedule(CreateScheduleViewModel model)
+        public async Task<ScheduleViewModel> CreateSchedule(Guid partyId, CreateScheduleViewModel model)
         {
             var schedule = _mapper.CreateMapper().Map<Schedule>(model);
-            schedule.PartyId = model.PartyId;
+            schedule.PartyId = partyId;
             schedule.Status = StatusConstants.OFF;
             schedule.TimeStart=TimeSpan.Parse(model.TimeStart);
             schedule.TimeEnd=TimeSpan.Parse(model.TimeEnd);
@@ -45,7 +41,7 @@ namespace kiosk_solution.Business.Services.impl
                 result.StringTimeEnd = result.TimeEnd.ToString();
                 return result;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 _logger.LogInformation("Invalid Data.");
                 throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
@@ -63,6 +59,18 @@ namespace kiosk_solution.Business.Services.impl
                 list[i].StringTimeEnd =  list[i].TimeEnd.ToString();
             }
             return list;
+        }
+
+        public async Task<bool> IsOwner(Guid partyId, Guid scheduleId)
+        {
+            var schedule = await _unitOfWork.ScheduleRepository.Get(s => s.Id.Equals(scheduleId)).FirstOrDefaultAsync();
+            if (schedule == null)
+            {
+                _logger.LogInformation($"Schedule {scheduleId} is not exist.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Schedule is not exist.");
+            }
+            bool result = schedule.PartyId.Equals(partyId);
+            return result;
         }
     }
 }

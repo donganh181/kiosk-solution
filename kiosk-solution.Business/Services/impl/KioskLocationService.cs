@@ -55,7 +55,7 @@ namespace kiosk_solution.Business.Services.impl
         {
             var kioskLocations = _unitOfWork.KioskLocationRepository.Get().ProjectTo<KioskLocationSearchViewModel>(_mapper)
                 .DynamicFilter(model)
-                .AsQueryable().OrderByDescending(l => l.Name);
+                .AsQueryable().OrderByDescending(l => l.District);
 
             var listPaging = kioskLocations
                 .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
@@ -77,6 +77,80 @@ namespace kiosk_solution.Business.Services.impl
                 Data = listPaging.Item2.ToList()
             };
             return result;
+        }
+
+        public async Task<KioskLocationViewModel> UpdateInformation(UpdateKioskLocationViewModel model)
+        {
+            var kioskLocation = await _unitOfWork.KioskLocationRepository.Get(k => k.Id.Equals(model.Id)).FirstOrDefaultAsync();
+
+            if(kioskLocation == null)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+
+            kioskLocation.District = model.District;
+            kioskLocation.Province = model.Province;
+            try
+            {
+                _unitOfWork.KioskLocationRepository.Update(kioskLocation);
+                await _unitOfWork.SaveAsync();
+
+                var result = _mapper.CreateMapper().Map<KioskLocationViewModel>(kioskLocation);
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid Data.");
+                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
+            }
+        }
+
+        public async Task<KioskLocationViewModel> UpdateStatus(Guid id)
+        {
+            var kioskLocation = await _unitOfWork.KioskLocationRepository.Get(k => k.Id.Equals(id)).Include(k => k.Kiosks).FirstOrDefaultAsync();
+
+            if (kioskLocation == null)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+
+            if (kioskLocation.Status.Equals(StatusConstants.ACTIVE))
+            {
+                if (kioskLocation.Kiosks.ToList().Count == 0) {
+                    kioskLocation.Status = StatusConstants.DEACTIVATE;
+                }
+                else
+                {
+                    _logger.LogInformation("Found kiosk work at this location.");
+                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Found kiosk work at this location.");
+                }
+                    
+            }
+            else if (kioskLocation.Status.Equals(StatusConstants.DEACTIVATE))
+            {
+                kioskLocation.Status = StatusConstants.ACTIVE;
+            }
+            else
+            {
+                _logger.LogInformation("Status format is not valid.");
+                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Status format is not valid.");
+            }
+
+            try
+            {
+                _unitOfWork.KioskLocationRepository.Update(kioskLocation);
+                await _unitOfWork.SaveAsync();
+
+                var result = _mapper.CreateMapper().Map<KioskLocationViewModel>(kioskLocation);
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid Data.");
+                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
+            }
         }
     }
 }

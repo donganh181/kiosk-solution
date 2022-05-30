@@ -68,5 +68,39 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Get all Kiosk Locations by party {token.Mail}");
             return Ok(new SuccessResponse<DynamicModelResponse<KioskLocationSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
+
+        /// <summary>
+        /// Update kiosk location by admin
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin")]
+        [HttpPut]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateInformation([FromBody] UpdateKioskLocationViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _kioskLocationService.UpdateInformation(model);
+            _logger.LogInformation($"Update kiosk location by party {token.Mail}");
+            return Ok(new SuccessResponse<KioskLocationViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+
+        /// <summary>
+        /// Update status of kiosk location by admin
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin")]
+        [HttpPatch]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateStatus([FromQuery] Guid id)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _kioskLocationService.UpdateStatus(id);
+            _logger.LogInformation($"Update status of kiosk location {result.Id} by party {token.Mail}");
+            return Ok(new SuccessResponse<KioskLocationViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
     }
 }
