@@ -16,18 +16,17 @@ namespace kiosk_solution.Data.Repositories.impl
         public ITemplateRepository TemplateRepository { get; set; }
         public IScheduleTemplateRepository ScheduleTemplateRepository { get; set; }
 
-        public UnitOfWork(Kiosk_PlatformContext context, IPartyRepository PartyRepository,
-            IRoleRepository RoleRepository, IKioskRepository KioskRepository,
-            IKioskLocationRepository KioskLocationRepository, IScheduleRepository ScheduleRepository)
+        public UnitOfWork(Kiosk_PlatformContext context, IRoleRepository roleRepository, IKioskRepository kioskRepository, IPartyRepository partyRepository, IKioskLocationRepository kioskLocationRepository, IScheduleRepository scheduleRepository, ITemplateRepository templateRepository, IScheduleTemplateRepository scheduleTemplateRepository)
         {
             _context = context;
-            this.PartyRepository = PartyRepository;
-            this.RoleRepository = RoleRepository;
-            this.KioskRepository = KioskRepository;
-            this.KioskLocationRepository = KioskLocationRepository;
-            this.ScheduleRepository = ScheduleRepository;
+            RoleRepository = roleRepository;
+            KioskRepository = kioskRepository;
+            PartyRepository = partyRepository;
+            KioskLocationRepository = kioskLocationRepository;
+            ScheduleRepository = scheduleRepository;
+            TemplateRepository = templateRepository;
+            ScheduleTemplateRepository = scheduleTemplateRepository;
         }
-
         public void Save()
         {
             _context.SaveChanges();
