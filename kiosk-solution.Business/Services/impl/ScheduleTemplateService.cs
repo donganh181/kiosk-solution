@@ -29,7 +29,7 @@ namespace kiosk_solution.Business.Services.impl
             _templateService = templateService;
         }
 
-        public async Task<AddTemplateViewModel> AddTemplateToSchedule(Guid partyId, AddTemplateViewModel model)
+        public async Task<ScheduleTemplateViewModel> AddTemplateToSchedule(Guid partyId, AddTemplateViewModel model)
         {
             bool isScheduleOwner = await _scheduleService.IsOwner(partyId, (Guid) model.ScheduleId);
             bool isTemplateOwner = await _templateService.IsOwner(partyId, (Guid) model.TemplateId);
@@ -57,7 +57,9 @@ namespace kiosk_solution.Business.Services.impl
                 var data = _mapper.CreateMapper().Map<ScheduleTemplate>(model);
                 await _unitOfWork.ScheduleTemplateRepository.InsertAsync(data);
                 await _unitOfWork.SaveAsync();
-                return model;
+
+                var result = _mapper.CreateMapper().Map<ScheduleTemplateViewModel>(data);
+                return result;
             }
             catch (DbUpdateException)
             {

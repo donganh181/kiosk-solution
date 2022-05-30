@@ -35,8 +35,8 @@ namespace kiosk_solution.Controllers
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _scheduleTemplateService.AddTemplateToSchedule(token.Id, model);
-            _logger.LogInformation($"Add template {model.TemplateId} to schedule {model.ScheduleId} by party {token.Id}.");
-            return Ok(new SuccessResponse<AddTemplateViewModel>((int) HttpStatusCode.OK,"Add template to schedule successful.", model));
+            _logger.LogInformation($"Add template {result.TemplateId} to schedule {model.ScheduleId} by party {token.Id}.");
+            return Ok(new SuccessResponse<ScheduleTemplateViewModel>((int) HttpStatusCode.OK,"Add template to schedule successful.", result));
         }
     }
 }

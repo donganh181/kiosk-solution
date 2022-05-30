@@ -10,6 +10,9 @@ namespace kiosk_solution.Data.AutoMapper
         {
             mc.CreateMap<ScheduleTemplate, AddTemplateViewModel>();
             mc.CreateMap<AddTemplateViewModel, ScheduleTemplate>();
+
+            mc.CreateMap<ScheduleTemplate, ScheduleTemplateViewModel>();
+            mc.CreateMap<ScheduleTemplateViewModel, ScheduleTemplate>();
         }
     }
 }

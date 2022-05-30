@@ -6,6 +6,6 @@ namespace kiosk_solution.Business.Services
 {
     public interface IScheduleTemplateService
     {
-        Task<AddTemplateViewModel> AddTemplateToSchedule(Guid partyId, AddTemplateViewModel model);
+        Task<ScheduleTemplateViewModel> AddTemplateToSchedule(Guid partyId, AddTemplateViewModel model);
     }
 }

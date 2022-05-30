@@ -11,6 +11,8 @@ namespace kiosk_solution.Business.Services
     public interface IKioskLocationService
     {
         Task<KioskLocationViewModel> CreateNew(CreateKioskLocationViewModel model);
+        Task<KioskLocationViewModel> UpdateInformation(UpdateKioskLocationViewModel model);
+        Task<KioskLocationViewModel> UpdateStatus(Guid id);
         Task<DynamicModelResponse<KioskLocationSearchViewModel>> GetAllWithPaging(KioskLocationSearchViewModel model, int size, int pageNum);
     }
 }

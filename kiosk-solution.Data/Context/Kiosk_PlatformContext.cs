@@ -147,23 +147,15 @@ namespace kiosk_solution.Data.Models
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
 
-                entity.Property(e => e.City).HasMaxLength(100);
-
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
                 entity.Property(e => e.District).HasMaxLength(100);
-
-                entity.Property(e => e.Name).HasMaxLength(255);
 
                 entity.Property(e => e.Province).HasMaxLength(100);
 
                 entity.Property(e => e.Status)
                     .HasMaxLength(20)
                     .IsUnicode(false);
-
-                entity.Property(e => e.Street).HasMaxLength(100);
-
-                entity.Property(e => e.Ward).HasMaxLength(100);
             });
 
             modelBuilder.Entity<KioskSchedule>(entity =>
@@ -187,10 +179,10 @@ namespace kiosk_solution.Data.Models
             {
                 entity.ToTable("Party");
 
-                entity.HasIndex(e => e.PhoneNumber, "UQ__Party__85FB4E3846D005EE")
+                entity.HasIndex(e => e.PhoneNumber, "UQ__Party__85FB4E38042C956E")
                     .IsUnique();
 
-                entity.HasIndex(e => e.Email, "UQ__Party__A9D10534DB27FFE1")
+                entity.HasIndex(e => e.Email, "UQ__Party__A9D105341F3AB11A")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");

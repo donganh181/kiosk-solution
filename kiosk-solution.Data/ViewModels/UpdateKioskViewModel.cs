@@ -13,5 +13,6 @@ namespace kiosk_solution.Data.ViewModels
         public string Name { get; set; }
         public string Longtitude { get; set; }
         public string Latitude { get; set; }
+        public Guid KioskLocationId { get; set; }
     }
 }

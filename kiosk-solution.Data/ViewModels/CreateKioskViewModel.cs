@@ -11,6 +11,5 @@ namespace kiosk_solution.Data.ViewModels
     {
         [Required] public string Name { get; set; }
         [Required] public Guid? PartyId { get; set; }
-        public Guid? KioskLocationId { get; set; }
     }
 }
