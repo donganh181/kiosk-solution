@@ -45,6 +45,13 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Your account cannot use this feature.");
             }
 
+            var scheduleTemplate = await _unitOfWork.ScheduleTemplateRepository.Get(x =>
+                x.ScheduleId.Equals(model.ScheduleId) && x.TemplateId.Equals(model.TemplateId)).FirstOrDefaultAsync();
+            if (scheduleTemplate != null)
+            {
+                _logger.LogInformation("Template is already on schedule.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Template is already on schedule.");
+            }
             try
             {
                 var data = _mapper.CreateMapper().Map<ScheduleTemplate>(model);
