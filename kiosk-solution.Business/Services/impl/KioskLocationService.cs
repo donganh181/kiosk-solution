@@ -108,7 +108,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<KioskLocationViewModel> UpdateStatus(Guid id)
         {
-            var kioskLocation = await _unitOfWork.KioskLocationRepository.Get(k => k.Id.Equals(id)).FirstOrDefaultAsync();
+            var kioskLocation = await _unitOfWork.KioskLocationRepository.Get(k => k.Id.Equals(id)).Include(k => k.Kiosks).FirstOrDefaultAsync();
 
             if (kioskLocation == null)
             {
@@ -118,7 +118,15 @@ namespace kiosk_solution.Business.Services.impl
 
             if (kioskLocation.Status.Equals(StatusConstants.ACTIVE))
             {
-                kioskLocation.Status = StatusConstants.DEACTIVATE;
+                if (kioskLocation.Kiosks.ToList().Count == 0) {
+                    kioskLocation.Status = StatusConstants.DEACTIVATE;
+                }
+                else
+                {
+                    _logger.LogInformation("Found kiosk work at this location.");
+                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Found kiosk work at this location.");
+                }
+                    
             }
             else if (kioskLocation.Status.Equals(StatusConstants.DEACTIVATE))
             {
