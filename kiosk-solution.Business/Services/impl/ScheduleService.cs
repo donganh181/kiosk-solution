@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using kiosk_solution.Data.ViewModels;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using kiosk_solution.Business.Utilities;
 using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
 using kiosk_solution.Data.Responses;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+
 namespace kiosk_solution.Business.Services.impl
 {
     public class ScheduleService : IScheduleService
@@ -25,13 +28,12 @@ namespace kiosk_solution.Business.Services.impl
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
+
         public async Task<ScheduleViewModel> CreateSchedule(Guid partyId, CreateScheduleViewModel model)
         {
             var schedule = _mapper.CreateMapper().Map<Schedule>(model);
             schedule.PartyId = partyId;
             schedule.Status = StatusConstants.OFF;
-            schedule.TimeStart=TimeSpan.Parse(model.TimeStart);
-            schedule.TimeEnd=TimeSpan.Parse(model.TimeEnd);
             try
             {
                 await _unitOfWork.ScheduleRepository.InsertAsync(schedule);
@@ -44,21 +46,33 @@ namespace kiosk_solution.Business.Services.impl
             catch (Exception)
             {
                 _logger.LogInformation("Invalid Data.");
-                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
+                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data.");
             }
         }
 
-        public async Task<List<ScheduleViewModel>> GetAll(Guid id)
+        public async Task<DynamicModelResponse<ScheduleViewModel>> GetAllWithPaging(Guid id, int size, int pageNum)
         {
-            var list = await _unitOfWork.ScheduleRepository.Get(s => s.PartyId.Equals(id)).ProjectTo<ScheduleViewModel>(_mapper).ToListAsync();
-            if(list == null)
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
-            for(int i = 0; i < list.Count; i++)
+            var list = _unitOfWork.ScheduleRepository.Get(s => s.PartyId.Equals(id))
+                .ProjectTo<ScheduleViewModel>(_mapper).OrderByDescending(x => x.Name);
+            var listPaging =
+                list.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
+            if (listPaging.Item2.ToList().Count < 1)
             {
-                list[i].StringTimeStart =  list[i].TimeStart.ToString();
-                list[i].StringTimeEnd =  list[i].TimeEnd.ToString();
+                _logger.LogInformation("Can not found");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
             }
-            return list;
+
+            var result = new DynamicModelResponse<ScheduleViewModel>
+            {
+                Metadata = new PagingMetaData
+                {
+                    Page = pageNum,
+                    Size = size,
+                    Total = listPaging.Item1
+                },
+                Data = listPaging.Item2.ToList()
+            };
+            return result;
         }
 
         public async Task<bool> IsOwner(Guid partyId, Guid scheduleId)
@@ -69,6 +83,7 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation($"Schedule {scheduleId} is not exist.");
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Schedule is not exist.");
             }
+
             bool result = schedule.PartyId.Equals(partyId);
             return result;
         }

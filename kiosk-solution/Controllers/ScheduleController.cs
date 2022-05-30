@@ -42,13 +42,13 @@ namespace kiosk_solution.Controllers
         [Authorize(Roles = "Location Owner")]
         [HttpGet]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(int pageNum, int size)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _scheduleService.GetAll(token.Id);
+            var result = await _scheduleService.GetAllWithPaging(token.Id, size, pageNum);
             _logger.LogInformation($"Get all schedule of party {token.Mail}.");
-            return Ok(new SuccessResponse<List<ScheduleViewModel>>((int) HttpStatusCode.OK, "Create success.", result));
+            return Ok(new SuccessResponse<DynamicModelResponse<ScheduleViewModel>>((int) HttpStatusCode.OK, "Create success.", result));
         }
     }
 }
