@@ -1,4 +1,5 @@
 ﻿using kiosk_solution.Business.Services;
+using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
 using kiosk_solution.Utils;
@@ -27,10 +28,15 @@ namespace kiosk_solution.Controllers
             _configuration = configuration;
         }
 
+        /// <summary>
+        /// Update information by service provider
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [Authorize(Roles = "Service Provider")]
         [HttpPut]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> Update([FromBody] UpdateServiceApplicationViewModel model)
+        public async Task<IActionResult> UpdateInformation([FromBody] UpdateServiceApplicationViewModel model)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
@@ -38,6 +44,27 @@ namespace kiosk_solution.Controllers
             var result = await _serviceApplicationService.UpdateInformation(updaterId, model);
             _logger.LogInformation($"Updated application {result.Name} by party {token.Mail}");
             return Ok(new SuccessResponse<ServiceApplicationViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+
+        /// <summary>
+        /// Search list app by admin or service provider
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="size"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Service Provider")]
+        [HttpGet]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Get([FromQuery] ServiceApplicationSearchViewModel model, int size, int page = CommonConstants.DefaultPage)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            Guid id = token.Id;
+            string role = token.Role;
+            var result = await _serviceApplicationService.GetAllWithPaging(role, id, model, size, page);
+            _logger.LogInformation($"Get all Kiosks by party {token.Mail}");
+            return Ok(new SuccessResponse<DynamicModelResponse<ServiceApplicationSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
     }
 }
