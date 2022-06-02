@@ -80,7 +80,7 @@ namespace kiosk_solution.Business.Services.impl
                 await _unitOfWork.PartyRepository.InsertAsync(account);
                 await _unitOfWork.SaveAsync();
 
-                string subject = EmailConstants.CREATE_ACCOUNT_SUBJECT;
+                string subject = EmailConstants.CREATE_ACCOUNT_SUBJECT; 
                 string content = EmailUtil.getCreateAccountContent(account.Email);
                 await EmailUtil.SendEmail(account.Email, subject, content);
 
