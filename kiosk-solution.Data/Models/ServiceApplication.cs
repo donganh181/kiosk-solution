@@ -11,6 +11,7 @@ namespace kiosk_solution.Data.Models
         {
             PartyServiceApplications = new HashSet<PartyServiceApplication>();
             Positions = new HashSet<Position>();
+            ServiceApplicationPublishRequests = new HashSet<ServiceApplicationPublishRequest>();
             ServiceOrders = new HashSet<ServiceOrder>();
         }
 
@@ -29,6 +30,7 @@ namespace kiosk_solution.Data.Models
         public virtual Party Party { get; set; }
         public virtual ICollection<PartyServiceApplication> PartyServiceApplications { get; set; }
         public virtual ICollection<Position> Positions { get; set; }
+        public virtual ICollection<ServiceApplicationPublishRequest> ServiceApplicationPublishRequests { get; set; }
         public virtual ICollection<ServiceOrder> ServiceOrders { get; set; }
     }
 }

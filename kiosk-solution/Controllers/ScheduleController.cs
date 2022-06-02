@@ -48,7 +48,7 @@ namespace kiosk_solution.Controllers
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _scheduleService.GetAllWithPaging(token.Id, size, pageNum);
             _logger.LogInformation($"Get all schedule of party {token.Mail}.");
-            return Ok(new SuccessResponse<DynamicModelResponse<ScheduleViewModel>>((int) HttpStatusCode.OK, "Create success.", result));
+            return Ok(new SuccessResponse<DynamicModelResponse<ScheduleViewModel>>((int) HttpStatusCode.OK, "Get success.", result));
         }
     }
 }

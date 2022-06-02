@@ -34,13 +34,15 @@ namespace kiosk_solution.Business.Services.impl
             var schedule = _mapper.CreateMapper().Map<Schedule>(model);
             schedule.PartyId = partyId;
             schedule.Status = StatusConstants.OFF;
+            schedule.TimeStart = TimeSpan.Parse(model.StringTimeStart);
+            schedule.TimeEnd = TimeSpan.Parse(model.StringTimeEnd);
             try
             {
                 await _unitOfWork.ScheduleRepository.InsertAsync(schedule);
                 await _unitOfWork.SaveAsync();
                 var result = _mapper.CreateMapper().Map<ScheduleViewModel>(schedule);
-                result.StringTimeStart = result.TimeStart.ToString();
-                result.StringTimeEnd = result.TimeEnd.ToString();
+                result.TimeStart = schedule.TimeStart.ToString();
+                result.TimeEnd = schedule.TimeEnd.ToString();
                 return result;
             }
             catch (Exception)

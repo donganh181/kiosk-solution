@@ -10,7 +10,6 @@ namespace kiosk_solution.Data.Models
         public KioskLocation()
         {
             Kiosks = new HashSet<Kiosk>();
-            PartyKioskLocations = new HashSet<PartyKioskLocation>();
         }
 
         public Guid Id { get; set; }
@@ -20,6 +19,5 @@ namespace kiosk_solution.Data.Models
         public string Status { get; set; }
 
         public virtual ICollection<Kiosk> Kiosks { get; set; }
-        public virtual ICollection<PartyKioskLocation> PartyKioskLocations { get; set; }
     }
 }

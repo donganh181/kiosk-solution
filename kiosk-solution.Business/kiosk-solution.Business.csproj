@@ -8,6 +8,10 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="Firebase.Auth" Version="1.0.0" />
+    <PackageReference Include="FirebaseAdmin" Version="2.3.0" />
+    <PackageReference Include="FirebaseStorage.net" Version="1.0.3" />
+    <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="11.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.DynamicLinq" Version="5.2.12" />
