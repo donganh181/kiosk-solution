@@ -1,4 +1,5 @@
-﻿using kiosk_solution.Data.ViewModels;
+﻿using kiosk_solution.Data.Responses;
+using kiosk_solution.Data.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +11,6 @@ namespace kiosk_solution.Business.Services
     public interface IServiceApplicationService
     {
         public Task<ServiceApplicationViewModel> UpdateInformation(Guid updaterId, UpdateServiceApplicationViewModel model);
+        Task<DynamicModelResponse<ServiceApplicationSearchViewModel>> GetAllWithPaging(string role, Guid id, ServiceApplicationSearchViewModel model, int size, int pageNum);
     }
 }

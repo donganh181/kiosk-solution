@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using kiosk_solution.Business.Utilities;
+using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Repositories;
 using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
@@ -29,6 +30,41 @@ namespace kiosk_solution.Business.Services.impl
             _logger = logger;
             _firebaseUtil = firebaseUtil;
         }
+
+        public async Task<DynamicModelResponse<ServiceApplicationSearchViewModel>> GetAllWithPaging(string role, Guid id, ServiceApplicationSearchViewModel model, int size, int pageNum)
+        {
+            var apps = _unitOfWork.ServiceApplicationRepository.Get().Include(a => a.Party).Include(a => a.AppCategory).ProjectTo<ServiceApplicationSearchViewModel>(_mapper.ConfigurationProvider)
+                .DynamicFilter(model)
+                .AsQueryable().OrderByDescending(a => a.Name);
+
+            if (role.Equals(RoleConstants.SERVICE_PROVIDER))
+            {
+                apps = _unitOfWork.ServiceApplicationRepository.Get(a => a.PartyId.Equals(id)).Include(a => a.Party).Include(a => a.AppCategory).ProjectTo<ServiceApplicationSearchViewModel>(_mapper.ConfigurationProvider)
+                .DynamicFilter(model)
+                .AsQueryable().OrderByDescending(a => a.Name);
+            }
+
+            var listPaging = apps.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
+
+            if (listPaging.Item2.ToList().Count < 1)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+
+            var result = new DynamicModelResponse<ServiceApplicationSearchViewModel>
+            {
+                Metadata = new PagingMetaData
+                {
+                    Page = pageNum,
+                    Size = size,
+                    Total = listPaging.Item1
+                },
+                Data = listPaging.Item2.ToList()
+            };
+            return result;
+        }
+
         public async Task<ServiceApplicationViewModel> UpdateInformation(Guid updaterId, UpdateServiceApplicationViewModel model)
         {
             var app = await _unitOfWork.ServiceApplicationRepository.Get(a => a.Id.Equals(model.Id)).Include(a => a.AppCategory).FirstOrDefaultAsync();
