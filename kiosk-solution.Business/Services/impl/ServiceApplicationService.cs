@@ -34,25 +34,39 @@ namespace kiosk_solution.Business.Services.impl
             _firebaseUtil = firebaseUtil;
         }
 
-        public async Task<DynamicModelResponse<ServiceApplicationSearchViewModel>> GetAllWithPaging(string role, Guid id, ServiceApplicationSearchViewModel model, int size, int pageNum)
+        public async Task<DynamicModelResponse<ServiceApplicationSearchViewModel>> GetAllWithPaging(string role,
+            Guid id, ServiceApplicationSearchViewModel model, int size, int pageNum)
         {
-            var apps = _unitOfWork.ServiceApplicationRepository.Get().Include(a => a.Party).Include(a => a.AppCategory).ProjectTo<ServiceApplicationSearchViewModel>(_mapper.ConfigurationProvider)
-                .DynamicFilter(model)
-                .AsQueryable().OrderByDescending(a => a.Name);
+            dynamic apps;
 
             if (role.Equals(RoleConstants.SERVICE_PROVIDER))
             {
-                apps = _unitOfWork.ServiceApplicationRepository.Get(a => a.PartyId.Equals(id)).Include(a => a.Party).Include(a => a.AppCategory).ProjectTo<ServiceApplicationSearchViewModel>(_mapper.ConfigurationProvider)
-                .DynamicFilter(model)
-                .AsQueryable().OrderByDescending(a => a.Name);
+                apps = _unitOfWork.ServiceApplicationRepository
+                    .Get(a => a.PartyId.Equals(id))
+                    .Include(a => a.Party)
+                    .Include(a => a.AppCategory)
+                    .ProjectTo<ServiceApplicationSearchViewModel>(_mapper.ConfigurationProvider)
+                    .DynamicFilter(model)
+                    .AsQueryable().OrderByDescending(a => a.Name);
+            }
+            else
+            {
+                apps = _unitOfWork.ServiceApplicationRepository
+                    .Get()
+                    .Include(a => a.Party)
+                    .Include(a => a.AppCategory)
+                    .ProjectTo<ServiceApplicationSearchViewModel>(_mapper.ConfigurationProvider)
+                    .DynamicFilter(model)
+                    .AsQueryable().OrderByDescending(a => a.Name);
             }
 
-            var listPaging = apps.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
+            var listPaging =
+                apps.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
 
             if (listPaging.Item2.ToList().Count < 1)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
 
             var result = new DynamicModelResponse<ServiceApplicationSearchViewModel>
@@ -68,10 +82,13 @@ namespace kiosk_solution.Business.Services.impl
             return result;
         }
 
-        public async Task<ServiceApplicationViewModel> UpdateInformation(Guid updaterId, UpdateServiceApplicationViewModel model)
+        public async Task<ServiceApplicationViewModel> UpdateInformation(Guid updaterId,
+            UpdateServiceApplicationViewModel model)
         {
-            var app = await _unitOfWork.ServiceApplicationRepository.Get(a => a.Id.Equals(model.Id))
-                .Include(a => a.AppCategory).FirstOrDefaultAsync();
+            var app = await _unitOfWork.ServiceApplicationRepository
+                .Get(a => a.Id.Equals(model.Id))
+                .Include(a => a.AppCategory)
+                .FirstOrDefaultAsync();
             if (!app.PartyId.Equals(updaterId))
             {
                 _logger.LogInformation("User not match.");
