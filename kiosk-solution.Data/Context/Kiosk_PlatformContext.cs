@@ -25,7 +25,6 @@ namespace kiosk_solution.Data.Models
         public virtual DbSet<KioskLocation> KioskLocations { get; set; }
         public virtual DbSet<KioskSchedule> KioskSchedules { get; set; }
         public virtual DbSet<Party> Parties { get; set; }
-        public virtual DbSet<PartyKioskLocation> PartyKioskLocations { get; set; }
         public virtual DbSet<PartyServiceApplication> PartyServiceApplications { get; set; }
         public virtual DbSet<Poi> Pois { get; set; }
         public virtual DbSet<Position> Positions { get; set; }
@@ -33,6 +32,7 @@ namespace kiosk_solution.Data.Models
         public virtual DbSet<Schedule> Schedules { get; set; }
         public virtual DbSet<ScheduleTemplate> ScheduleTemplates { get; set; }
         public virtual DbSet<ServiceApplication> ServiceApplications { get; set; }
+        public virtual DbSet<ServiceApplicationPublishRequest> ServiceApplicationPublishRequests { get; set; }
         public virtual DbSet<ServiceOrder> ServiceOrders { get; set; }
         public virtual DbSet<Template> Templates { get; set; }
 
@@ -179,10 +179,10 @@ namespace kiosk_solution.Data.Models
             {
                 entity.ToTable("Party");
 
-                entity.HasIndex(e => e.PhoneNumber, "UQ__Party__85FB4E38042C956E")
+                entity.HasIndex(e => e.PhoneNumber, "UQ__Party__85FB4E38FBC7ED2C")
                     .IsUnique();
 
-                entity.HasIndex(e => e.Email, "UQ__Party__A9D105341F3AB11A")
+                entity.HasIndex(e => e.Email, "UQ__Party__A9D10534450624A7")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
@@ -223,25 +223,6 @@ namespace kiosk_solution.Data.Models
                     .HasConstraintName("FK__Party__RoleId__3D5E1FD2");
             });
 
-            modelBuilder.Entity<PartyKioskLocation>(entity =>
-            {
-                entity.ToTable("Party_KioskLocation");
-
-                entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
-
-                entity.Property(e => e.CreateDate).HasColumnType("datetime");
-
-                entity.HasOne(d => d.KioskLocation)
-                    .WithMany(p => p.PartyKioskLocations)
-                    .HasForeignKey(d => d.KioskLocationId)
-                    .HasConstraintName("FK__Party_Kio__Kiosk__6EF57B66");
-
-                entity.HasOne(d => d.Party)
-                    .WithMany(p => p.PartyKioskLocations)
-                    .HasForeignKey(d => d.PartyId)
-                    .HasConstraintName("FK__Party_Kio__Party__6E01572D");
-            });
-
             modelBuilder.Entity<PartyServiceApplication>(entity =>
             {
                 entity.ToTable("Party_ServiceApplication");
@@ -251,12 +232,12 @@ namespace kiosk_solution.Data.Models
                 entity.HasOne(d => d.Party)
                     .WithMany(p => p.PartyServiceApplications)
                     .HasForeignKey(d => d.PartyId)
-                    .HasConstraintName("FK__Party_Ser__Party__72C60C4A");
+                    .HasConstraintName("FK__Party_Ser__Party__6E01572D");
 
                 entity.HasOne(d => d.ServiceApplication)
                     .WithMany(p => p.PartyServiceApplications)
                     .HasForeignKey(d => d.ServiceApplicationId)
-                    .HasConstraintName("FK__Party_Ser__Servi__73BA3083");
+                    .HasConstraintName("FK__Party_Ser__Servi__6EF57B66");
             });
 
             modelBuilder.Entity<Poi>(entity =>
@@ -370,12 +351,12 @@ namespace kiosk_solution.Data.Models
                 entity.HasOne(d => d.Schedule)
                     .WithMany(p => p.ScheduleTemplates)
                     .HasForeignKey(d => d.ScheduleId)
-                    .HasConstraintName("FK__Schedule___Sched__778AC167");
+                    .HasConstraintName("FK__Schedule___Sched__72C60C4A");
 
                 entity.HasOne(d => d.Template)
                     .WithMany(p => p.ScheduleTemplates)
                     .HasForeignKey(d => d.TemplateId)
-                    .HasConstraintName("FK__Schedule___Templ__787EE5A0");
+                    .HasConstraintName("FK__Schedule___Templ__73BA3083");
             });
 
             modelBuilder.Entity<ServiceApplication>(entity =>
@@ -410,6 +391,32 @@ namespace kiosk_solution.Data.Models
                     .HasConstraintName("FK__ServiceAp__Party__4F7CD00D");
             });
 
+            modelBuilder.Entity<ServiceApplicationPublishRequest>(entity =>
+            {
+                entity.ToTable("ServiceApplicationPublishRequest");
+
+                entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+
+                entity.Property(e => e.Status)
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.Creator)
+                    .WithMany(p => p.ServiceApplicationPublishRequestCreators)
+                    .HasForeignKey(d => d.CreatorId)
+                    .HasConstraintName("FK__ServiceAp__Creat__01142BA1");
+
+                entity.HasOne(d => d.Handler)
+                    .WithMany(p => p.ServiceApplicationPublishRequestHandlers)
+                    .HasForeignKey(d => d.HandlerId)
+                    .HasConstraintName("FK__ServiceAp__Handl__02084FDA");
+
+                entity.HasOne(d => d.ServiceApplication)
+                    .WithMany(p => p.ServiceApplicationPublishRequests)
+                    .HasForeignKey(d => d.ServiceApplicationId)
+                    .HasConstraintName("FK__ServiceAp__Servi__00200768");
+            });
+
             modelBuilder.Entity<ServiceOrder>(entity =>
             {
                 entity.ToTable("ServiceOrder");
@@ -431,17 +438,17 @@ namespace kiosk_solution.Data.Models
                 entity.HasOne(d => d.Kiosk)
                     .WithMany(p => p.ServiceOrders)
                     .HasForeignKey(d => d.KioskId)
-                    .HasConstraintName("FK__ServiceOr__Kiosk__01142BA1");
+                    .HasConstraintName("FK__ServiceOr__Kiosk__7C4F7684");
 
                 entity.HasOne(d => d.Party)
                     .WithMany(p => p.ServiceOrders)
                     .HasForeignKey(d => d.PartyId)
-                    .HasConstraintName("FK__ServiceOr__Party__00200768");
+                    .HasConstraintName("FK__ServiceOr__Party__7B5B524B");
 
                 entity.HasOne(d => d.ServiceApplication)
                     .WithMany(p => p.ServiceOrders)
                     .HasForeignKey(d => d.ServiceApplicationId)
-                    .HasConstraintName("FK__ServiceOr__Servi__7F2BE32F");
+                    .HasConstraintName("FK__ServiceOr__Servi__7A672E12");
             });
 
             modelBuilder.Entity<Template>(entity =>

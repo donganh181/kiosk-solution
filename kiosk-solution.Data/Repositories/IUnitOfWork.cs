@@ -12,6 +12,7 @@ namespace kiosk_solution.Data.Repositories
         IKioskLocationRepository KioskLocationRepository { get; }
         ITemplateRepository TemplateRepository { get; }
         IScheduleTemplateRepository ScheduleTemplateRepository { get; }
+        IServiceApplicationRepository ServiceApplicationRepository { get; }
         void Save();
         Task SaveAsync();
     }
