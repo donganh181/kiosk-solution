@@ -27,6 +27,30 @@ namespace kiosk_solution.Controllers
             _serviceApplicationService = serviceApplicationService;
             _configuration = configuration;
         }
+        
+        [Authorize(Roles = "Service Provider")]
+        [HttpPost]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Create([FromBody] CreateServiceApplicationViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _serviceApplicationService.Create(token.Id, model);
+            _logger.LogInformation($"Create application {result.Name} by party {token.Mail}");
+            return Ok(new SuccessResponse<ServiceApplicationViewModel>((int)HttpStatusCode.OK, "Create success.", result));
+        }
+        
+        [Authorize(Roles = "Service Provider")]
+        [HttpPut("logo")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateLogo([FromBody] UpdateLogoViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _serviceApplicationService.UpdateLogo(token.Id, model);
+            _logger.LogInformation($"Update logo of application {result.Name} by party {token.Mail}");
+            return Ok(new SuccessResponse<ServiceApplicationViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
 
         /// <summary>
         /// Update information by service provider

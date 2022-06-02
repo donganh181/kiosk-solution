@@ -19,6 +19,8 @@ namespace kiosk_solution.Data.AutoMapper
             mc.CreateMap<ServiceApplication, ServiceApplicationSearchViewModel>().ForMember(src => src.PartyName, opt => opt.MapFrom(des => des.Party.FirstName))
                 .ForMember(src => src.AppCategoryName, opt => opt.MapFrom(des => des.AppCategory.Name));
             mc.CreateMap<ServiceApplicationSearchViewModel, ServiceApplication>();
+            mc.CreateMap<ServiceApplication, CreateServiceApplicationViewModel>();
+            mc.CreateMap<CreateServiceApplicationViewModel, ServiceApplication>();
         }
     }
 }

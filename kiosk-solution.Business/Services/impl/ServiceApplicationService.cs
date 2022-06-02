@@ -13,6 +13,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using kiosk_solution.Data.Constants;
+using kiosk_solution.Data.Models;
 
 namespace kiosk_solution.Business.Services.impl
 {
@@ -23,7 +25,8 @@ namespace kiosk_solution.Business.Services.impl
         private readonly ILogger<ServiceApplicationService> _logger;
         private readonly IFirebaseUtil _firebaseUtil;
 
-        public ServiceApplicationService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<ServiceApplicationService> logger, IFirebaseUtil firebaseUtil)
+        public ServiceApplicationService(IUnitOfWork unitOfWork, IMapper mapper,
+            ILogger<ServiceApplicationService> logger, IFirebaseUtil firebaseUtil)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -67,16 +70,18 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<ServiceApplicationViewModel> UpdateInformation(Guid updaterId, UpdateServiceApplicationViewModel model)
         {
-            var app = await _unitOfWork.ServiceApplicationRepository.Get(a => a.Id.Equals(model.Id)).Include(a => a.AppCategory).FirstOrDefaultAsync();
+            var app = await _unitOfWork.ServiceApplicationRepository.Get(a => a.Id.Equals(model.Id))
+                .Include(a => a.AppCategory).FirstOrDefaultAsync();
             if (!app.PartyId.Equals(updaterId))
             {
                 _logger.LogInformation("User not match.");
-                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You cannot use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You cannot use this feature.");
             }
-            if(app == null)
+
+            if (app == null)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found.");
             }
 
             app.Name = model.Name;
@@ -89,7 +94,8 @@ namespace kiosk_solution.Business.Services.impl
                 _unitOfWork.ServiceApplicationRepository.Update(app);
                 await _unitOfWork.SaveAsync();
 
-                var newLogo = await _firebaseUtil.UploadImageToFirebase(model.Logo, app.AppCategory.Name, model.Id, "Logo");
+                var newLogo =
+                    await _firebaseUtil.UploadImageToFirebase(model.Logo, app.AppCategory.Name, model.Id, "Logo");
                 app.Logo = newLogo;
                 _unitOfWork.ServiceApplicationRepository.Update(app);
                 await _unitOfWork.SaveAsync();
@@ -98,9 +104,61 @@ namespace kiosk_solution.Business.Services.impl
             }
             catch (Exception e)
             {
-          
                 _logger.LogInformation("Invalid data.");
-                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
+                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid data.");
+            }
+        }
+
+        public async Task<ServiceApplicationViewModel> Create(Guid partyId, CreateServiceApplicationViewModel model)
+        {
+            var serviceApplication = _mapper.Map<ServiceApplication>(model);
+            serviceApplication.PartyId = partyId;
+            serviceApplication.Status = StatusConstants.INCOMPLETE;
+            try
+            {
+                await _unitOfWork.ServiceApplicationRepository.InsertAsync(serviceApplication);
+                await _unitOfWork.SaveAsync();
+                var result = _mapper.Map<ServiceApplicationViewModel>(serviceApplication);
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid data.");
+            }
+        }
+
+        public async Task<ServiceApplicationViewModel> UpdateLogo(Guid partyId, UpdateLogoViewModel model)
+        {
+            var serviceApplication = await _unitOfWork.ServiceApplicationRepository
+                .Get(a => a.Id.Equals(model.ServiceApplicationId)).Include(a => a.AppCategory).FirstOrDefaultAsync();
+            if (serviceApplication == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            if (!serviceApplication.PartyId.Equals(partyId))
+            {
+                _logger.LogInformation("User not match.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You cannot use this feature.");
+            }
+
+            try
+            {
+                var logo = await _firebaseUtil.UploadImageToFirebase(model.Logo, serviceApplication.AppCategory.Name,
+                    model.ServiceApplicationId, "Logo");
+                serviceApplication.Logo = logo;
+                serviceApplication.Status = StatusConstants.UNAVAILABLE;
+                _unitOfWork.ServiceApplicationRepository.Update(serviceApplication);
+                await _unitOfWork.SaveAsync();
+                var result = _mapper.Map<ServiceApplicationViewModel>(serviceApplication);
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid data.");
             }
         }
     }

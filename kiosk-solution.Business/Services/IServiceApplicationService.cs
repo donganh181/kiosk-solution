@@ -12,5 +12,7 @@ namespace kiosk_solution.Business.Services
     {
         public Task<ServiceApplicationViewModel> UpdateInformation(Guid updaterId, UpdateServiceApplicationViewModel model);
         Task<DynamicModelResponse<ServiceApplicationSearchViewModel>> GetAllWithPaging(string role, Guid id, ServiceApplicationSearchViewModel model, int size, int pageNum);
+        public Task<ServiceApplicationViewModel> Create(Guid partyId, CreateServiceApplicationViewModel model);
+        public Task<ServiceApplicationViewModel> UpdateLogo(Guid partyId, UpdateLogoViewModel model);
     }
 }
