@@ -5,6 +5,7 @@ using kiosk_solution.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using kiosk_solution.Data.Repositories.impl;
+using kiosk_solution.Business.Utilities;
 
 namespace kiosk_solution.Business.DI
 {
@@ -15,6 +16,7 @@ namespace kiosk_solution.Business.DI
 
             services.AddScoped<DbContext, Kiosk_PlatformContext>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IFirebaseUtil, FirebaseUtil>();
 
             services.AddScoped<IPartyRepository, PartyRepository>();
             services.AddScoped<IPartyService, PartyService>();
@@ -36,6 +38,9 @@ namespace kiosk_solution.Business.DI
 
             services.AddScoped<IScheduleTemplateRepository, ScheduleTemplateRepository>();
             services.AddScoped<IScheduleTemplateService, ScheduleTemplateService>();
+
+            services.AddScoped<IServiceApplicationRepository, ServiceApplicationRepository>();
+            services.AddScoped<IServiceApplicationService, ServiceApplicationService>();
         }
     }
 }

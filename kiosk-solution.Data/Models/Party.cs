@@ -12,10 +12,11 @@ namespace kiosk_solution.Data.Models
             Events = new HashSet<Event>();
             InverseCreator = new HashSet<Party>();
             Kiosks = new HashSet<Kiosk>();
-            PartyKioskLocations = new HashSet<PartyKioskLocation>();
             PartyServiceApplications = new HashSet<PartyServiceApplication>();
             Pois = new HashSet<Poi>();
             Schedules = new HashSet<Schedule>();
+            ServiceApplicationPublishRequestCreators = new HashSet<ServiceApplicationPublishRequest>();
+            ServiceApplicationPublishRequestHandlers = new HashSet<ServiceApplicationPublishRequest>();
             ServiceApplications = new HashSet<ServiceApplication>();
             ServiceOrders = new HashSet<ServiceOrder>();
             Templates = new HashSet<Template>();
@@ -39,10 +40,11 @@ namespace kiosk_solution.Data.Models
         public virtual ICollection<Event> Events { get; set; }
         public virtual ICollection<Party> InverseCreator { get; set; }
         public virtual ICollection<Kiosk> Kiosks { get; set; }
-        public virtual ICollection<PartyKioskLocation> PartyKioskLocations { get; set; }
         public virtual ICollection<PartyServiceApplication> PartyServiceApplications { get; set; }
         public virtual ICollection<Poi> Pois { get; set; }
         public virtual ICollection<Schedule> Schedules { get; set; }
+        public virtual ICollection<ServiceApplicationPublishRequest> ServiceApplicationPublishRequestCreators { get; set; }
+        public virtual ICollection<ServiceApplicationPublishRequest> ServiceApplicationPublishRequestHandlers { get; set; }
         public virtual ICollection<ServiceApplication> ServiceApplications { get; set; }
         public virtual ICollection<ServiceOrder> ServiceOrders { get; set; }
         public virtual ICollection<Template> Templates { get; set; }
