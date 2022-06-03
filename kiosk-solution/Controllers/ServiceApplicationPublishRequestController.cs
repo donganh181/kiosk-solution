@@ -45,5 +45,17 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Create publish request by party {token.Mail}");
             return Ok(new SuccessResponse<ServiceApplicationPublishRequestViewModel>((int)HttpStatusCode.OK, "Create success.", result));
         }
+        
+        [Authorize(Roles = "Admin")]
+        [HttpPut]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Update([FromBody] UpdateServiceApplicationPublishRequestViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _requestPublishService.Update(token.Id, model);
+            _logger.LogInformation($"Update publish request by party {token.Mail}");
+            return Ok(new SuccessResponse<ServiceApplicationPublishRequestViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
     }
 }

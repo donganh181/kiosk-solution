@@ -79,5 +79,37 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
             }
         }
+
+        public async Task<ServiceApplicationPublishRequestViewModel> Update(Guid handlerId, UpdateServiceApplicationPublishRequestViewModel model)
+        {
+            var publishRequest = await _unitOfWork.ServiceApplicationPublishRequestRepository
+                .Get(p => p.Id.Equals(model.Id)).FirstOrDefaultAsync();
+            if (publishRequest == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
+            }
+            if (!publishRequest.Status.Equals(StatusConstants.IN_PROGRESS))
+            {
+                _logger.LogInformation("Invalid status to use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid status to use this feature.");
+            }
+            publishRequest.HandlerId = handlerId;
+            publishRequest.HandlerComment = model.HandlerComment;
+            publishRequest.Status = model.Status;
+            try
+            {
+                _unitOfWork.ServiceApplicationPublishRequestRepository.Update(publishRequest);
+                await _unitOfWork.SaveAsync();
+                var result = _mapper.Map<ServiceApplicationPublishRequestViewModel>(publishRequest);
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
+            }
+
+        }
     }
 }
