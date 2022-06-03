@@ -178,5 +178,10 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid data.");
             }
         }
+
+        public async Task<ServiceApplicationViewModel> GetById(Guid id)
+        {
+            return await _unitOfWork.ServiceApplicationRepository.Get(a => a.Id.Equals(id)).ProjectTo<ServiceApplicationViewModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
+        }
     }
 }

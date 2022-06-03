@@ -16,10 +16,12 @@ namespace kiosk_solution.Data.Repositories.impl
         public ITemplateRepository TemplateRepository { get; set; }
         public IScheduleTemplateRepository ScheduleTemplateRepository { get; set; }
         public IServiceApplicationRepository ServiceApplicationRepository { get; set; }
+        public IServiceApplicationPublishRequestRepository ServiceApplicationPublishRequestRepository { get; set; }
 
         public UnitOfWork(Kiosk_PlatformContext context, IRoleRepository roleRepository, IKioskRepository kioskRepository, 
             IPartyRepository partyRepository, IKioskLocationRepository kioskLocationRepository, IScheduleRepository scheduleRepository,
-            ITemplateRepository templateRepository, IScheduleTemplateRepository scheduleTemplateRepository, IServiceApplicationRepository serviceApplicationRepository)
+            ITemplateRepository templateRepository, IScheduleTemplateRepository scheduleTemplateRepository, IServiceApplicationRepository serviceApplicationRepository,
+            IServiceApplicationPublishRequestRepository serviceApplicationPublishRequestRepository)
         {
             _context = context;
             RoleRepository = roleRepository;
@@ -30,6 +32,7 @@ namespace kiosk_solution.Data.Repositories.impl
             TemplateRepository = templateRepository;
             ScheduleTemplateRepository = scheduleTemplateRepository;
             ServiceApplicationRepository = serviceApplicationRepository;
+            ServiceApplicationPublishRequestRepository = serviceApplicationPublishRequestRepository;
         }
         public void Save()
         {

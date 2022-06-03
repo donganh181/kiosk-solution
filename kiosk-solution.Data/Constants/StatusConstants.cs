@@ -15,5 +15,9 @@ namespace kiosk_solution.Data.Constants
         
         public static string ON = "on";
         public static string OFF = "off";
+
+        public static string IN_PROGRESS = "in progress";
+        public static string APPROVED = "approved";
+        public static string DENIED = "denied";
     }
 }
