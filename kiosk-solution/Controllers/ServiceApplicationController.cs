@@ -87,7 +87,7 @@ namespace kiosk_solution.Controllers
             Guid id = token.Id;
             string role = token.Role;
             var result = await _serviceApplicationService.GetAllWithPaging(role, id, model, size, page);
-            _logger.LogInformation($"Get all Kiosks by party {token.Mail}");
+            _logger.LogInformation($"Get all applications by party {token.Mail}");
             return Ok(new SuccessResponse<DynamicModelResponse<ServiceApplicationSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
     }

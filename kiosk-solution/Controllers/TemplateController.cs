@@ -1,4 +1,5 @@
 ﻿using kiosk_solution.Business.Services;
+using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
 using kiosk_solution.Utils;
@@ -29,6 +30,11 @@ namespace kiosk_solution.Controllers
             _configuration = configuration;
         }
 
+        /// <summary>
+        /// Create template by location owner
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [Authorize(Roles = "Location Owner")]
         [HttpPost]
         [MapToApiVersion("1")]
@@ -39,6 +45,27 @@ namespace kiosk_solution.Controllers
             var result = await _templateService.Create(token.Id, model);
             _logger.LogInformation($"Create template {result.Name} by party {token.Mail}");
             return Ok(new SuccessResponse<TemplateViewModel>((int)HttpStatusCode.OK, "Create success.", result));
+        }
+
+        /// <summary>
+        /// Get all of its template by location owner
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="size"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Location Owner")]
+        [HttpGet]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Get([FromQuery] TemplateSearchViewModel model, int size, int page = CommonConstants.DefaultPage)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            Guid id = token.Id;
+            string role = token.Role;
+            var result = await _templateService.GetAllWithPaging(id, model, size, page);
+            _logger.LogInformation($"Get all templates by party {token.Mail}");
+            return Ok(new SuccessResponse<DynamicModelResponse<TemplateSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
     }
 }
