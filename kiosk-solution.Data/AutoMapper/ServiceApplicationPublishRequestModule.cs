@@ -21,6 +21,13 @@ namespace kiosk_solution.Data.AutoMapper
 
             mc.CreateMap<ServiceApplicationPublishRequest, UpdateServiceApplicationPublishRequestViewModel>();
             mc.CreateMap<UpdateServiceApplicationPublishRequestViewModel, ServiceApplicationPublishRequest>();
+
+            mc.CreateMap<ServiceApplicationPublishRequest, ServiceApplicationPublishRequestSearchViewModel>()
+                .ForMember(src => src.CreatorName, opt => opt.MapFrom(des => des.Creator.FirstName))
+                .ForMember(src => src.HandlerName, opt => opt.MapFrom(des => des.Handler.FirstName))
+                .ForMember(src => src.ServiceApplicationName, opt => opt.MapFrom(des => des.ServiceApplication.Name));
+            mc.CreateMap<ServiceApplicationPublishRequestSearchViewModel, ServiceApplicationPublishRequest>();
+
         }
     }
 }

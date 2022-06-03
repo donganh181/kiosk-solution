@@ -1,4 +1,5 @@
 ﻿using kiosk_solution.Business.Services;
+using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
 using kiosk_solution.Utils;
@@ -56,6 +57,27 @@ namespace kiosk_solution.Controllers
             var result = await _requestPublishService.Update(token.Id, model);
             _logger.LogInformation($"Update publish request by party {token.Mail}");
             return Ok(new SuccessResponse<ServiceApplicationPublishRequestViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+
+        /// <summary>
+        /// Get all publish request by admin and service provider
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="size"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Service Provider")]
+        [HttpGet]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Get([FromQuery] ServiceApplicationPublishRequestSearchViewModel model, int size, int page = CommonConstants.DefaultPage)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            Guid id = token.Id;
+            string role = token.Role;
+            var result = await _requestPublishService.GetAllWithPaging(role, id, model, size, page);
+            _logger.LogInformation($"Get all Kiosks by party {token.Mail}");
+            return Ok(new SuccessResponse<DynamicModelResponse<ServiceApplicationPublishRequestSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
     }
 }
