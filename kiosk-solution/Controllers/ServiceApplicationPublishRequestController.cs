@@ -79,5 +79,17 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Get all Kiosks by party {token.Mail}");
             return Ok(new SuccessResponse<DynamicModelResponse<ServiceApplicationPublishRequestSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
+        
+        [Authorize(Roles = "Service Provider")]
+        [HttpGet("id")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetById(Guid requestId)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _requestPublishService.GetById(token.Id, requestId);
+            _logger.LogInformation($"Get request by id {requestId}");
+            return Ok(new SuccessResponse<ServiceApplicationPublishRequestViewModel>((int)HttpStatusCode.OK, "Get success.", result));
+        }
     }
 }
