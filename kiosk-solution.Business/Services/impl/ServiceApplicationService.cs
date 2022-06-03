@@ -37,22 +37,18 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<DynamicModelResponse<ServiceApplicationSearchViewModel>> GetAllWithPaging(string role,
             Guid id, ServiceApplicationSearchViewModel model, int size, int pageNum)
         {
-            dynamic apps;
-
-            if (role.Equals(RoleConstants.SERVICE_PROVIDER))
-            {
-                apps = _unitOfWork.ServiceApplicationRepository
-                    .Get(a => a.PartyId.Equals(id))
+            var apps = _unitOfWork.ServiceApplicationRepository
+                    .Get()
                     .Include(a => a.Party)
                     .Include(a => a.AppCategory)
                     .ProjectTo<ServiceApplicationSearchViewModel>(_mapper.ConfigurationProvider)
                     .DynamicFilter(model)
                     .AsQueryable().OrderByDescending(a => a.Name);
-            }
-            else
+
+            if (role.Equals(RoleConstants.SERVICE_PROVIDER))
             {
                 apps = _unitOfWork.ServiceApplicationRepository
-                    .Get()
+                    .Get(a => a.PartyId.Equals(id))
                     .Include(a => a.Party)
                     .Include(a => a.AppCategory)
                     .ProjectTo<ServiceApplicationSearchViewModel>(_mapper.ConfigurationProvider)

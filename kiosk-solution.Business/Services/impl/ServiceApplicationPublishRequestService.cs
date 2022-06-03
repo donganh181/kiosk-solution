@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using kiosk_solution.Business.Utilities;
 using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
@@ -78,6 +80,51 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Invalid data.");
                 throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
             }
+        }
+
+        public async Task<DynamicModelResponse<ServiceApplicationPublishRequestSearchViewModel>> GetAllWithPaging(string role, Guid id, ServiceApplicationPublishRequestSearchViewModel model, int size, int pageNum)
+        {
+            var requests = _unitOfWork.ServiceApplicationPublishRequestRepository
+                .Get()
+                .Include(r => r.Creator)
+                .Include(r => r.Handler)
+                .Include(r => r.ServiceApplication)
+                .ProjectTo<ServiceApplicationPublishRequestSearchViewModel>(_mapper.ConfigurationProvider)
+                .DynamicFilter(model)
+                .AsQueryable().OrderByDescending(r => r.ServiceApplicationName);
+
+            if (role.Equals(RoleConstants.SERVICE_PROVIDER))
+            {
+                requests = _unitOfWork.ServiceApplicationPublishRequestRepository
+                .Get(r => r.CreatorId.Equals(id))
+                .Include(r => r.Creator)
+                .Include(r => r.Handler)
+                .Include(r => r.ServiceApplication)
+                .ProjectTo<ServiceApplicationPublishRequestSearchViewModel>(_mapper.ConfigurationProvider)
+                .DynamicFilter(model)
+                .AsQueryable().OrderByDescending(r => r.ServiceApplicationName);
+            }
+
+            var listPaging = requests
+                .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
+
+            if (listPaging.Item2.ToList().Count < 1)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+
+            var result = new DynamicModelResponse<ServiceApplicationPublishRequestSearchViewModel>
+            {
+                Metadata = new PagingMetaData
+                {
+                    Page = pageNum,
+                    Size = size,
+                    Total = listPaging.Item1
+                },
+                Data = listPaging.Item2.ToList()
+            };
+            return result;
         }
 
         public async Task<ServiceApplicationPublishRequestViewModel> Update(Guid handlerId, UpdateServiceApplicationPublishRequestViewModel model)
