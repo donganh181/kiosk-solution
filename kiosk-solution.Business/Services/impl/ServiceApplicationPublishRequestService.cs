@@ -127,6 +127,19 @@ namespace kiosk_solution.Business.Services.impl
             return result;
         }
 
+        public async Task<ServiceApplicationPublishRequestViewModel> GetById(Guid partyId, Guid requestId)
+        {
+            var publishRequest = await _unitOfWork.ServiceApplicationPublishRequestRepository
+                .Get(p => p.Id.Equals(requestId) && p.CreatorId.Equals(partyId)).FirstOrDefaultAsync();
+            if (publishRequest == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
+            }
+            var result = _mapper.Map<ServiceApplicationPublishRequestViewModel>(publishRequest);
+            return result;
+        }
+
         public async Task<ServiceApplicationPublishRequestViewModel> Update(Guid handlerId, UpdateServiceApplicationPublishRequestViewModel model)
         {
             var publishRequest = await _unitOfWork.ServiceApplicationPublishRequestRepository
