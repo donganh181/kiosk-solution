@@ -10,5 +10,8 @@ namespace kiosk_solution.Business.Services
     public interface IServiceApplicationPublishRequestService
     {
         public Task<ServiceApplicationPublishRequestViewModel> Create(Guid creatorId, ServiceApplicationPublishRequestCreateViewModel model);
+
+        public Task<ServiceApplicationPublishRequestViewModel> Update(Guid handlerId,
+            UpdateServiceApplicationPublishRequestViewModel model);
     }
 }

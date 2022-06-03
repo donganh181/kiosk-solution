@@ -18,6 +18,9 @@ namespace kiosk_solution.Data.AutoMapper
 
             mc.CreateMap<ServiceApplicationPublishRequest, ServiceApplicationPublishRequestCreateViewModel>();
             mc.CreateMap<ServiceApplicationPublishRequestCreateViewModel, ServiceApplicationPublishRequest>();
+
+            mc.CreateMap<ServiceApplicationPublishRequest, UpdateServiceApplicationPublishRequestViewModel>();
+            mc.CreateMap<UpdateServiceApplicationPublishRequestViewModel, ServiceApplicationPublishRequest>();
         }
     }
 }
