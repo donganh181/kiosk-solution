@@ -84,7 +84,11 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<DynamicModelResponse<ServiceApplicationPublishRequestSearchViewModel>> GetAllWithPaging(string role, Guid id, ServiceApplicationPublishRequestSearchViewModel model, int size, int pageNum)
         {
-            var requests = _unitOfWork.ServiceApplicationPublishRequestRepository
+            object requests = null;
+
+            if (role.Equals(RoleConstants.ADMIN))
+            {
+                requests = _unitOfWork.ServiceApplicationPublishRequestRepository
                 .Get()
                 .Include(r => r.Creator)
                 .Include(r => r.Handler)
@@ -92,6 +96,8 @@ namespace kiosk_solution.Business.Services.impl
                 .ProjectTo<ServiceApplicationPublishRequestSearchViewModel>(_mapper.ConfigurationProvider)
                 .DynamicFilter(model)
                 .AsQueryable().OrderByDescending(r => r.ServiceApplicationName);
+            }
+                
 
             if (role.Equals(RoleConstants.SERVICE_PROVIDER))
             {
@@ -105,7 +111,15 @@ namespace kiosk_solution.Business.Services.impl
                 .AsQueryable().OrderByDescending(r => r.ServiceApplicationName);
             }
 
-            var listPaging = requests
+            if(requests == null)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+            
+            var listRequest = (IQueryable<ServiceApplicationPublishRequestSearchViewModel>)requests;
+
+            var listPaging = listRequest
                 .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
 
             if (listPaging.Data.ToList().Count < 1)
