@@ -77,7 +77,7 @@ namespace kiosk_solution.Business.Services.impl
             var listPaging = kiosks
                 .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
 
-            if (listPaging.Item2.ToList().Count < 1)
+            if (listPaging.Data.ToList().Count < 1)
             {
                 _logger.LogInformation("Can not Found.");
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
@@ -89,9 +89,9 @@ namespace kiosk_solution.Business.Services.impl
                 {
                     Page = pageNum,
                     Size = size,
-                    Total = listPaging.Item1
+                    Total = listPaging.Total
                 },
-                Data = listPaging.Item2.ToList()
+                Data = listPaging.Data.ToList()
             };
             return result;
         }
