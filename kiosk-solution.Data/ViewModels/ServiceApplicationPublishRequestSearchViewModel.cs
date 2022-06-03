@@ -16,6 +16,8 @@ namespace kiosk_solution.Data.ViewModels
         public Guid? CreatorId { get; set; }
         [String]
         public string CreatorName { get; set; }
+        [String]
+        public string CreatorEmail { get; set; }
         [BindNever]
         public Guid? HandlerId { get; set; }
         [String]
