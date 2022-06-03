@@ -63,9 +63,14 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<DynamicModelResponse<KioskSearchViewModel>> GetAllWithPaging(string role, Guid id, KioskSearchViewModel model, int size, int pageNum)
         {
-            var kiosks = _unitOfWork.KioskRepository.Get().ProjectTo<KioskSearchViewModel>(_mapper)
-                .DynamicFilter(model)
-                .AsQueryable().OrderByDescending(k => k.Name);
+            object kiosks = null;
+            if (role.Equals(RoleConstants.ADMIN))
+            {
+                kiosks = _unitOfWork.KioskRepository.Get().ProjectTo<KioskSearchViewModel>(_mapper)
+                    .DynamicFilter(model)
+                    .AsQueryable().OrderByDescending(k => k.Name);
+            }
+                
 
             if (role.Equals(RoleConstants.LOCATION_OWNER))
             {
@@ -73,8 +78,16 @@ namespace kiosk_solution.Business.Services.impl
                     .DynamicFilter(model)
                     .AsQueryable().OrderByDescending(k => k.Name); 
             }
-          
-            var listPaging = kiosks
+            
+            if(kiosks == null)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+
+            var listKiosk = (IQueryable<KioskSearchViewModel>)kiosks;
+
+            var listPaging = listKiosk
                 .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
 
             if (listPaging.Data.ToList().Count < 1)
