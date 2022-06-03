@@ -2,8 +2,11 @@
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
+using kiosk_solution.Data.Constants;
+using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
 using kiosk_solution.Data.Responses;
+using kiosk_solution.Data.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -11,16 +14,37 @@ namespace kiosk_solution.Business.Services.impl
 {
     public class TemplateService : ITemplateService
     {
-        private readonly AutoMapper.IConfigurationProvider _mapper;
+        private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ITemplateService> _logger;
 
         public TemplateService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<ITemplateService> logger)
         {
-            _mapper = mapper.ConfigurationProvider;
+            _mapper = mapper;
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
+
+        public async Task<TemplateViewModel> Create(Guid id, TemplateCreateViewModel model)
+        {
+            var template = _mapper.Map<Template>(model);
+            template.PartyId = id;
+            template.CreateDate = DateTime.Now;
+            template.Status = StatusConstants.INCOMPLETE;
+            try
+            {
+                await _unitOfWork.TemplateRepository.InsertAsync(template);
+                await _unitOfWork.SaveAsync();
+                var result = _mapper.Map<TemplateViewModel>(template);
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
+            }
+        }
+
         public async Task<bool> IsOwner(Guid partyId, Guid templateId)
         {
             var template = await _unitOfWork.TemplateRepository.Get(s => s.Id.Equals(templateId)).FirstOrDefaultAsync();
