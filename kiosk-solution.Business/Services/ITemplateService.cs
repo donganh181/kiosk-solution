@@ -11,5 +11,6 @@ namespace kiosk_solution.Business.Services
         Task<TemplateViewModel> Create(Guid id, TemplateCreateViewModel model);
         Task<DynamicModelResponse<TemplateSearchViewModel>> GetAllWithPaging(Guid id, TemplateSearchViewModel model, int size, int pageNum);
         Task<TemplateViewModel> UpdateInformation(Guid updaterId, TemplateUpdateViewModel model);
+        Task<TemplateViewModel> UpdateStatus(Guid updaterId, Guid templateId);
     }
 }

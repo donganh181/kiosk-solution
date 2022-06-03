@@ -98,13 +98,52 @@ namespace kiosk_solution.Business.Services.impl
 
             if (!template.PartyId.Equals(updaterId))
             {
-                _logger.LogInformation($"Your account cannot update template of other account.");
+                _logger.LogInformation("Your account cannot update template of other account.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot update template of other account.");
             }
 
             template.Name = model.Name;
             template.Description = model.Description;
 
+            try
+            {
+                _unitOfWork.TemplateRepository.Update(template);
+                await _unitOfWork.SaveAsync();
+                var result = _mapper.Map<TemplateViewModel>(template);
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
+            }
+        }
+
+        public async Task<TemplateViewModel> UpdateStatus(Guid updaterId, Guid templateId)
+        {
+            var template = await _unitOfWork.TemplateRepository
+                .Get(t => t.Id.Equals(templateId))
+                .FirstOrDefaultAsync();
+
+            if (!template.PartyId.Equals(updaterId))
+            {
+                _logger.LogInformation("Your account cannot update template of other account.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot update template of other account.");
+            }
+
+            if (template.Status.Equals(StatusConstants.ACTIVE))
+            {
+                template.Status = StatusConstants.DEACTIVATE;
+            }
+            else if (template.Status.Equals(StatusConstants.DEACTIVATE))
+            {
+                template.Status = StatusConstants.ACTIVE;
+            }
+            else 
+            {
+                _logger.LogInformation("You cannot change status of this incomplete template.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You cannot change status of this incomplete template.");
+            }
             try
             {
                 _unitOfWork.TemplateRepository.Update(template);

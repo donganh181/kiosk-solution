@@ -85,5 +85,17 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Updated template {result.Name} by party {token.Mail}");
             return Ok(new SuccessResponse<TemplateViewModel>((int)HttpStatusCode.OK, "Update success.", result));
         }
+
+        [Authorize(Roles = "Location Owner")]
+        [HttpPatch("status")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateStatus(Guid id)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _templateService.UpdateStatus(token.Id, id);
+            _logger.LogInformation($"Update status of template [{result.Id}] by party {token.Mail}");
+            return Ok(new SuccessResponse<TemplateViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
     }
 }
