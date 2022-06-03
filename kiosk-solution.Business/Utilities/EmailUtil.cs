@@ -19,7 +19,7 @@ namespace kiosk_solution.Data.ViewModels
             try
             {
                 MailMessage mail = new MailMessage();
-                SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
+                SmtpClient smtpServer = new SmtpClient("smtp.gmail.com");
 
                 mail.From = new MailAddress(_email);
                 mail.To.Add(sendto);
@@ -27,14 +27,14 @@ namespace kiosk_solution.Data.ViewModels
                 mail.IsBodyHtml = true;
                 mail.Body = content;
 
-                SmtpServer.Host = "smtp.gmail.com";
-                SmtpServer.Port = 587;
-                SmtpServer.DeliveryMethod = SmtpDeliveryMethod.Network;
-                SmtpServer.EnableSsl = true;
-                SmtpServer.UseDefaultCredentials = false;
-                SmtpServer.Credentials = new System.Net.NetworkCredential(_email, _pass);
+                smtpServer.Host = "smtp.gmail.com";
+                smtpServer.Port = 587;
+                smtpServer.DeliveryMethod = SmtpDeliveryMethod.Network;
+                smtpServer.EnableSsl = true;
+                smtpServer.UseDefaultCredentials = false;
+                smtpServer.Credentials = new System.Net.NetworkCredential(_email, _pass);
 
-                await SmtpServer.SendMailAsync(mail);
+                await smtpServer.SendMailAsync(mail);
                 Console.WriteLine("Email sent successfully");
             }
             catch (Exception ex)
