@@ -130,20 +130,7 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Your account cannot update template of other account.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot update template of other account.");
             }
-
-            if (template.Status.Equals(StatusConstants.ACTIVE))
-            {
-                template.Status = StatusConstants.DEACTIVATE;
-            }
-            else if (template.Status.Equals(StatusConstants.DEACTIVATE))
-            {
-                template.Status = StatusConstants.ACTIVE;
-            }
-            else 
-            {
-                _logger.LogInformation("You cannot change status of this incomplete template.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You cannot change status of this incomplete template.");
-            }
+            template.Status = StatusConstants.DELETED;
             try
             {
                 _unitOfWork.TemplateRepository.Update(template);
