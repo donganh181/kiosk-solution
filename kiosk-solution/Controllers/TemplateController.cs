@@ -67,5 +67,23 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Get all templates by party {token.Mail}");
             return Ok(new SuccessResponse<DynamicModelResponse<TemplateSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
+
+        /// <summary>
+        /// Update template information by its location owner
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Location Owner")]
+        [HttpPut]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateInformation([FromBody] TemplateUpdateViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            Guid updaterId = token.Id;
+            var result = await _templateService.UpdateInformation(updaterId, model);
+            _logger.LogInformation($"Updated template {result.Name} by party {token.Mail}");
+            return Ok(new SuccessResponse<TemplateViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
     }
 }
