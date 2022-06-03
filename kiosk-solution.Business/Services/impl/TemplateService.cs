@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using kiosk_solution.Business.Utilities;
 using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
@@ -43,6 +46,36 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Invalid data.");
                 throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
             }
+        }
+
+        public async Task<DynamicModelResponse<TemplateSearchViewModel>> GetAllWithPaging(Guid id, TemplateSearchViewModel model, int size, int pageNum)
+        {
+            var templates = _unitOfWork.TemplateRepository
+                .Get(t => t.PartyId.Equals(id))
+                .ProjectTo<TemplateSearchViewModel>(_mapper.ConfigurationProvider)
+                .DynamicFilter(model)
+                .AsQueryable().OrderByDescending(t => t.Name);
+
+            var listPaging =
+                templates.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
+
+            if (listPaging.Item2.ToList().Count < 1)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+
+            var result = new DynamicModelResponse<TemplateSearchViewModel>
+            {
+                Metadata = new PagingMetaData
+                {
+                    Page = pageNum,
+                    Size = size,
+                    Total = listPaging.Item1
+                },
+                Data = listPaging.Item2.ToList()
+            };
+            return result;
         }
 
         public async Task<bool> IsOwner(Guid partyId, Guid templateId)
