@@ -25,7 +25,7 @@ namespace kiosk_solution.Controllers
             _logger = logger;
         }
 
-        [HttpGet("geocoding/forward/address/{address}")]
+        [HttpGet("geocode/forward/address/{address}")]
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetForwardGeocoding(string address)
         {
