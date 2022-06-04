@@ -51,7 +51,7 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<DynamicModelResponse<TemplateSearchViewModel>> GetAllWithPaging(Guid id, TemplateSearchViewModel model, int size, int pageNum)
         {
             var templates = _unitOfWork.TemplateRepository
-                .Get(t => t.PartyId.Equals(id))
+                .Get(t => t.PartyId.Equals(id) && !t.Status.Equals(StatusConstants.DELETED))
                 .ProjectTo<TemplateSearchViewModel>(_mapper.ConfigurationProvider)
                 .DynamicFilter(model)
                 .AsQueryable().OrderByDescending(t => t.Name);

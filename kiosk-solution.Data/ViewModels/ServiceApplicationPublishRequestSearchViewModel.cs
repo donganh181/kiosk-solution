@@ -22,6 +22,8 @@ namespace kiosk_solution.Data.ViewModels
         public Guid? HandlerId { get; set; }
         [String]
         public string HandlerName { get; set; }
+        [String]
+        public string HandlerEmail { get; set; }
         [BindNever]
         public Guid? ServiceApplicationId { get; set; }
         [String]
