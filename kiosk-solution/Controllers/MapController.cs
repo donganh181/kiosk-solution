@@ -14,8 +14,8 @@ namespace kiosk_solution.Controllers
     [ApiVersion("1")]
     public class MapController : Controller
     {
-        private ILogger<PartyController> _logger;
-        private IMapService _mapService;
+        private readonly ILogger<PartyController> _logger;
+        private readonly IMapService _mapService;
         private IConfiguration _configuration;
 
         public MapController(IMapService mapService, IConfiguration configuration, ILogger<PartyController> logger)
@@ -25,7 +25,7 @@ namespace kiosk_solution.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{address}")]
+        [HttpGet("geocoding/forward/address/{address}")]
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetForwardGeocoding(string address)
         {
