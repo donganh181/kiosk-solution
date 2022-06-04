@@ -44,6 +44,8 @@ namespace kiosk_solution.Business.DI
 
             services.AddScoped<IServiceApplicationPublishRequestRepository, ServiceApplicationPublishRequestRepository>();
             services.AddScoped<IServiceApplicationPublishRequestService, ServiceApplicationPublishRequestService>();
+
+            services.AddScoped<IMapService, GoongMapService>();
         }
     }
 }
