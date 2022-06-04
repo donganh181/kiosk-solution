@@ -6,5 +6,6 @@ namespace kiosk_solution.Business.Services
     public interface IMapService
     {
         Task<GetGeocodingResponse> GetForwardGeocode(string address);
+        Task<GetGeocodingResponse> GetReverseGeocode(string lat, string lng);
     }
 }
