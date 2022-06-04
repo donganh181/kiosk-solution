@@ -33,5 +33,13 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<GetGeocodingResponse>((int) HttpStatusCode.OK, "Get Geocoding success.",
                 result));
         }
+        [HttpGet("geocode/reverse/lat/{lat}/lng/{lng}")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetForwardGeocoding(string lat,string lng)
+        {
+            var result = await _mapService.GetReverseGeocode(lat,lng);
+            return Ok(new SuccessResponse<GetGeocodingResponse>((int) HttpStatusCode.OK, "Get Geocoding success.",
+                result));
+        }
     }
 }
