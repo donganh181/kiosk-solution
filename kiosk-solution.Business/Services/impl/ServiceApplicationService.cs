@@ -191,5 +191,28 @@ namespace kiosk_solution.Business.Services.impl
         {
             return await _unitOfWork.ServiceApplicationRepository.Get(a => a.Id.Equals(id)).ProjectTo<ServiceApplicationViewModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
         }
+
+        public async Task<bool> SetStatus(Guid id, string status)
+        {
+            var app = await _unitOfWork.ServiceApplicationRepository.Get(a => a.Id.Equals(id)).FirstOrDefaultAsync();
+            if(app == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+            app.Status = status;
+
+            try
+            {
+                _unitOfWork.ServiceApplicationRepository.Update(app);
+                await _unitOfWork.SaveAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
+            }
+        }
     }
 }

@@ -35,7 +35,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<ServiceApplicationPublishRequestViewModel> Create(Guid creatorId, ServiceApplicationPublishRequestCreateViewModel model)
         {
-           
+
             var app = await _appService.GetById(Guid.Parse(model.ServiceApplicationId + ""));
             if (app == null)
             {
@@ -49,31 +49,28 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Cannot publish other user's application.");
             }
 
-            if (app.Status.Equals(StatusConstants.INCOMPLETE) || app.Status.Equals(StatusConstants.AVAILABLE))
+            if (app.Status.Equals(StatusConstants.INCOMPLETE) || app.Status.Equals(StatusConstants.AVAILABLE) || app.Status.Equals(StatusConstants.PENDING))
             {
                 _logger.LogInformation("App did not meet requirement to publish.");
                 throw new ErrorResponse((int)HttpStatusCode.BadRequest, "App did not meet requirement to publish.");
             }
-            var listRequest = await _unitOfWork.ServiceApplicationPublishRequestRepository.Get(r => r.ServiceApplicationId.Equals(app.Id)).ToListAsync();
-            if (listRequest.Count != 0)
-            {
-                foreach(var checkRequest in listRequest)
-                {
-                    if (checkRequest.Status.Equals(StatusConstants.IN_PROGRESS))
-                    {
-                        _logger.LogInformation("You have already request this application.");
-                        throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You have already request this application.");
-                    }
-                }
-            }
+            
             var request = _mapper.Map<ServiceApplicationPublishRequest>(model);
             request.Status = StatusConstants.IN_PROGRESS;
             try
             {
                 await _unitOfWork.ServiceApplicationPublishRequestRepository.InsertAsync(request);
                 await _unitOfWork.SaveAsync();
+
+                bool check = await _appService.SetStatus(app.Id, StatusConstants.PENDING);
+                if(check == false)
+                {
+                    _logger.LogInformation("Server Error.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
+                }
                 var result = _mapper.Map<ServiceApplicationPublishRequestViewModel>(request);
                 return result;
+
             }
             catch (Exception)
             {

@@ -22,5 +22,7 @@ namespace kiosk_solution.Data.Constants
         public static string APPROVED = "approved";
         public static string DENIED = "denied";
         public static string DELETED = "deleted";
+
+        public static string PENDING = "pending";
     }
 }
