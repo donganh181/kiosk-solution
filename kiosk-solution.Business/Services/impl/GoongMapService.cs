@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -42,6 +43,33 @@ namespace kiosk_solution.Business.Services.impl
                 PlaceId = results["place_id"],
             };
             geoMetries.Add(geoMetry);
+            return new GetGeocodingResponse
+            {
+                GeoMetries = geoMetries
+            };
+        }
+
+        public async Task<GetGeocodingResponse> GetReverseGeocode(string lat, string lng)
+        {
+            var url = GongHost + "/Geocode?latlng=" + lat + ", " + lng + "&api_key=" + GongAPIAccessKey;
+            var res = await client.GetAsync(url);
+            if (res.StatusCode != HttpStatusCode.OK) return null;
+            var geoMetries = new List<GeoMetry>();
+            var jsonContent = res.Content.ReadAsStringAsync().Result;
+            dynamic json = JsonConvert.DeserializeObject(jsonContent);
+            var results = json["results"];
+            for (int i = 0; i < results.Count; i++)
+            {
+                var geoMetry = new GeoMetry
+                {
+                    Address = results[i]["formatted_address"],
+                    Lat = results[i]["geometry"]["location"]["lat"],
+                    Lng = results[i]["geometry"]["location"]["lng"],
+                    PlaceId = results[i]["place_id"],
+                };
+                geoMetries.Add(geoMetry);
+            }
+
             return new GetGeocodingResponse
             {
                 GeoMetries = geoMetries
