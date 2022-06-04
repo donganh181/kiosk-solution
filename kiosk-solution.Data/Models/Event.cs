@@ -7,6 +7,11 @@ namespace kiosk_solution.Data.Models
 {
     public partial class Event
     {
+        public Event()
+        {
+            EventPositions = new HashSet<EventPosition>();
+        }
+
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
@@ -20,5 +25,6 @@ namespace kiosk_solution.Data.Models
 
         public virtual Party Creator { get; set; }
         public virtual Template Template { get; set; }
+        public virtual ICollection<EventPosition> EventPositions { get; set; }
     }
 }
