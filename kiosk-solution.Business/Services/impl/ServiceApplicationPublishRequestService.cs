@@ -49,7 +49,7 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Cannot publish other user's application.");
             }
 
-            if (app.Status.Equals(StatusConstants.INCOMPLETE) || app.Status.Equals(StatusConstants.AVAILABLE) || app.Status.Equals(StatusConstants.PENDING))
+            if (app.Status.Equals(StatusConstants.AVAILABLE) || app.Status.Equals(StatusConstants.PENDING))
             {
                 _logger.LogInformation("App did not meet requirement to publish.");
                 throw new ErrorResponse((int)HttpStatusCode.BadRequest, "App did not meet requirement to publish.");

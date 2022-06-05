@@ -15,6 +15,8 @@ namespace kiosk_solution.Data.Models
 
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public string Logo { get; set; }
+        public string Type { get; set; }
 
         public virtual ICollection<AppCategoryPosition> AppCategoryPositions { get; set; }
         public virtual ICollection<ServiceApplication> ServiceApplications { get; set; }

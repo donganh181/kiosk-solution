@@ -1,23 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using kiosk_solution.Data.Attributes;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace kiosk_solution.Data.ViewModels
 {
-    public class EventViewModel
+    public class EventSearchViewModel
     {
-        public Guid Id { get; set; }
+        [BindNever]
+        public Guid? Id { get; set; }
+        [String]
         public string Name { get; set; }
+        [BindNever]
         public string Description { get; set; }
+        [BindNever]
         public DateTime? TimeStart { get; set; }
+        [BindNever]
         public DateTime? TimeEnd { get; set; }
+        [BindNever]
         public string Address { get; set; }
+        [Guid]
         public Guid? CreatorId { get; set; }
-        public string CreatorName { get; set; }
-        public string CreatorEmail { get; set; }
+        [String]
         public string Type { get; set; }
+        [String]
         public string Status { get; set; }
     }
 }

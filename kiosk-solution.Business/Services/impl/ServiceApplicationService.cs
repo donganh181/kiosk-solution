@@ -142,42 +142,18 @@ namespace kiosk_solution.Business.Services.impl
             {
                 await _unitOfWork.ServiceApplicationRepository.InsertAsync(serviceApplication);
                 await _unitOfWork.SaveAsync();
-                var result = _mapper.Map<ServiceApplicationViewModel>(serviceApplication);
-                return result;
-            }
-            catch (Exception)
-            {
-                _logger.LogInformation("Invalid data.");
-                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid data.");
-            }
-        }
-
-        public async Task<ServiceApplicationViewModel> UpdateLogo(Guid partyId, UpdateLogoViewModel model)
-        {
-            var serviceApplication = await _unitOfWork.ServiceApplicationRepository
-                .Get(a => a.Id.Equals(model.ServiceApplicationId))
-                .Include(a => a.AppCategory).FirstOrDefaultAsync();
-            if (serviceApplication == null)
-            {
-                _logger.LogInformation("Can not found.");
-                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
-            }
-
-            if (!serviceApplication.PartyId.Equals(partyId))
-            {
-                _logger.LogInformation("User not match.");
-                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You cannot use this feature.");
-            }
-
-            try
-            {
-                var logo = await _fileService.UploadImageToFirebase(model.Logo, serviceApplication.AppCategory.Name,
-                    model.ServiceApplicationId, "Logo");
+                
+                var serviceApplicationNew = await _unitOfWork.ServiceApplicationRepository
+                    .Get(a => a.Id.Equals(serviceApplication.Id))
+                    .Include(a => a.AppCategory).FirstOrDefaultAsync();
+                var logo = await _fileService.UploadImageToFirebase(model.Logo, serviceApplicationNew.AppCategory.Name,
+                    serviceApplication.Id, "Logo");
                 serviceApplication.Logo = logo;
                 serviceApplication.Status = StatusConstants.UNAVAILABLE;
-                _unitOfWork.ServiceApplicationRepository.Update(serviceApplication);
+                _unitOfWork.ServiceApplicationRepository.Update(serviceApplicationNew);
                 await _unitOfWork.SaveAsync();
-                var result = _mapper.Map<ServiceApplicationViewModel>(serviceApplication);
+                
+                var result = _mapper.Map<ServiceApplicationViewModel>(serviceApplicationNew);
                 return result;
             }
             catch (Exception)
