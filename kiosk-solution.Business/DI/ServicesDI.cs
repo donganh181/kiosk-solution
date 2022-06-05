@@ -16,7 +16,8 @@ namespace kiosk_solution.Business.DI
 
             services.AddScoped<DbContext, Kiosk_PlatformContext>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IFirebaseUtil, FirebaseUtil>();
+            services.AddScoped<IFileService, FirebaseStorageService>();
+            services.AddScoped<IMapService, GoongMapService>();
 
             services.AddScoped<IPartyRepository, PartyRepository>();
             services.AddScoped<IPartyService, PartyService>();
@@ -45,7 +46,8 @@ namespace kiosk_solution.Business.DI
             services.AddScoped<IServiceApplicationPublishRequestRepository, ServiceApplicationPublishRequestRepository>();
             services.AddScoped<IServiceApplicationPublishRequestService, ServiceApplicationPublishRequestService>();
 
-            services.AddScoped<IMapService, GoongMapService>();
+            services.AddScoped<IEventRepository, EventRepository>();
+            services.AddScoped<IEventService, EventService>();
         }
     }
 }

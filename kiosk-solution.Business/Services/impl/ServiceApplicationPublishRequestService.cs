@@ -21,7 +21,7 @@ namespace kiosk_solution.Business.Services.impl
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly ILogger<ServiceApplicationPublishRequestService> _logger;
+        private readonly ILogger<IServiceApplicationPublishRequestService> _logger;
         private readonly IServiceApplicationService _appService;
 
         public ServiceApplicationPublishRequestService(IUnitOfWork unitOfWork, IMapper mapper,

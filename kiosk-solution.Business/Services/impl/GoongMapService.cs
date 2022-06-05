@@ -13,12 +13,12 @@ namespace kiosk_solution.Business.Services.impl
     public class GoongMapService : IMapService
     {
         private readonly IConfiguration _configuration;
-        private readonly ILogger<IPartyService> _logger;
+        private readonly ILogger<IMapService> _logger;
         private readonly HttpClient client = new HttpClient();
         private string GongHost;
         private string GongAPIAccessKey;
 
-        public GoongMapService(IConfiguration configuration, ILogger<IPartyService> logger)
+        public GoongMapService(IConfiguration configuration, ILogger<IMapService> logger)
         {
             _configuration = configuration;
             _logger = logger;

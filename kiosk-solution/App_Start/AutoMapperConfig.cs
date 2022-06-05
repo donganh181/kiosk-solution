@@ -23,6 +23,7 @@ namespace kiosk_solution.App_Start
                 mc.ConfigServiceApplicationModule();
                 mc.ConfigServiceApplicationPublishRequestModule();
                 mc.ConfigTemplateModule();
+                mc.ConfigEventModule();
             });
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
