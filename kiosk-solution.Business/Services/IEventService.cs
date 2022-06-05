@@ -12,5 +12,6 @@ namespace kiosk_solution.Business.Services
     {
         public Task<EventViewModel> Create(Guid creatorId, string role, EventCreateViewModel model);
         public Task<DynamicModelResponse<EventSearchViewModel>> GetAllWithPaging(Guid partyId, EventSearchViewModel model, int size, int pageNum);
+        public Task<EventViewModel> Update(Guid partyId, EventUpdateViewModel model, string roleName);
     }
 }
