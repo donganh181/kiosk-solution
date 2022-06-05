@@ -1,11 +1,11 @@
 ﻿using System.Threading.Tasks;
-using kiosk_solution.Data.DTOs.Response.GongMap;
+using kiosk_solution.Data.ViewModels.Map;
 
 namespace kiosk_solution.Business.Services
 {
     public interface IMapService
     {
-        Task<GetGeocodingResponse> GetForwardGeocode(string address);
-        Task<GetGeocodingResponse> GetReverseGeocode(string lat, string lng);
+        Task<GeocodingViewModel> GetForwardGeocode(string address);
+        Task<GeocodingViewModel> GetReverseGeocode(string lat, string lng);
     }
 }

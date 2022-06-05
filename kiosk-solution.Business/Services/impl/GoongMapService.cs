@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using kiosk_solution.Data.DTOs.Response.GongMap;
+
+using kiosk_solution.Data.ViewModels.Map;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -26,16 +27,16 @@ namespace kiosk_solution.Business.Services.impl
             GongAPIAccessKey = _configuration.GetSection("GONG_MAP")["API_ACCESS_KEY"];
         }
 
-        public async Task<GetGeocodingResponse> GetForwardGeocode(string address)
+        public async Task<GeocodingViewModel> GetForwardGeocode(string address)
         {
             var url = GongHost + "/geocode?address=" + address + "&api_key=" + GongAPIAccessKey;
             var res = await client.GetAsync(url);
             if (res.StatusCode != HttpStatusCode.OK) return null;
-            var geoMetries = new List<GeoMetry>();
+            var geoMetries = new List<GeoMetryViewModel>();
             var jsonContent = res.Content.ReadAsStringAsync().Result;
             dynamic json = JsonConvert.DeserializeObject(jsonContent);
             var results = json["results"][0];
-            var geoMetry = new GeoMetry
+            var geoMetry = new GeoMetryViewModel
             {
                 Address = results["formatted_address"],
                 Lat = results["geometry"]["location"]["lat"],
@@ -43,24 +44,24 @@ namespace kiosk_solution.Business.Services.impl
                 PlaceId = results["place_id"],
             };
             geoMetries.Add(geoMetry);
-            return new GetGeocodingResponse
+            return new GeocodingViewModel
             {
                 GeoMetries = geoMetries
             };
         }
 
-        public async Task<GetGeocodingResponse> GetReverseGeocode(string lat, string lng)
+        public async Task<GeocodingViewModel> GetReverseGeocode(string lat, string lng)
         {
             var url = GongHost + "/Geocode?latlng=" + lat + ", " + lng + "&api_key=" + GongAPIAccessKey;
             var res = await client.GetAsync(url);
             if (res.StatusCode != HttpStatusCode.OK) return null;
-            var geoMetries = new List<GeoMetry>();
+            var geoMetries = new List<GeoMetryViewModel>();
             var jsonContent = res.Content.ReadAsStringAsync().Result;
             dynamic json = JsonConvert.DeserializeObject(jsonContent);
             var results = json["results"];
             for (int i = 0; i < results.Count; i++)
             {
-                var geoMetry = new GeoMetry
+                var geoMetry = new GeoMetryViewModel
                 {
                     Address = results[i]["formatted_address"],
                     Lat = results[i]["geometry"]["location"]["lat"],
@@ -70,7 +71,7 @@ namespace kiosk_solution.Business.Services.impl
                 geoMetries.Add(geoMetry);
             }
 
-            return new GetGeocodingResponse
+            return new GeocodingViewModel
             {
                 GeoMetries = geoMetries
             };
