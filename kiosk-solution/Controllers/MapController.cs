@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 using kiosk_solution.Business.Services;
-using kiosk_solution.Data.DTOs.Response.GongMap;
 using kiosk_solution.Data.Responses;
+using kiosk_solution.Data.ViewModels.Map;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -30,7 +30,7 @@ namespace kiosk_solution.Controllers
         public async Task<IActionResult> GetForwardGeocoding(string address)
         {
             var result = await _mapService.GetForwardGeocode(address);
-            return Ok(new SuccessResponse<GetGeocodingResponse>((int) HttpStatusCode.OK, "Get Geocoding success.",
+            return Ok(new SuccessResponse<GeocodingViewModel>((int) HttpStatusCode.OK, "Get Geocoding success.",
                 result));
         }
         [HttpGet("geocode/reverse/lat/{lat}/lng/{lng}")]
@@ -38,7 +38,7 @@ namespace kiosk_solution.Controllers
         public async Task<IActionResult> GetForwardGeocoding(string lat,string lng)
         {
             var result = await _mapService.GetReverseGeocode(lat,lng);
-            return Ok(new SuccessResponse<GetGeocodingResponse>((int) HttpStatusCode.OK, "Get Geocoding success.",
+            return Ok(new SuccessResponse<GeocodingViewModel>((int) HttpStatusCode.OK, "Get Geocoding success.",
                 result));
         }
     }
