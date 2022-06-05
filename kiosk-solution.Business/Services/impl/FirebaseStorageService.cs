@@ -13,19 +13,16 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace kiosk_solution.Business.Utilities
+namespace kiosk_solution.Business.Services.impl
 {
-    public interface IFirebaseUtil
+    public class FirebaseStorageService : IFileService
     {
-        Task<string> UploadImageToFirebase(string image, string type, Guid id, string name);
-    }
-    public class FirebaseUtil : IFirebaseUtil
-    {
-       
-        private readonly ILogger<FirebaseUtil> logger;
+        private readonly ILogger<IFileService> _logger;
 
-        public static string key = "AIzaSyBC_Q1n9Veg-TcTu6FVC0ZEQY5-Gy8z9X0";
-        public static string bucket = "kiosk-solution.appspot.com";
+        public FirebaseStorageService(ILogger<FirebaseStorageService> logger)
+        {
+            _logger = logger;
+        }
 
         public async Task<string> UploadImageToFirebase(string image, string type, Guid id, string name)
         {
@@ -44,13 +41,13 @@ namespace kiosk_solution.Business.Utilities
                     memStream.Position = 0;
                     try
                     {
-                        var auth = new FirebaseAuthProvider(new FirebaseConfig(key));
+                        var auth = new FirebaseAuthProvider(new FirebaseConfig(FirebaseConstants.KEY));
                         var a = await auth.SignInWithEmailAndPasswordAsync(FirebaseConstants.ADMIN_USERNAME, FirebaseConstants.ADMIN_PASSWORD);
 
                         var cancellation = new CancellationTokenSource();
 
                         var upload = new FirebaseStorage(
-                                    bucket,
+                                    FirebaseConstants.BUCKET,
                                     new FirebaseStorageOptions
                                     {
                                         AuthTokenAsyncFactory = () => Task.FromResult(a.FirebaseToken),
@@ -65,10 +62,10 @@ namespace kiosk_solution.Business.Utilities
                     }
                     catch (Exception)
                     {
-                        logger.LogInformation("Firebase error.");
+                        _logger.LogInformation("Firebase error.");
                         throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Firebase error.");
                     }
-                    
+
                 }
             }
         }
