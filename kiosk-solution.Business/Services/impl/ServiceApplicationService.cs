@@ -22,16 +22,16 @@ namespace kiosk_solution.Business.Services.impl
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly ILogger<ServiceApplicationService> _logger;
-        private readonly IFirebaseUtil _firebaseUtil;
+        private readonly ILogger<IServiceApplicationService> _logger;
+        private readonly IFileService _fileService;
 
         public ServiceApplicationService(IUnitOfWork unitOfWork, IMapper mapper,
-            ILogger<ServiceApplicationService> logger, IFirebaseUtil firebaseUtil)
+            ILogger<ServiceApplicationService> logger, IFileService fileService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
-            _firebaseUtil = firebaseUtil;
+            _fileService = fileService;
         }
 
         public async Task<DynamicModelResponse<ServiceApplicationSearchViewModel>> GetAllWithPaging(string role,
@@ -119,7 +119,7 @@ namespace kiosk_solution.Business.Services.impl
                 await _unitOfWork.SaveAsync();
 
                 var newLogo =
-                    await _firebaseUtil.UploadImageToFirebase(model.Logo, app.AppCategory.Name, model.Id, "Logo");
+                    await _fileService.UploadImageToFirebase(model.Logo, app.AppCategory.Name, model.Id, "Logo");
                 app.Logo = newLogo;
                 _unitOfWork.ServiceApplicationRepository.Update(app);
                 await _unitOfWork.SaveAsync();
@@ -171,7 +171,7 @@ namespace kiosk_solution.Business.Services.impl
 
             try
             {
-                var logo = await _firebaseUtil.UploadImageToFirebase(model.Logo, serviceApplication.AppCategory.Name,
+                var logo = await _fileService.UploadImageToFirebase(model.Logo, serviceApplication.AppCategory.Name,
                     model.ServiceApplicationId, "Logo");
                 serviceApplication.Logo = logo;
                 serviceApplication.Status = StatusConstants.UNAVAILABLE;
