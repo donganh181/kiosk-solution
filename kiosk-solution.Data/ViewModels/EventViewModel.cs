@@ -14,8 +14,6 @@ namespace kiosk_solution.Data.ViewModels
         public DateTime? TimeStart { get; set; }
         public DateTime? TimeEnd { get; set; }
         public string Address { get; set; }
-        public Guid? TemplateId { get; set; }
-        public string TemplateName { get; set; }
         public Guid? CreatorId { get; set; }
         public string CreatorName { get; set; }
         public string CreatorEmail { get; set; }
