@@ -11,6 +11,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper.QueryableExtensions;
+using kiosk_solution.Business.Utilities;
 
 namespace kiosk_solution.Business.Services.impl
 {
@@ -37,16 +39,18 @@ namespace kiosk_solution.Business.Services.impl
             var TimeEnd = DateTime.Parse(newEvent.TimeEnd + "");
 
             //case time start = time end or time start > time end
-            if (DateTime.Compare(TimeStart,TimeEnd) == 0 || DateTime.Compare(TimeStart, TimeEnd) > 0)
+            if (DateTime.Compare(TimeStart, TimeEnd) == 0 || DateTime.Compare(TimeStart, TimeEnd) > 0)
             {
                 _logger.LogInformation("Time start cannot happen at the same time or later than time end.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Time start cannot happen at the same time or later than time end.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest,
+                    "Time start cannot happen at the same time or later than time end.");
             }
+
             ///case now > time end
-            if (DateTime.Compare(DateTime.Now, TimeEnd) > 0 )
+            if (DateTime.Compare(DateTime.Now, TimeEnd) > 0)
             {
                 _logger.LogInformation("This event is end.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "This event is end.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "This event is end.");
             }
 
             //case time now < start
@@ -71,8 +75,9 @@ namespace kiosk_solution.Business.Services.impl
             else
             {
                 _logger.LogInformation("Server Error.");
-                throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
+                throw new ErrorResponse((int) HttpStatusCode.InternalServerError, "Server Error.");
             }
+
             try
             {
                 await _unitOfWork.EventRepository.InsertAsync(newEvent);
@@ -83,10 +88,38 @@ namespace kiosk_solution.Business.Services.impl
             catch (Exception)
             {
                 _logger.LogInformation("Invalid Data.");
-                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
+                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data.");
+            }
+        }
+
+        public async Task<DynamicModelResponse<EventSearchViewModel>> GetAllWithPaging(Guid partyId,
+            EventSearchViewModel model, int size, int pageNum)
+        {
+            var events = _unitOfWork.EventRepository
+                .Get(e => (e.CreatorId.Equals(partyId) && e.Type.Equals(CommonConstants.LOCAL_TYPE)) ||
+                          e.Type.Equals(CommonConstants.SERVER_TYPE))
+                .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider)
+                .DynamicFilter(model)
+                .AsQueryable().OrderByDescending(t => t.Name);
+            var listPaging = events.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging,
+                CommonConstants.DefaultPaging);
+            if (listPaging.Data.ToList().Count < 1)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
 
-
+            var result = new DynamicModelResponse<EventSearchViewModel>
+            {
+                Metadata = new PagingMetaData
+                {
+                    Page = pageNum,
+                    Size = size,
+                    Total = listPaging.Total
+                },
+                Data = listPaging.Data.ToList()
+            };
+            return result;
         }
     }
 }

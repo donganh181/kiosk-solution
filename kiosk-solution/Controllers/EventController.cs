@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using kiosk_solution.Data.Constants;
 
 namespace kiosk_solution.Controllers
 {
@@ -44,6 +45,18 @@ namespace kiosk_solution.Controllers
             var result = await _eventService.Create(token.Id,token.Role, model);
             _logger.LogInformation($"Create event {result.Name} by party {token.Mail}");
             return Ok(new SuccessResponse<EventViewModel>((int)HttpStatusCode.OK, "Create success.", result));
+        }
+        
+        [Authorize(Roles = "Location Owner")]
+        [HttpGet]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Get([FromQuery] EventSearchViewModel model, int size, int pageNum = CommonConstants.DefaultPage)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _eventService.GetAllWithPaging(token.Id, model, size, pageNum);
+            _logger.LogInformation($"Get event by party {token.Mail}");
+            return Ok(new SuccessResponse<DynamicModelResponse<EventSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
     }
 }
