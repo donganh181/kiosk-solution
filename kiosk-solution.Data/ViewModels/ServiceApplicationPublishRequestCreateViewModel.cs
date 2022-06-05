@@ -8,7 +8,6 @@ namespace kiosk_solution.Data.ViewModels
 {
     public class ServiceApplicationPublishRequestCreateViewModel
     {
-        public Guid? CreatorId { get; set; }
         public Guid? ServiceApplicationId { get; set; }
     }
 }

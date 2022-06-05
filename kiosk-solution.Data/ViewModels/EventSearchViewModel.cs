@@ -18,8 +18,12 @@ namespace kiosk_solution.Data.ViewModels
         public DateTime? TimeEnd { get; set; }
         [BindNever]
         public string Address { get; set; }
-        [Guid]
+        [BindNever]
         public Guid? CreatorId { get; set; }
+        [String]
+        public string CreatorName { get; set; }
+        [String]
+        public string CreatorEmail { get; set; }
         [String]
         public string Type { get; set; }
         [String]

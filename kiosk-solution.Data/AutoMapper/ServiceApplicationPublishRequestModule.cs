@@ -13,7 +13,12 @@ namespace kiosk_solution.Data.AutoMapper
     {
         public static void ConfigServiceApplicationPublishRequestModule(this IMapperConfigurationExpression mc)
         {
-            mc.CreateMap<ServiceApplicationPublishRequest, ServiceApplicationPublishRequestViewModel>();
+            mc.CreateMap<ServiceApplicationPublishRequest, ServiceApplicationPublishRequestViewModel>()
+                .ForMember(src => src.CreatorName, opt => opt.MapFrom(des => des.Creator.FirstName))
+                .ForMember(src => src.CreatorEmail, opt => opt.MapFrom(des => des.Creator.Email))
+                .ForMember(src => src.HandlerName, opt => opt.MapFrom(des => des.Handler.FirstName))
+                .ForMember(src => src.HandlerEmail, opt => opt.MapFrom(des => des.Handler.Email))
+                .ForMember(src => src.ServiceApplicationName, opt => opt.MapFrom(des => des.ServiceApplication.Name));
             mc.CreateMap<ServiceApplicationPublishRequestViewModel, ServiceApplicationPublishRequest>();
 
             mc.CreateMap<ServiceApplicationPublishRequest, ServiceApplicationPublishRequestCreateViewModel>();

@@ -14,7 +14,10 @@ namespace kiosk_solution.Data.ViewModels
         public string Logo { get; set; }
         public string Link { get; set; }
         public Guid? PartyId { get; set; }
+        public string PartyName { get; set; }
+        public string PartyEmail { get; set; }
         public Guid? AppCategoryId { get; set; }
+        public string AppCategoryName { get; set; }
         public Guid? ApplicationMarketId { get; set; }
         public string Status { get; set; }
     }

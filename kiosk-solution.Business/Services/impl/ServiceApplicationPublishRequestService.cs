@@ -56,6 +56,7 @@ namespace kiosk_solution.Business.Services.impl
             }
             
             var request = _mapper.Map<ServiceApplicationPublishRequest>(model);
+            request.CreatorId = creatorId;
             request.Status = StatusConstants.IN_PROGRESS;
             try
             {
@@ -68,7 +69,12 @@ namespace kiosk_solution.Business.Services.impl
                     _logger.LogInformation("Server Error.");
                     throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
                 }
-                var result = _mapper.Map<ServiceApplicationPublishRequestViewModel>(request);
+                var result = await _unitOfWork.ServiceApplicationPublishRequestRepository
+                    .Get(r => r.Id.Equals(request.Id))
+                    .Include(r => r.Creator)
+                    .Include(r => r.ServiceApplication)
+                    .ProjectTo<ServiceApplicationPublishRequestViewModel>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync();
                 return result;
 
             }
@@ -138,17 +144,39 @@ namespace kiosk_solution.Business.Services.impl
             return result;
         }
 
-        public async Task<ServiceApplicationPublishRequestViewModel> GetById(Guid partyId, Guid requestId)
+        public async Task<ServiceApplicationPublishRequestViewModel> GetById(Guid partyId, string role, Guid requestId)
         {
-            var publishRequest = await _unitOfWork.ServiceApplicationPublishRequestRepository
-                .Get(p => p.Id.Equals(requestId) && p.CreatorId.Equals(partyId)).FirstOrDefaultAsync();
+            ServiceApplicationPublishRequestViewModel publishRequest = null;
+            if (role.Equals(RoleConstants.ADMIN))
+            {
+                publishRequest = await _unitOfWork.ServiceApplicationPublishRequestRepository
+                .Get(p => p.Id.Equals(requestId))
+                .Include(r => r.Creator)
+                .Include(r => r.Handler)
+                .Include(r => r.ServiceApplication)
+                .ProjectTo<ServiceApplicationPublishRequestViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+            }else if (role.Equals(RoleConstants.SERVICE_PROVIDER))
+            {
+                publishRequest = await _unitOfWork.ServiceApplicationPublishRequestRepository
+                .Get(p => p.Id.Equals(requestId) && p.CreatorId.Equals(partyId))
+                .Include(r => r.Creator)
+                .Include(r => r.Handler)
+                .Include(r => r.ServiceApplication)
+                .ProjectTo<ServiceApplicationPublishRequestViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+            }
+            else
+            {
+                _logger.LogInformation("Server Error");
+                throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
+            }
             if (publishRequest == null)
             {
                 _logger.LogInformation("Can not found.");
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
             }
-            var result = _mapper.Map<ServiceApplicationPublishRequestViewModel>(publishRequest);
-            return result;
+            return publishRequest;
         }
 
         public async Task<ServiceApplicationPublishRequestViewModel> Update(Guid handlerId, UpdateServiceApplicationPublishRequestViewModel model)
@@ -172,7 +200,13 @@ namespace kiosk_solution.Business.Services.impl
             {
                 _unitOfWork.ServiceApplicationPublishRequestRepository.Update(publishRequest);
                 await _unitOfWork.SaveAsync();
-                var result = _mapper.Map<ServiceApplicationPublishRequestViewModel>(publishRequest);
+                var result = await _unitOfWork.ServiceApplicationPublishRequestRepository
+                    .Get(r => r.Id.Equals(publishRequest.Id))
+                    .Include(r => r.Creator)
+                    .Include(r => r.Handler)
+                    .Include(r => r.ServiceApplication)
+                    .ProjectTo<ServiceApplicationPublishRequestViewModel>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync();
                 return result;
             }
             catch (Exception)

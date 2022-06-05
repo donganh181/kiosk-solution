@@ -80,14 +80,19 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<DynamicModelResponse<ServiceApplicationPublishRequestSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
         
-        [Authorize(Roles = "Service Provider")]
+        /// <summary>
+        /// Admin and their own service provider can get request publish by id.
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Service Provider")]
         [HttpGet("id")]
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetById(Guid requestId)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _requestPublishService.GetById(token.Id, requestId);
+            var result = await _requestPublishService.GetById(token.Id, token.Role, requestId);
             _logger.LogInformation($"Get request by id {requestId}");
             return Ok(new SuccessResponse<ServiceApplicationPublishRequestViewModel>((int)HttpStatusCode.OK, "Get success.", result));
         }
