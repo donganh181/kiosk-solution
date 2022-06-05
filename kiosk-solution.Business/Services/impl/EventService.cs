@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper.QueryableExtensions;
 using kiosk_solution.Business.Utilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace kiosk_solution.Business.Services.impl
 {
@@ -120,6 +121,76 @@ namespace kiosk_solution.Business.Services.impl
                 Data = listPaging.Data.ToList()
             };
             return result;
+        }
+
+        public async Task<EventViewModel> Update(Guid partyId, EventUpdateViewModel model, string roleName)
+        {
+            var eventUpdate = await _unitOfWork.EventRepository
+                .Get(e => e.Id.Equals(model.Id))
+                .FirstOrDefaultAsync();
+            if (eventUpdate == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            if (eventUpdate.Type.Equals(CommonConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+            if (eventUpdate.Type.Equals(CommonConstants.LOCAL_TYPE) && !eventUpdate.CreatorId.Equals(partyId))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+            eventUpdate.Name = model.Name;
+            eventUpdate.Description = model.Description;
+            eventUpdate.Address = model.Address;
+            eventUpdate.TimeStart = model.TimeStart;
+            eventUpdate.TimeEnd = model.TimeEnd;
+
+            var TimeStart = DateTime.Parse(eventUpdate.TimeStart + "");
+            var TimeEnd = DateTime.Parse(eventUpdate.TimeEnd + "");
+
+            //case time start = time end or time start > time end
+            if (DateTime.Compare(TimeStart, TimeEnd) == 0 || DateTime.Compare(TimeStart, TimeEnd) > 0)
+            {
+                _logger.LogInformation("Time start cannot happen at the same time or later than time end.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest,
+                    "Time start cannot happen at the same time or later than time end.");
+            }
+
+            ///case now > time end
+            if (DateTime.Compare(DateTime.Now, TimeEnd) > 0)
+            {
+                _logger.LogInformation("This event is end.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "This event is end.");
+            }
+
+            //case time now < start
+            if (DateTime.Compare(TimeStart, DateTime.Now) > 0)
+            {
+                eventUpdate.Status = StatusConstants.COMING_SOON;
+            }
+            //case time start <  now  < time end
+            else if (DateTime.Compare(TimeStart, DateTime.Now) < 0 && DateTime.Compare(DateTime.Now, TimeEnd) < 0)
+            {
+                eventUpdate.Status = StatusConstants.ON_GOING;
+            }
+
+            try
+            {
+                _unitOfWork.EventRepository.Update(eventUpdate);
+                await _unitOfWork.SaveAsync();
+                var result = _mapper.Map<EventViewModel>(eventUpdate);
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid data.");
+            }
         }
     }
 }

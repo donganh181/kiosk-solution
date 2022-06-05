@@ -58,5 +58,17 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Get event by party {token.Mail}");
             return Ok(new SuccessResponse<DynamicModelResponse<EventSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
+        
+        [Authorize(Roles = "Admin, Location Owner")]
+        [HttpPut]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Update([FromBody] EventUpdateViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _eventService.Update(token.Id, model, token.Role);
+            _logger.LogInformation($"Update event by party {token.Mail}");
+            return Ok(new SuccessResponse<EventViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
     }
 }
