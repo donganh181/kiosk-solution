@@ -48,6 +48,9 @@ namespace kiosk_solution.Business.DI
 
             services.AddScoped<IEventRepository, EventRepository>();
             services.AddScoped<IEventService, EventService>();
+
+            services.AddScoped<IPartyServiceApplicationRepository, PartyServiceApplicationRepository>();
+            services.AddScoped<IPartyServiceApplicationService, PartyServiceApplicationService>();
         }
     }
 }
