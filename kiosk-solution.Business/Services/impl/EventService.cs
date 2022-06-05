@@ -93,16 +93,29 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<DynamicModelResponse<EventSearchViewModel>> GetAllWithPaging(Guid partyId,
+        public async Task<DynamicModelResponse<EventSearchViewModel>> GetAllWithPaging(Guid partyId, string roleName,
             EventSearchViewModel model, int size, int pageNum)
         {
-            var events = _unitOfWork.EventRepository
-                .Get(e => (e.CreatorId.Equals(partyId) && 
-                            e.Type.Equals(CommonConstants.LOCAL_TYPE)) ||
-                            e.Type.Equals(CommonConstants.SERVER_TYPE))
-                .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider)
-                .DynamicFilter(model)
-                .AsQueryable().OrderByDescending(t => t.Name);
+            IOrderedQueryable<EventSearchViewModel> events = null;
+            if (roleName.Equals(RoleConstants.LOCATION_OWNER))
+            {
+                events = _unitOfWork.EventRepository
+                    .Get(e => (e.CreatorId.Equals(partyId) &&
+                               e.Type.Equals(CommonConstants.LOCAL_TYPE)) ||
+                              e.Type.Equals(CommonConstants.SERVER_TYPE))
+                    .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider)
+                    .DynamicFilter(model)
+                    .AsQueryable().OrderByDescending(t => t.Name);
+            }
+            else if(roleName.Equals(RoleConstants.ADMIN))
+            {
+                events = _unitOfWork.EventRepository
+                    .Get()
+                    .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider)
+                    .DynamicFilter(model)
+                    .AsQueryable().OrderByDescending(t => t.Name);
+            }
+
             var listPaging = events.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging,
                 CommonConstants.DefaultPaging);
             if (listPaging.Data.ToList().Count < 1)

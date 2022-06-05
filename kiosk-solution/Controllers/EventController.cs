@@ -47,14 +47,14 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<EventViewModel>((int)HttpStatusCode.OK, "Create success.", result));
         }
         
-        [Authorize(Roles = "Location Owner")]
+        [Authorize(Roles = "Admin, Location Owner")]
         [HttpGet]
         [MapToApiVersion("1")]
         public async Task<IActionResult> Get([FromQuery] EventSearchViewModel model, int size, int pageNum = CommonConstants.DefaultPage)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _eventService.GetAllWithPaging(token.Id, model, size, pageNum);
+            var result = await _eventService.GetAllWithPaging(token.Id, token.Role, model, size, pageNum);
             _logger.LogInformation($"Get event by party {token.Mail}");
             return Ok(new SuccessResponse<DynamicModelResponse<EventSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
