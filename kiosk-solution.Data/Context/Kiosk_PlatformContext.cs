@@ -49,7 +49,13 @@ namespace kiosk_solution.Data.Models
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
 
+                entity.Property(e => e.Logo).IsUnicode(false);
+
                 entity.Property(e => e.Name).HasMaxLength(255);
+
+                entity.Property(e => e.Type)
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<AppCategoryPosition>(entity =>
@@ -84,6 +90,10 @@ namespace kiosk_solution.Data.Models
                 entity.Property(e => e.Name).HasMaxLength(255);
 
                 entity.Property(e => e.Status)
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Type)
                     .HasMaxLength(20)
                     .IsUnicode(false);
             });
@@ -232,10 +242,10 @@ namespace kiosk_solution.Data.Models
             {
                 entity.ToTable("Party");
 
-                entity.HasIndex(e => e.PhoneNumber, "UQ__Party__85FB4E3882366657")
+                entity.HasIndex(e => e.PhoneNumber, "UQ__Party__85FB4E38101B2A8D")
                     .IsUnique();
 
-                entity.HasIndex(e => e.Email, "UQ__Party__A9D1053410D30A32")
+                entity.HasIndex(e => e.Email, "UQ__Party__A9D10534D501EEEB")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");

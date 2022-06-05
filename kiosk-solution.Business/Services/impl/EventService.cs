@@ -97,8 +97,9 @@ namespace kiosk_solution.Business.Services.impl
             EventSearchViewModel model, int size, int pageNum)
         {
             var events = _unitOfWork.EventRepository
-                .Get(e => (e.CreatorId.Equals(partyId) && e.Type.Equals(CommonConstants.LOCAL_TYPE)) ||
-                          e.Type.Equals(CommonConstants.SERVER_TYPE))
+                .Get(e => (e.CreatorId.Equals(partyId) && 
+                            e.Type.Equals(CommonConstants.LOCAL_TYPE)) ||
+                            e.Type.Equals(CommonConstants.SERVER_TYPE))
                 .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider)
                 .DynamicFilter(model)
                 .AsQueryable().OrderByDescending(t => t.Name);
