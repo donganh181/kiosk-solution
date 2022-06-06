@@ -45,5 +45,22 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Create category {result.Name} by party {token.Mail}");
             return Ok(new SuccessResponse<AppCategoryViewModel>((int)HttpStatusCode.OK, "Create success.", result));
         }
+
+        /// <summary>
+        /// Update category information by admin
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin")]
+        [HttpPut]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateInformation([FromBody] AppCategoryUpdateViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _appCategoryService.Update(model);
+            _logger.LogInformation($"Updated category {result.Name} by party {token.Mail}");
+            return Ok(new SuccessResponse<AppCategoryViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
     }
 }
