@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace kiosk_solution.Controllers
 {
-    [Route("api/v{version:apiVersion}/provinces")]
+    [Route("api/v{version:apiVersion}/pois")]
     [ApiController]
     [ApiVersion("1")]
     public class PoiController : Controller
