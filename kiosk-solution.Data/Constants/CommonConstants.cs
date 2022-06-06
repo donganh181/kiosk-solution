@@ -20,5 +20,11 @@ namespace kiosk_solution.Data.Constants
         /// </summary>
         public static string SERVER_TYPE = "server";
         public static string LOCAL_TYPE = "local";
+
+        /// <summary>
+        /// Upload File Zone
+        /// </summary>
+        public static string APP_IMAGE = "app_image";
+        public static string CATE_IMAGE = "category_image";
     }
 }

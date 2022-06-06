@@ -8,6 +8,6 @@ namespace kiosk_solution.Business.Services
 {
     public interface IFileService
     {
-        public Task<string> UploadImageToFirebase(string image, string type, Guid id, string name);
+        public Task<string> UploadImageToFirebase(string image, string type, string cateName, Guid id, string name);
     }
 }
