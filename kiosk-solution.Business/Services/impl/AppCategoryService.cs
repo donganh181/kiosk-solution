@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using kiosk_solution.Business.Utilities;
 using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
@@ -60,6 +62,36 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Invalid data.");
                 throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
             }
+        }
+
+        public async Task<DynamicModelResponse<AppCategorySearchViewModel>> GetAllWithPaging(AppCategorySearchViewModel model, int size, int pageNum)
+        {
+            var cates = _unitOfWork.AppCategoryRepository
+                .Get()
+                .ProjectTo<AppCategorySearchViewModel>(_mapper.ConfigurationProvider)
+                .DynamicFilter(model)
+                .AsQueryable().OrderByDescending(c => c.Name);
+
+            var listPaging = cates.PagingIQueryable(pageNum, size,
+                CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
+            
+            if (listPaging.Data.ToList().Count < 1)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+
+            var result = new DynamicModelResponse<AppCategorySearchViewModel>
+            {
+                Metadata = new PagingMetaData
+                {
+                    Page = pageNum,
+                    Size = size,
+                    Total = listPaging.Total
+                },
+                Data = listPaging.Data.ToList()
+            };
+            return result;
         }
 
         public async Task<AppCategoryViewModel> Update(AppCategoryUpdateViewModel model)
