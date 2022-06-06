@@ -94,6 +94,7 @@ namespace kiosk_solution.Business.Services.impl
         {
             var app = await _unitOfWork.ServiceApplicationRepository
                 .Get(a => a.Id.Equals(model.Id))
+                .Include(a => a.Party)
                 .Include(a => a.AppCategory)
                 .FirstOrDefaultAsync();
             if (!app.PartyId.Equals(updaterId))
@@ -119,7 +120,7 @@ namespace kiosk_solution.Business.Services.impl
                 await _unitOfWork.SaveAsync();
 
                 var newLogo =
-                    await _fileService.UploadImageToFirebase(model.Logo, app.AppCategory.Name, model.Id, "Logo");
+                    await _fileService.UploadImageToFirebase(model.Logo ,CommonConstants.APP_IMAGE ,app.AppCategory.Name, model.Id, "Logo");
                 app.Logo = newLogo;
                 _unitOfWork.ServiceApplicationRepository.Update(app);
                 await _unitOfWork.SaveAsync();
@@ -145,8 +146,10 @@ namespace kiosk_solution.Business.Services.impl
                 
                 var serviceApplicationNew = await _unitOfWork.ServiceApplicationRepository
                     .Get(a => a.Id.Equals(serviceApplication.Id))
-                    .Include(a => a.AppCategory).FirstOrDefaultAsync();
-                var logo = await _fileService.UploadImageToFirebase(model.Logo, serviceApplicationNew.AppCategory.Name,
+                    .Include(a => a.AppCategory)
+                    .Include(a => a.Party)
+                    .FirstOrDefaultAsync();
+                var logo = await _fileService.UploadImageToFirebase(model.Logo,CommonConstants.APP_IMAGE, serviceApplicationNew.AppCategory.Name,
                     serviceApplication.Id, "Logo");
                 serviceApplication.Logo = logo;
                 serviceApplication.Status = StatusConstants.UNAVAILABLE;
@@ -165,7 +168,12 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<ServiceApplicationViewModel> GetById(Guid id)
         {
-            return await _unitOfWork.ServiceApplicationRepository.Get(a => a.Id.Equals(id)).ProjectTo<ServiceApplicationViewModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
+            return await _unitOfWork.ServiceApplicationRepository
+                .Get(a => a.Id.Equals(id))
+                .Include(a => a.Party)
+                .Include(a => a.AppCategory)
+                .ProjectTo<ServiceApplicationViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<bool> SetStatus(Guid id, string status)

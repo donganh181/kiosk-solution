@@ -24,7 +24,7 @@ namespace kiosk_solution.Business.Services.impl
             _logger = logger;
         }
 
-        public async Task<string> UploadImageToFirebase(string image, string type, Guid id, string name)
+        public async Task<string> UploadImageToFirebase(string image, string type, string cateName, Guid id, string name)
         {
             if (image == null) return null;
             if (image.Length <= 0) return null;
@@ -54,6 +54,7 @@ namespace kiosk_solution.Business.Services.impl
                                         ThrowOnCancel = true
                                     }).Child("assets")
                                     .Child($"{type}")
+                                    .Child($"{cateName}")
                                     .Child($"{id}")
                                     .Child($"{name}.jpg")
                                     .PutAsync(memStream, cancellation.Token);

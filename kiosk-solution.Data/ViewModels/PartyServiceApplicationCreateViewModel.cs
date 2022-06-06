@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace kiosk_solution.Data.ViewModels
 {
-    public class ServiceApplicationPublishRequestCreateViewModel
+    public class PartyServiceApplicationCreateViewModel
     {
         public Guid? ServiceApplicationId { get; set; }
     }

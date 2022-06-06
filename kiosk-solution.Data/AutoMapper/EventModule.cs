@@ -21,7 +21,9 @@ namespace kiosk_solution.Data.AutoMapper
             mc.CreateMap<Event, EventCreateViewModel>();
             mc.CreateMap<EventCreateViewModel, Event>();
 
-            mc.CreateMap<Event, EventSearchViewModel>();
+            mc.CreateMap<Event, EventSearchViewModel>()
+                .ForMember(src => src.CreatorName, opt => opt.MapFrom(des => des.Creator.FirstName))
+                .ForMember(src => src.CreatorEmail, opt => opt.MapFrom(des => des.Creator.Email));
             mc.CreateMap<EventSearchViewModel, Event>();
 
             mc.CreateMap<Event, EventUpdateViewModel>();

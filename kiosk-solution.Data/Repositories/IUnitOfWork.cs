@@ -5,7 +5,7 @@ namespace kiosk_solution.Data.Repositories
 {
     public interface IUnitOfWork
     {
-        IPartyRepository  PartyRepository { get; }
+        IPartyRepository PartyRepository { get; }
         IRoleRepository RoleRepository { get; }
         IKioskRepository KioskRepository { get; }
         IScheduleRepository ScheduleRepository { get; }
@@ -15,6 +15,9 @@ namespace kiosk_solution.Data.Repositories
         IServiceApplicationRepository ServiceApplicationRepository { get; }
         IServiceApplicationPublishRequestRepository ServiceApplicationPublishRequestRepository { get; }
         IEventRepository EventRepository { get; }
+        IPartyServiceApplicationRepository PartyServiceApplicationRepository { get; }
+        IPoiRepository PoiRepository { get; }
+        IAppCategoryRepository AppCategoryRepository { get; }
         void Save();
         Task SaveAsync();
     }

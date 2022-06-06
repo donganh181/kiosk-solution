@@ -83,7 +83,11 @@ namespace kiosk_solution.Business.Services.impl
             {
                 await _unitOfWork.EventRepository.InsertAsync(newEvent);
                 await _unitOfWork.SaveAsync();
-                var result = _mapper.Map<EventViewModel>(newEvent);
+                var result = await _unitOfWork.EventRepository
+                    .Get(e => e.Id.Equals(newEvent.Id))
+                    .Include(e => e.Creator)
+                    .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync();
                 return result;
             }
             catch (Exception)
@@ -103,6 +107,7 @@ namespace kiosk_solution.Business.Services.impl
                     .Get(e => (e.CreatorId.Equals(partyId) &&
                                e.Type.Equals(CommonConstants.LOCAL_TYPE)) ||
                               e.Type.Equals(CommonConstants.SERVER_TYPE))
+                    .Include(e => e.Creator)
                     .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider)
                     .DynamicFilter(model)
                     .AsQueryable().OrderByDescending(t => t.Name);
@@ -111,6 +116,7 @@ namespace kiosk_solution.Business.Services.impl
             {
                 events = _unitOfWork.EventRepository
                     .Get()
+                    .Include(e => e.Creator)
                     .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider)
                     .DynamicFilter(model)
                     .AsQueryable().OrderByDescending(t => t.Name);

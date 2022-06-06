@@ -1,22 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 
-#nullable disable
-
-namespace kiosk_solution.Data.Models
+namespace kiosk_solution.Data.ViewModels
 {
-    public partial class Event
+    public class PoiViewModel
     {
-        public Event()
-        {
-            EventPositions = new HashSet<EventPosition>();
-        }
-
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public DateTime? TimeStart { get; set; }
-        public DateTime? TimeEnd { get; set; }
+        public DateTime? OpenTime { get; set; }
+        public string DayOfWeek { get; set; }
         public string Longtitude { get; set; }
         public string Latitude { get; set; }
         public string Street { get; set; }
@@ -25,11 +17,8 @@ namespace kiosk_solution.Data.Models
         public string Province { get; set; }
         public string City { get; set; }
         public string Address { get; set; }
+        public DateTime? CreateDate { get; set; }
         public Guid? CreatorId { get; set; }
-        public string Type { get; set; }
         public string Status { get; set; }
-
-        public virtual Party Creator { get; set; }
-        public virtual ICollection<EventPosition> EventPositions { get; set; }
     }
 }
