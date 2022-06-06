@@ -1,4 +1,5 @@
-﻿using kiosk_solution.Data.ViewModels;
+﻿using kiosk_solution.Data.Responses;
+using kiosk_solution.Data.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +11,7 @@ namespace kiosk_solution.Business.Services
     public interface IAppCategoryService
     {
         public Task<AppCategoryViewModel> Create(AppCategoryCreateViewModel model);
-    }
+        public Task<AppCategoryViewModel> Update(AppCategoryUpdateViewModel model);
+   /*     public Task<DynamicModelResponse<AppCategoryViewModel>> GetAllWithPaging(ServiceApplicationSearchViewModel model, int size, int pageNum);
+   */ }
 }

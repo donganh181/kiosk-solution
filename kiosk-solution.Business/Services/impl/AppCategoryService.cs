@@ -61,5 +61,40 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
             }
         }
+
+        public async Task<AppCategoryViewModel> Update(AppCategoryUpdateViewModel model)
+        {
+            var cate = await _unitOfWork.AppCategoryRepository
+                .Get(c => c.Id.Equals(model.Id))
+                .FirstOrDefaultAsync();
+
+            if(cate == null)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found.");
+            }
+
+            cate.Name = model.Name;
+            try
+            {
+                _unitOfWork.AppCategoryRepository.Update(cate);
+                await _unitOfWork.SaveAsync();
+
+                var newLogo = await _fileService.UploadImageToFirebase(model.Logo,
+                    CommonConstants.CATE_IMAGE, cate.Name, cate.Id, "Cate");
+
+                cate.Logo = newLogo;
+                _unitOfWork.AppCategoryRepository.Update(cate);
+                await _unitOfWork.SaveAsync();
+
+                var result = _mapper.Map<AppCategoryViewModel>(cate);
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
+            }
+        }
     }
 }
