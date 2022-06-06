@@ -200,7 +200,20 @@ namespace kiosk_solution.Business.Services.impl
             {
                 _unitOfWork.ServiceApplicationPublishRequestRepository.Update(publishRequest);
                 await _unitOfWork.SaveAsync();
-                var result = await _unitOfWork.ServiceApplicationPublishRequestRepository
+                if (publishRequest.Status.Equals(StatusConstants.APPROVED))
+                {
+                    await _appService.SetStatus(Guid.Parse(publishRequest.ServiceApplicationId + ""), StatusConstants.AVAILABLE);
+                }
+                else if (publishRequest.Status.Equals(StatusConstants.DENIED))
+                {
+                    await _appService.SetStatus(Guid.Parse(publishRequest.ServiceApplicationId + ""), StatusConstants.UNAVAILABLE);
+                }
+                else
+                {
+                    _logger.LogInformation("Server Error.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
+                }
+                    var result = await _unitOfWork.ServiceApplicationPublishRequestRepository
                     .Get(r => r.Id.Equals(publishRequest.Id))
                     .Include(r => r.Creator)
                     .Include(r => r.Handler)
