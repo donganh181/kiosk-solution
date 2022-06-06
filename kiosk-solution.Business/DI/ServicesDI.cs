@@ -53,6 +53,9 @@ namespace kiosk_solution.Business.DI
             services.AddScoped<IPartyServiceApplicationService, PartyServiceApplicationService>();
 
             services.AddScoped<IProvinceService, ProvinceService>();
+
+            services.AddScoped<IPoiRepository, PoiRepository>();
+            services.AddScoped<IPoiService, PoiService>();
         }
     }
 }
