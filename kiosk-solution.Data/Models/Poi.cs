@@ -19,6 +19,7 @@ namespace kiosk_solution.Data.Models
         public string District { get; set; }
         public string Province { get; set; }
         public string City { get; set; }
+        public string Address { get; set; }
         public DateTime? CreateDate { get; set; }
         public Guid? CreatorId { get; set; }
         public string Status { get; set; }
