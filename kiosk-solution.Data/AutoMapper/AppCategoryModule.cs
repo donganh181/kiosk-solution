@@ -21,6 +21,9 @@ namespace kiosk_solution.Data.AutoMapper
 
             mc.CreateMap<AppCategory, AppCategoryUpdateViewModel>();
             mc.CreateMap<AppCategoryUpdateViewModel, AppCategory>();
+
+            mc.CreateMap<AppCategory, AppCategorySearchViewModel>();
+            mc.CreateMap<AppCategorySearchViewModel, AppCategory>();
         }
     }
 }
