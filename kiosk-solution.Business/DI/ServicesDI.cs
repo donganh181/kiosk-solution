@@ -56,6 +56,9 @@ namespace kiosk_solution.Business.DI
 
             services.AddScoped<IPoiRepository, PoiRepository>();
             services.AddScoped<IPoiService, PoiService>();
+
+            services.AddScoped<IAppCategoryRepository, AppCategoryRepository>();
+            services.AddScoped<IAppCategoryService, AppCategoryService>();
         }
     }
 }

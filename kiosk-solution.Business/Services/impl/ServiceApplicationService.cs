@@ -120,7 +120,7 @@ namespace kiosk_solution.Business.Services.impl
                 await _unitOfWork.SaveAsync();
 
                 var newLogo =
-                    await _fileService.UploadImageToFirebase(model.Logo, app.AppCategory.Name, model.Id, "Logo");
+                    await _fileService.UploadImageToFirebase(model.Logo ,CommonConstants.APP_IMAGE ,app.AppCategory.Name, model.Id, "Logo");
                 app.Logo = newLogo;
                 _unitOfWork.ServiceApplicationRepository.Update(app);
                 await _unitOfWork.SaveAsync();
@@ -149,7 +149,7 @@ namespace kiosk_solution.Business.Services.impl
                     .Include(a => a.AppCategory)
                     .Include(a => a.Party)
                     .FirstOrDefaultAsync();
-                var logo = await _fileService.UploadImageToFirebase(model.Logo, serviceApplicationNew.AppCategory.Name,
+                var logo = await _fileService.UploadImageToFirebase(model.Logo,CommonConstants.APP_IMAGE, serviceApplicationNew.AppCategory.Name,
                     serviceApplication.Id, "Logo");
                 serviceApplication.Logo = logo;
                 serviceApplication.Status = StatusConstants.UNAVAILABLE;
