@@ -30,7 +30,6 @@ namespace kiosk_solution.Controllers
             _configuration = configuration;
         }
         
-        [Authorize(Roles = "Admin, Location Owner")]
         [HttpGet]
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetCities()
@@ -38,11 +37,10 @@ namespace kiosk_solution.Controllers
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _provinceService.GetCities();
-            _logger.LogInformation($"Get cities by party {token.Mail}");
+            _logger.LogInformation($"Get cities success");
             return Ok(new SuccessResponse<List<CityViewModel>>((int)HttpStatusCode.OK, "Get success.", result));
         }
         
-        [Authorize(Roles = "Admin, Location Owner")]
         [HttpGet("districts")]
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetDistricts(string cityCode)
@@ -50,11 +48,10 @@ namespace kiosk_solution.Controllers
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _provinceService.GetDistrictsByCity(cityCode);
-            _logger.LogInformation($"Get districts by party {token.Mail}");
+            _logger.LogInformation($"Get districts success");
             return Ok(new SuccessResponse<List<DistrictViewModel>>((int)HttpStatusCode.OK, "Get success.", result));
         }
         
-        [Authorize(Roles = "Admin, Location Owner")]
         [HttpGet("wards")]
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetWards(string districtCode)
@@ -62,7 +59,7 @@ namespace kiosk_solution.Controllers
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _provinceService.GetWardsByDistrict(districtCode);
-            _logger.LogInformation($"Get wards by party {token.Mail}");
+            _logger.LogInformation($"Get wards success");
             return Ok(new SuccessResponse<List<WardViewModel>>((int)HttpStatusCode.OK, "Get success.", result));
         }
     }
