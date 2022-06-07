@@ -11,6 +11,8 @@ namespace kiosk_solution.Data.ViewModels
         [String]
         public string Name { get; set; }
         [BindNever]
+        public string Link { get; set; }
+        [BindNever]
         public string Description { get; set; }
         [BindNever]
         public DateTime? TimeStart { get; set; }

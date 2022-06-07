@@ -59,10 +59,10 @@ namespace kiosk_solution.Business.Services.impl
             throw new NotImplementedException();
         }
 
-        public async Task<ImageViewModel> GetByLink(string link)
+        public async Task<ImageViewModel> GetByKeyIdAndKeyType(Guid keyId, string keyType)
         {
             var result = await _unitOfWork.ImageRepository
-                .Get(i => i.Link.Equals(link))
+                .Get(i => i.KeyType.Equals(keyType) && i.KeyId.Equals(keyId))
                 .ProjectTo<ImageViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
             return result;

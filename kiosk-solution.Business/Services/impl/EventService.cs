@@ -110,7 +110,7 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<DynamicModelResponse<EventSearchViewModel>> GetAllWithPaging(Guid partyId, string roleName,
             EventSearchViewModel model, int size, int pageNum)
         {
-            IOrderedQueryable<EventSearchViewModel> events = null;
+            IQueryable<EventSearchViewModel> events = null;
             if (roleName.Equals(RoleConstants.LOCATION_OWNER))
             {
                 events = _unitOfWork.EventRepository
@@ -118,21 +118,34 @@ namespace kiosk_solution.Business.Services.impl
                                e.Type.Equals(CommonConstants.LOCAL_TYPE)) ||
                               e.Type.Equals(CommonConstants.SERVER_TYPE))
                     .Include(e => e.Creator)
-                    .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider)
-                    .DynamicFilter(model)
-                    .AsQueryable().OrderByDescending(t => t.Name);
+                    .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider);
             }
             else if(roleName.Equals(RoleConstants.ADMIN))
             {
                 events = _unitOfWork.EventRepository
                     .Get()
                     .Include(e => e.Creator)
-                    .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider)
-                    .DynamicFilter(model)
-                    .AsQueryable().OrderByDescending(t => t.Name);
+                    .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider);
             }
 
-            var listPaging = events.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging,
+            var listEvent = events.ToList();
+
+            foreach (var item in listEvent)
+            {
+                var img = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(item.Id + ""), CommonConstants.EVENT_IMAGE);
+                if (img == null)
+                {
+                    _logger.LogInformation($"{item.Name} has no image.");
+                    throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
+                }
+                item.Link = img.Link;
+            }
+
+            events = listEvent.AsQueryable().OrderByDescending(e => e.Name);
+
+            var listPaging = events
+                .DynamicFilter(model)
+                .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging,
                 CommonConstants.DefaultPaging);
             if (listPaging.Data.ToList().Count < 1)
             {
