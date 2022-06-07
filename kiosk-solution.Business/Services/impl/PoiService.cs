@@ -2,6 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
+using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
 using kiosk_solution.Data.Responses;
@@ -23,12 +24,17 @@ namespace kiosk_solution.Business.Services.impl
             _logger = logger;
         }
 
-        public async Task<PoiViewModel> Create(Guid partyId, PoiCreateViewModel model)
+        public async Task<PoiViewModel> Create(Guid partyId, string roleName, PoiCreateViewModel model)
         {
             var poi = _mapper.Map<Poi>(model);
+            poi.OpenTime = TimeSpan.Parse(model.StringOpenTime);
             poi.CreateDate = DateTime.Now;
             poi.CreatorId = partyId;
-            
+            poi.Status = StatusConstants.ACTIVE;
+            if (roleName.Equals(RoleConstants.ADMIN))
+                poi.Type = TypeConstants.CREATE_BY_ADMIN;
+            else
+                poi.Type = TypeConstants.CREATE_BY_LOCATION_OWNER;
             try
             {
                 await _unitOfWork.PoiRepository.InsertAsync(poi);

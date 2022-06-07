@@ -6,6 +6,6 @@ namespace kiosk_solution.Business.Services
 {
     public interface IPoiService
     {
-        public Task<PoiViewModel> Create(Guid partyId, PoiCreateViewModel model);
+        public Task<PoiViewModel> Create(Guid partyId, string roleName, PoiCreateViewModel model);
     }
 }

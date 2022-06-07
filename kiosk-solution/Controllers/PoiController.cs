@@ -35,7 +35,7 @@ namespace kiosk_solution.Controllers
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _poiService.Create(token.Id, model);
+            var result = await _poiService.Create(token.Id, token.Role, model);
             _logger.LogInformation($"Create POI by party {token.Mail}");
             return Ok(new SuccessResponse<PoiViewModel>((int)HttpStatusCode.OK, "Create success.", result));
         }
