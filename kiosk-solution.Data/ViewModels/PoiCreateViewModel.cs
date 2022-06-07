@@ -11,11 +11,10 @@ namespace kiosk_solution.Data.ViewModels
         public string DayOfWeek { get; set; }
         public string Longtitude { get; set; }
         public string Latitude { get; set; }
-        public string Street { get; set; }
         public string Ward { get; set; }
         public string District { get; set; }
-        public string Province { get; set; }
         public string City { get; set; }
         public string Address { get; set; }
+        public Guid? PoicategoryId { get; set; }
     }
 }

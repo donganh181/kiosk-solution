@@ -31,6 +31,7 @@ namespace kiosk_solution.Business.Services.impl
         {
             var poi = _mapper.Map<Poi>(model);
             poi.OpenTime = TimeSpan.Parse(model.StringOpenTime);
+            poi.CloseTime = TimeSpan.Parse(model.StringCloseTime);
             poi.CreateDate = DateTime.Now;
             poi.CreatorId = partyId;
             poi.Status = StatusConstants.ACTIVE;

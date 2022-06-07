@@ -7,12 +7,14 @@ namespace kiosk_solution.Data.ViewModels
     public class PoiSearchViewModel
     {
         [BindNever]
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
         public string Name { get; set; }
         [BindNever]
         public string Description { get; set; }
         [BindNever]
         public TimeSpan? OpenTime { get; set; }
+        [BindNever]
+        public TimeSpan? CloseTime { get; set; }
         [BindNever]
         public string DayOfWeek { get; set; }
         [BindNever]
@@ -33,6 +35,8 @@ namespace kiosk_solution.Data.ViewModels
         public Guid? CreatorId { get; set; }
         [BindNever]
         public string Status { get; set; }
+        [Guid]
+        public Guid? PoicategoryId { get; set; }
         [BindNever]
         public string Type { get; set; }
     }

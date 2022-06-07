@@ -14,6 +14,9 @@ namespace kiosk_solution.Data.AutoMapper
             mc.CreateMap<Poi, PoiViewModel>();
             mc.CreateMap<PoiViewModel, Poi>();
 
+            mc.CreateMap<Poi, PoiSearchViewModel>();
+            mc.CreateMap<PoiSearchViewModel, Poi>();
+
         }
     }
 }
