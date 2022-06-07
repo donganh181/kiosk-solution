@@ -1,11 +1,11 @@
 ﻿using kiosk_solution.Business.Services;
 using kiosk_solution.Business.Services.impl;
-using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using kiosk_solution.Data.Repositories.impl;
 using kiosk_solution.Business.Utilities;
+using kiosk_solution.Data.Context;
 
 namespace kiosk_solution.Business.DI
 {
@@ -59,6 +59,9 @@ namespace kiosk_solution.Business.DI
 
             services.AddScoped<IAppCategoryRepository, AppCategoryRepository>();
             services.AddScoped<IAppCategoryService, AppCategoryService>();
+
+            services.AddScoped<IImageRepository, ImageRepository>();
+            services.AddScoped<IImageService, ImageService>();
         }
     }
 }

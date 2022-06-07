@@ -17,6 +17,18 @@ namespace kiosk_solution.Data.ViewModels
         [BindNever]
         public DateTime? TimeEnd { get; set; }
         [BindNever]
+        public string Longtitude { get; set; }
+        [BindNever]
+        public string Latitude { get; set; }
+        [String]
+        public string Street { get; set; }
+        [String]
+        public string Ward { get; set; }
+        [String]
+        public string District { get; set; }
+        [String]
+        public string City { get; set; }
+        [BindNever]
         public string Address { get; set; }
         [BindNever]
         public Guid? CreatorId { get; set; }
