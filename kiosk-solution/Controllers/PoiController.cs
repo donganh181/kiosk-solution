@@ -41,7 +41,7 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<PoiViewModel>((int) HttpStatusCode.OK, "Create success.", result));
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin, Location Owner")]
         [HttpGet]
         [MapToApiVersion("1")]
         public async Task<IActionResult> Get([FromQuery] PoiSearchViewModel model, int size,
