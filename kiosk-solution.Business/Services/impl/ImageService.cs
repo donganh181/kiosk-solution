@@ -65,13 +65,22 @@ namespace kiosk_solution.Business.Services.impl
                 .Get(i => i.KeyType.Equals(keyType) && i.KeyId.Equals(keyId))
                 .ProjectTo<ImageViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
+            if(result == null)
+            {
+                _logger.LogInformation("Cannot found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Cannot found.");
+            }
             return result;
         }
 
         public async Task<ImageViewModel> Update(ImageUpdateViewModel model)
         {
             var img = await _unitOfWork.ImageRepository.Get(i => i.Id.Equals(model.Id)).FirstOrDefaultAsync();
-
+            if(img == null)
+            {
+                _logger.LogInformation("Cannot found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Cannot found.");
+            }
             try
             {
                 var link = await _fileService.UploadImageToFirebase(model.Image, img.KeyType, model.KeySubType, img.Id, model.Name);
