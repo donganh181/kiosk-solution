@@ -40,17 +40,16 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Create POI by party {token.Mail}");
             return Ok(new SuccessResponse<PoiViewModel>((int) HttpStatusCode.OK, "Create success.", result));
         }
-
-        [Authorize]
+        
         [HttpGet]
         [MapToApiVersion("1")]
         public async Task<IActionResult> Get([FromQuery] PoiSearchViewModel model, int size,
             int pageNum = CommonConstants.DefaultPage)
         {
             var request = Request;
-            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _poiService.GetWithPaging(token.Id, token.Role, model, size, pageNum);
-            _logger.LogInformation($"Get POI by party {token.Mail}");
+            
+            var result = await _poiService.GetWithPaging(model, size, pageNum);
+            _logger.LogInformation($"Get POIs");
             return Ok(new SuccessResponse<DynamicModelResponse<PoiSearchViewModel>>((int) HttpStatusCode.OK,
                 "Search success.", result));
         }
