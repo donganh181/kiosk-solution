@@ -27,6 +27,7 @@ namespace kiosk_solution.App_Start
                 mc.ConfigPartyServiceApplicationModule();
                 mc.ConfigPoiModule();
                 mc.ConfigAppCategoryModule();
+                mc.ConfigImageModule();
             });
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);

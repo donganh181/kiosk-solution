@@ -26,5 +26,9 @@ namespace kiosk_solution.Data.Constants
         /// </summary>
         public static string APP_IMAGE = "app_image";
         public static string CATE_IMAGE = "category_image";
+        public static string EVENT_IMAGE = "event_image";
+        public static string POI_IMAGE = "poi_image";
+
+        public static string THUMBNAIL = "thumbnail";
     }
 }

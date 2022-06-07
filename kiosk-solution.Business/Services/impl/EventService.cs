@@ -22,16 +22,19 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<IEventService> _logger;
+        private readonly IImageService _imageService;
 
-        public EventService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IEventService> logger)
+        public EventService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IEventService> logger, IImageService imageService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _imageService = imageService;
         }
 
         public async Task<EventViewModel> Create(Guid creatorId, string role, EventCreateViewModel model)
         {
+            
             var newEvent = _mapper.Map<Event>(model);
 
             newEvent.CreatorId = creatorId;
@@ -80,14 +83,21 @@ namespace kiosk_solution.Business.Services.impl
             }
 
             try
-            {
+            {                
                 await _unitOfWork.EventRepository.InsertAsync(newEvent);
                 await _unitOfWork.SaveAsync();
+
+                ImageCreateViewModel imageModel = new ImageCreateViewModel(newEvent.Name, model.Image, newEvent.Id, CommonConstants.EVENT_IMAGE, CommonConstants.THUMBNAIL);
+
+                var img = await _imageService.Create(imageModel);
+
                 var result = await _unitOfWork.EventRepository
                     .Get(e => e.Id.Equals(newEvent.Id))
                     .Include(e => e.Creator)
                     .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync();
+
+                result.Image = img;
                 return result;
             }
             catch (Exception)
@@ -100,7 +110,7 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<DynamicModelResponse<EventSearchViewModel>> GetAllWithPaging(Guid partyId, string roleName,
             EventSearchViewModel model, int size, int pageNum)
         {
-            IOrderedQueryable<EventSearchViewModel> events = null;
+            IQueryable<EventSearchViewModel> events = null;
             if (roleName.Equals(RoleConstants.LOCATION_OWNER))
             {
                 events = _unitOfWork.EventRepository
@@ -108,21 +118,34 @@ namespace kiosk_solution.Business.Services.impl
                                e.Type.Equals(CommonConstants.LOCAL_TYPE)) ||
                               e.Type.Equals(CommonConstants.SERVER_TYPE))
                     .Include(e => e.Creator)
-                    .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider)
-                    .DynamicFilter(model)
-                    .AsQueryable().OrderByDescending(t => t.Name);
+                    .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider);
             }
             else if(roleName.Equals(RoleConstants.ADMIN))
             {
                 events = _unitOfWork.EventRepository
                     .Get()
                     .Include(e => e.Creator)
-                    .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider)
-                    .DynamicFilter(model)
-                    .AsQueryable().OrderByDescending(t => t.Name);
+                    .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider);
             }
 
-            var listPaging = events.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging,
+            var listEvent = events.ToList();
+
+            foreach (var item in listEvent)
+            {
+                var img = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(item.Id + ""), CommonConstants.EVENT_IMAGE);
+                if (img == null)
+                {
+                    _logger.LogInformation($"{item.Name} has no image.");
+                    throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
+                }
+                item.Image = img;
+            }
+
+            events = listEvent.AsQueryable().OrderByDescending(e => e.Name);
+
+            var listPaging = events
+                .DynamicFilter(model)
+                .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging,
                 CommonConstants.DefaultPaging);
             if (listPaging.Data.ToList().Count < 1)
             {
@@ -169,6 +192,12 @@ namespace kiosk_solution.Business.Services.impl
             eventUpdate.Address = model.Address;
             eventUpdate.TimeStart = model.TimeStart;
             eventUpdate.TimeEnd = model.TimeEnd;
+            eventUpdate.City = model.City;
+            eventUpdate.District = model.District;
+            eventUpdate.Latitude = model.Latitude;
+            eventUpdate.Longtitude = model.Longtitude;
+            eventUpdate.Ward = model.Ward;
+            eventUpdate.Street = model.Street;
 
             var TimeStart = DateTime.Parse(eventUpdate.TimeStart + "");
             var TimeEnd = DateTime.Parse(eventUpdate.TimeEnd + "");
@@ -201,9 +230,14 @@ namespace kiosk_solution.Business.Services.impl
 
             try
             {
+                ImageUpdateViewModel imageUpdateModel = new ImageUpdateViewModel(model.ImageId,
+                    eventUpdate.Name, model.Image, model.ImageType);
+
+                var imageModel = await _imageService.Update(imageUpdateModel);
                 _unitOfWork.EventRepository.Update(eventUpdate);
                 await _unitOfWork.SaveAsync();
                 var result = _mapper.Map<EventViewModel>(eventUpdate);
+                result.Image = imageModel;
                 return result;
             }
             catch (Exception)

@@ -13,9 +13,23 @@ namespace kiosk_solution.Data.ViewModels
         public string Name { get; set; }
         public string Description { get; set; }
         [Required]
+        public string Image { get; set; }
+        [Required]
         public DateTime? TimeStart { get; set; }
         [Required]
         public DateTime? TimeEnd { get; set; }
+        [Required]
+        public string Longtitude { get; set; }
+        [Required]
+        public string Latitude { get; set; }
+        [Required]
+        public string Street { get; set; }
+        [Required]
+        public string Ward { get; set; }
+        [Required]
+        public string District { get; set; }
+        [Required]
+        public string City { get; set; }
         [Required]
         public string Address { get; set; }
     }

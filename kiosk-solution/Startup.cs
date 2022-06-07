@@ -1,5 +1,5 @@
 ﻿using kiosk_solution.App_Start;
-using kiosk_solution.Data.Models;
+using kiosk_solution.Data.Context;
 using kiosk_solution.Handler;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

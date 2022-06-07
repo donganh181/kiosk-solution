@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 using kiosk_solution.Business.Services;
+using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
@@ -27,17 +28,31 @@ namespace kiosk_solution.Controllers
             _logger = logger;
             _configuration = configuration;
         }
-        
+
         [Authorize(Roles = "Admin, Location Owner")]
         [HttpPost]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> Create([FromBody]PoiCreateViewModel model)
+        public async Task<IActionResult> Create([FromBody] PoiCreateViewModel model)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _poiService.Create(token.Id, model);
+            var result = await _poiService.Create(token.Id, token.Role, model);
             _logger.LogInformation($"Create POI by party {token.Mail}");
-            return Ok(new SuccessResponse<PoiViewModel>((int)HttpStatusCode.OK, "Create success.", result));
+            return Ok(new SuccessResponse<PoiViewModel>((int) HttpStatusCode.OK, "Create success.", result));
+        }
+
+        [Authorize(Roles = "Admin, Location Owner")]
+        [HttpGet]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Get([FromQuery] PoiSearchViewModel model, int size,
+            int pageNum = CommonConstants.DefaultPage)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _poiService.GetWithPaging(token.Id, token.Role, model, size, pageNum);
+            _logger.LogInformation($"Get POI by party {token.Mail}");
+            return Ok(new SuccessResponse<DynamicModelResponse<PoiSearchViewModel>>((int) HttpStatusCode.OK,
+                "Search success.", result));
         }
     }
 }

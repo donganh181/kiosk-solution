@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using kiosk_solution.Business.Utilities;
+using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
 using kiosk_solution.Data.Responses;
@@ -23,12 +27,18 @@ namespace kiosk_solution.Business.Services.impl
             _logger = logger;
         }
 
-        public async Task<PoiViewModel> Create(Guid partyId, PoiCreateViewModel model)
+        public async Task<PoiViewModel> Create(Guid partyId, string roleName, PoiCreateViewModel model)
         {
             var poi = _mapper.Map<Poi>(model);
+            poi.OpenTime = TimeSpan.Parse(model.StringOpenTime);
+            poi.CloseTime = TimeSpan.Parse(model.StringCloseTime);
             poi.CreateDate = DateTime.Now;
             poi.CreatorId = partyId;
-            
+            poi.Status = StatusConstants.ACTIVE;
+            if (roleName.Equals(RoleConstants.ADMIN))
+                poi.Type = TypeConstants.CREATE_BY_ADMIN;
+            else
+                poi.Type = TypeConstants.CREATE_BY_LOCATION_OWNER;
             try
             {
                 await _unitOfWork.PoiRepository.InsertAsync(poi);
@@ -39,8 +49,46 @@ namespace kiosk_solution.Business.Services.impl
             catch (Exception)
             {
                 _logger.LogInformation("Invalid data.");
-                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity,"Invalid data.");
+                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid data.");
             }
+        }
+
+        public async Task<DynamicModelResponse<PoiSearchViewModel>> GetWithPaging(Guid partyId, string roleName,
+            PoiSearchViewModel model, int size, int pageNum)
+        {
+            IOrderedQueryable<PoiSearchViewModel> pois;
+            if (roleName.Equals(RoleConstants.ADMIN))
+            {
+                pois = _unitOfWork.PoiRepository.Get(p => p.Type.Equals(TypeConstants.CREATE_BY_ADMIN))
+                    .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider).DynamicFilter(model).AsQueryable()
+                    .OrderByDescending(p => p.Name);
+            }
+            else
+            {
+                pois = _unitOfWork.PoiRepository.Get(p =>
+                        p.Type.Equals(TypeConstants.CREATE_BY_ADMIN) || p.CreatorId.Equals(partyId))
+                    .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider).DynamicFilter(model).AsQueryable()
+                    .OrderByDescending(p => p.Name);
+            }
+            var listPaging =
+                pois.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
+            
+            if (listPaging.Data.ToList().Count < 1)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+            var result = new DynamicModelResponse<PoiSearchViewModel>
+            {
+                Metadata = new PagingMetaData
+                {
+                    Page = pageNum,
+                    Size = size,
+                    Total = listPaging.Total
+                },
+                Data = listPaging.Data.ToList()
+            };
+            return result;
         }
     }
 }
