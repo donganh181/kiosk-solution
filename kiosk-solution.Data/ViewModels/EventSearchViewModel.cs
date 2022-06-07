@@ -11,7 +11,7 @@ namespace kiosk_solution.Data.ViewModels
         [String]
         public string Name { get; set; }
         [BindNever]
-        public string Link { get; set; }
+        public ImageViewModel Image { get; set; }
         [BindNever]
         public string Description { get; set; }
         [BindNever]

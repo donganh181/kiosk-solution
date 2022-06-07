@@ -9,7 +9,7 @@ namespace kiosk_solution.Data.ViewModels
     public class EventViewModel
     {
         public Guid Id { get; set; }
-        public string Link { get; set; }
+        public ImageViewModel Image { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime? TimeStart { get; set; }

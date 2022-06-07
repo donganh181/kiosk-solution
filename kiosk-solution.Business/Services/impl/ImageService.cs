@@ -70,7 +70,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<ImageViewModel> Update(ImageUpdateViewModel model)
         {
-            var img = await _unitOfWork.ImageRepository.Get(i => i.Link.Equals(model.Link)).FirstOrDefaultAsync();
+            var img = await _unitOfWork.ImageRepository.Get(i => i.Id.Equals(model.Id)).FirstOrDefaultAsync();
 
             try
             {

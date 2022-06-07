@@ -97,7 +97,7 @@ namespace kiosk_solution.Business.Services.impl
                     .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync();
 
-                result.Link = img.Link;
+                result.Image = img;
                 return result;
             }
             catch (Exception)
@@ -138,7 +138,7 @@ namespace kiosk_solution.Business.Services.impl
                     _logger.LogInformation($"{item.Name} has no image.");
                     throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
                 }
-                item.Link = img.Link;
+                item.Image = img;
             }
 
             events = listEvent.AsQueryable().OrderByDescending(e => e.Name);
@@ -230,9 +230,14 @@ namespace kiosk_solution.Business.Services.impl
 
             try
             {
+                ImageUpdateViewModel imageUpdateModel = new ImageUpdateViewModel(model.ImageId,
+                    eventUpdate.Name, model.Image, model.ImageType);
+
+                var imageModel = await _imageService.Update(imageUpdateModel);
                 _unitOfWork.EventRepository.Update(eventUpdate);
                 await _unitOfWork.SaveAsync();
                 var result = _mapper.Map<EventViewModel>(eventUpdate);
+                result.Image = imageModel;
                 return result;
             }
             catch (Exception)
