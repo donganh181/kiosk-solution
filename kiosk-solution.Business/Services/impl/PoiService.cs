@@ -53,31 +53,33 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<DynamicModelResponse<PoiSearchViewModel>> GetWithPaging(Guid partyId, string roleName,
-            PoiSearchViewModel model, int size, int pageNum)
+        public async Task<DynamicModelResponse<PoiSearchViewModel>> GetWithPaging(PoiSearchViewModel model, int size, int pageNum)
         {
             IOrderedQueryable<PoiSearchViewModel> pois;
-            if (roleName.Equals(RoleConstants.ADMIN))
+            if (string.IsNullOrEmpty(model.Type))
             {
-                pois = _unitOfWork.PoiRepository.Get(p => p.Type.Equals(TypeConstants.CREATE_BY_ADMIN))
-                    .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider).DynamicFilter(model).AsQueryable()
+                pois = _unitOfWork.PoiRepository.Get()
+                    .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
+                    .DynamicFilter(model)
+                    .AsQueryable()
                     .OrderByDescending(p => p.Name);
             }
             else
             {
-                pois = _unitOfWork.PoiRepository.Get(p =>
-                        p.Type.Equals(TypeConstants.CREATE_BY_ADMIN) || p.CreatorId.Equals(partyId))
+                pois = _unitOfWork.PoiRepository.Get(p => p.Type.Equals(model.Type))
                     .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider).DynamicFilter(model).AsQueryable()
                     .OrderByDescending(p => p.Name);
             }
+
             var listPaging =
                 pois.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
-            
+
             if (listPaging.Data.ToList().Count < 1)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
+
             var result = new DynamicModelResponse<PoiSearchViewModel>
             {
                 Metadata = new PagingMetaData

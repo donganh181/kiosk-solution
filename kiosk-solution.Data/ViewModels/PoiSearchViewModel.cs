@@ -37,7 +37,6 @@ namespace kiosk_solution.Data.ViewModels
         public string Status { get; set; }
         [Guid]
         public Guid? PoicategoryId { get; set; }
-        [BindNever]
         public string Type { get; set; }
     }
 }
