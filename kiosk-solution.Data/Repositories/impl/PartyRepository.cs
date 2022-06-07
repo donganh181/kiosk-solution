@@ -1,4 +1,5 @@
-﻿using kiosk_solution.Data.Models;
+﻿using kiosk_solution.Data.Context;
+using kiosk_solution.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

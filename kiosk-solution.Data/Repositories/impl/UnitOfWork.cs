@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using kiosk_solution.Data.Models;
+using kiosk_solution.Data.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace kiosk_solution.Data.Repositories.impl
@@ -21,13 +21,14 @@ namespace kiosk_solution.Data.Repositories.impl
         public IPartyServiceApplicationRepository PartyServiceApplicationRepository { get; set; }
         public IPoiRepository PoiRepository { get; set; }
         public IAppCategoryRepository AppCategoryRepository { get; set; }
+        public IImageRepository ImageRepository { get; set; }
 
         public UnitOfWork(Kiosk_PlatformContext context, IRoleRepository roleRepository, IKioskRepository kioskRepository, 
             IPartyRepository partyRepository, IKioskLocationRepository kioskLocationRepository, IScheduleRepository scheduleRepository,
             ITemplateRepository templateRepository, IScheduleTemplateRepository scheduleTemplateRepository, IServiceApplicationRepository serviceApplicationRepository,
             IServiceApplicationPublishRequestRepository serviceApplicationPublishRequestRepository, IEventRepository eventRepository,
             IPartyServiceApplicationRepository partyServiceApplicationRepository, IPoiRepository poiRepository,
-            IAppCategoryRepository appCategoryRepository)
+            IAppCategoryRepository appCategoryRepository, IImageRepository imageRepository)
         {
             _context = context;
             RoleRepository = roleRepository;
@@ -43,6 +44,7 @@ namespace kiosk_solution.Data.Repositories.impl
             PartyServiceApplicationRepository = partyServiceApplicationRepository;
             PoiRepository = poiRepository;
             AppCategoryRepository = appCategoryRepository;
+            ImageRepository = imageRepository;
         }
         public void Save()
         {

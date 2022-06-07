@@ -18,6 +18,7 @@ namespace kiosk_solution.Data.Repositories
         IPartyServiceApplicationRepository PartyServiceApplicationRepository { get; }
         IPoiRepository PoiRepository { get; }
         IAppCategoryRepository AppCategoryRepository { get; }
+        IImageRepository ImageRepository { get; }
         void Save();
         Task SaveAsync();
     }

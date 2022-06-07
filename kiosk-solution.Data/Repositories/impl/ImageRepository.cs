@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace kiosk_solution.Data.Repositories.impl
 {
-    public class AppCategoryRepository : BaseRepository<AppCategory>, IAppCategoryRepository
+    public class ImageRepository : BaseRepository<Image>, IImageRepository
     {
-        public AppCategoryRepository(Kiosk_PlatformContext dbContext) : base(dbContext)
+        public ImageRepository(Kiosk_PlatformContext dbContext) : base(dbContext)
         {
         }
     }

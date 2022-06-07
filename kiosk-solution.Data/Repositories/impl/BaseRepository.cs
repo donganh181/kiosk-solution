@@ -5,11 +5,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using kiosk_solution.Data.Models;
+using kiosk_solution.Data.Context;
 
 namespace kiosk_solution.Data.Repositories.impl
 {
-   
+
     public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : class
     {
         protected Kiosk_PlatformContext dbContext;

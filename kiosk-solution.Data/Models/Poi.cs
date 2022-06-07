@@ -10,7 +10,7 @@ namespace kiosk_solution.Data.Models
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public DateTime? OpenTime { get; set; }
+        public TimeSpan? OpenTime { get; set; }
         public string DayOfWeek { get; set; }
         public string Longtitude { get; set; }
         public string Latitude { get; set; }
@@ -23,6 +23,7 @@ namespace kiosk_solution.Data.Models
         public DateTime? CreateDate { get; set; }
         public Guid? CreatorId { get; set; }
         public string Status { get; set; }
+        public string Type { get; set; }
 
         public virtual Party Creator { get; set; }
     }
