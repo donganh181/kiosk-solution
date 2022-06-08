@@ -9,8 +9,6 @@ namespace kiosk_solution.Data.ViewModels
         public string StringOpenTime { get; set; }
         public string StringCloseTime { get; set; }
         public string DayOfWeek { get; set; }
-        public string Longtitude { get; set; }
-        public string Latitude { get; set; }
         public string Ward { get; set; }
         public string District { get; set; }
         public string City { get; set; }

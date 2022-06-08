@@ -23,13 +23,15 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<IEventService> _logger;
         private readonly IImageService _imageService;
+        private readonly IMapService _mapService;
 
-        public EventService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IEventService> logger, IImageService imageService)
+        public EventService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IEventService> logger, IImageService imageService, IMapService mapService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _imageService = imageService;
+            _mapService = mapService;
         }
 
         public async Task<EventViewModel> Create(Guid creatorId, string role, EventCreateViewModel model)
@@ -81,7 +83,10 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Server Error.");
                 throw new ErrorResponse((int) HttpStatusCode.InternalServerError, "Server Error.");
             }
-
+            var address = $"{newEvent.Address}, {newEvent.Ward}, {newEvent.District}, {newEvent.City}";
+            var geoCodeing = await _mapService.GetForwardGeocode(address);
+            newEvent.Longtitude = geoCodeing.GeoMetries[0].Lng;
+            newEvent.Latitude = geoCodeing.GeoMetries[0].Lat;
             try
             {                
                 await _unitOfWork.EventRepository.InsertAsync(newEvent);
@@ -187,6 +192,10 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");
             }
+            var address = $"{eventUpdate.Address}, {eventUpdate.Ward}, {eventUpdate.District}, {eventUpdate.City}";
+            var geoCodeing = await _mapService.GetForwardGeocode(address);
+            eventUpdate.Longtitude = geoCodeing.GeoMetries[0].Lng;
+            eventUpdate.Latitude = geoCodeing.GeoMetries[0].Lat;
             eventUpdate.Name = model.Name;
             eventUpdate.Description = model.Description;
             eventUpdate.Address = model.Address;
@@ -194,10 +203,7 @@ namespace kiosk_solution.Business.Services.impl
             eventUpdate.TimeEnd = model.TimeEnd;
             eventUpdate.City = model.City;
             eventUpdate.District = model.District;
-            eventUpdate.Latitude = model.Latitude;
-            eventUpdate.Longtitude = model.Longtitude;
             eventUpdate.Ward = model.Ward;
-            eventUpdate.Street = model.Street;
 
             var TimeStart = DateTime.Parse(eventUpdate.TimeStart + "");
             var TimeEnd = DateTime.Parse(eventUpdate.TimeEnd + "");
