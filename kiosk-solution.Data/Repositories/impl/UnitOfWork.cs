@@ -22,13 +22,14 @@ namespace kiosk_solution.Data.Repositories.impl
         public IPoiRepository PoiRepository { get; set; }
         public IAppCategoryRepository AppCategoryRepository { get; set; }
         public IImageRepository ImageRepository { get; set; }
+        public IAppCategoryPositionRepository AppCategoryPositionRepository { get; set; }
 
         public UnitOfWork(Kiosk_PlatformContext context, IRoleRepository roleRepository, IKioskRepository kioskRepository, 
             IPartyRepository partyRepository, IKioskLocationRepository kioskLocationRepository, IScheduleRepository scheduleRepository,
             ITemplateRepository templateRepository, IScheduleTemplateRepository scheduleTemplateRepository, IServiceApplicationRepository serviceApplicationRepository,
             IServiceApplicationPublishRequestRepository serviceApplicationPublishRequestRepository, IEventRepository eventRepository,
             IPartyServiceApplicationRepository partyServiceApplicationRepository, IPoiRepository poiRepository,
-            IAppCategoryRepository appCategoryRepository, IImageRepository imageRepository)
+            IAppCategoryRepository appCategoryRepository, IImageRepository imageRepository, IAppCategoryPositionRepository appCategoryPositionRepository)
         {
             _context = context;
             RoleRepository = roleRepository;
@@ -45,6 +46,7 @@ namespace kiosk_solution.Data.Repositories.impl
             PoiRepository = poiRepository;
             AppCategoryRepository = appCategoryRepository;
             ImageRepository = imageRepository;
+            AppCategoryPositionRepository = appCategoryPositionRepository;
         }
         public void Save()
         {

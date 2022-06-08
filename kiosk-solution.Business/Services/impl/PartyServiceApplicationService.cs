@@ -27,6 +27,29 @@ namespace kiosk_solution.Business.Services.impl
             _logger = logger;
             _unitOfWork = unitOfWork;
         }
+
+        public async Task<bool> CheckAppExist(Guid partyId, Guid cateId)
+        {
+            bool check = false;
+
+            var listApp = await _unitOfWork.PartyServiceApplicationRepository
+                .Get(a => a.PartyId.Equals(partyId))
+                .Include(a => a.ServiceApplication)
+                .ToListAsync();
+
+            if(listApp != null)
+            {
+                foreach (var app in listApp)
+                {
+                    if (app.ServiceApplication.AppCategoryId.Equals(cateId))
+                    {
+                        check = true;
+                    }
+                }
+            }
+            return check;           
+        }
+
         public async Task<PartyServiceApplicationViewModel> Create(Guid id, PartyServiceApplicationCreateViewModel model)
         {
             var checkExist = await _unitOfWork.PartyServiceApplicationRepository.Get(c => c.PartyId.Equals(id) && c.ServiceApplicationId.Equals(model.ServiceApplicationId)).FirstOrDefaultAsync();
