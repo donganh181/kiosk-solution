@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using kiosk_solution.Business.Utilities;
+using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
 using kiosk_solution.Data.Responses;
@@ -27,6 +29,29 @@ namespace kiosk_solution.Business.Services.impl
             _logger = logger;
             _unitOfWork = unitOfWork;
         }
+
+        public async Task<bool> CheckAppExist(Guid partyId, Guid cateId)
+        {
+            bool check = false;
+
+            var listApp = await _unitOfWork.PartyServiceApplicationRepository
+                .Get(a => a.PartyId.Equals(partyId))
+                .Include(a => a.ServiceApplication)
+                .ToListAsync();
+
+            if(listApp != null)
+            {
+                foreach (var app in listApp)
+                {
+                    if (app.ServiceApplication.AppCategoryId.Equals(cateId))
+                    {
+                        check = true;
+                    }
+                }
+            }
+            return check;           
+        }
+
         public async Task<PartyServiceApplicationViewModel> Create(Guid id, PartyServiceApplicationCreateViewModel model)
         {
             var checkExist = await _unitOfWork.PartyServiceApplicationRepository.Get(c => c.PartyId.Equals(id) && c.ServiceApplicationId.Equals(model.ServiceApplicationId)).FirstOrDefaultAsync();
@@ -55,6 +80,38 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Invalid Data.");
                 throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
             }
+        }
+
+        public async Task<DynamicModelResponse<PartyServiceApplicationSearchViewModel>> GetAllWithPaging(Guid id, PartyServiceApplicationSearchViewModel model, int size, int pageNum)
+        {
+            var apps = _unitOfWork.PartyServiceApplicationRepository
+                .Get(a => a.PartyId.Equals(id))
+                .Include(a => a.Party)
+                .Include(a => a.ServiceApplication)
+                .ProjectTo<PartyServiceApplicationSearchViewModel>(_mapper.ConfigurationProvider)
+                .DynamicFilter(model)
+                .AsQueryable().OrderByDescending(a => a.ServiceApplicationName);
+
+            var listPaging = apps.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging,
+                CommonConstants.DefaultPaging);
+
+            if (listPaging.Data.ToList().Count < 1)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+
+            var result = new DynamicModelResponse<PartyServiceApplicationSearchViewModel>
+            {
+                Metadata = new PagingMetaData
+                {
+                    Page = pageNum,
+                    Size = size,
+                    Total = listPaging.Total
+                },
+                Data = listPaging.Data.ToList()
+            };
+            return result;
         }
     }
 }
