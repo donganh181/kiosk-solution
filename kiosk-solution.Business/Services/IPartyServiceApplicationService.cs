@@ -10,5 +10,6 @@ namespace kiosk_solution.Business.Services
     public interface IPartyServiceApplicationService
     {
         public Task<PartyServiceApplicationViewModel> Create(Guid id, PartyServiceApplicationCreateViewModel model);
+        public Task<bool> CheckAppExist(Guid partyId, Guid cateId);
     }
 }
