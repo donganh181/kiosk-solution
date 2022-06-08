@@ -118,12 +118,14 @@ namespace kiosk_solution.Business.Services.impl
             {
                 _unitOfWork.ServiceApplicationRepository.Update(app);
                 await _unitOfWork.SaveAsync();
-
-                var newLogo =
-                    await _fileService.UploadImageToFirebase(model.Logo ,CommonConstants.APP_IMAGE ,app.AppCategory.Name, model.Id, "Logo");
-                app.Logo = newLogo;
-                _unitOfWork.ServiceApplicationRepository.Update(app);
-                await _unitOfWork.SaveAsync();
+                if(model.Logo != null)
+                {
+                    var newLogo =
+                   await _fileService.UploadImageToFirebase(model.Logo, CommonConstants.APP_IMAGE, app.AppCategory.Name, model.Id, "Logo");
+                    app.Logo = newLogo;
+                    _unitOfWork.ServiceApplicationRepository.Update(app);
+                    await _unitOfWork.SaveAsync();
+                }
                 var result = _mapper.Map<ServiceApplicationViewModel>(app);
                 return result;
             }
