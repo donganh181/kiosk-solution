@@ -19,17 +19,23 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<IPoiService> _logger;
+        private readonly IMapService _mapService;
 
-        public PoiService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IPoiService> logger)
+        public PoiService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IPoiService> logger, IMapService mapService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _mapService = mapService;
         }
 
         public async Task<PoiViewModel> Create(Guid partyId, string roleName, PoiCreateViewModel model)
         {
             var poi = _mapper.Map<Poi>(model);
+            var address = $"{poi.Address}, {poi.Ward}, {poi.District}, {poi.City}";
+            var geoCodeing = await _mapService.GetForwardGeocode(address);
+            poi.Longtitude = geoCodeing.GeoMetries[0].Lng;
+            poi.Latitude = geoCodeing.GeoMetries[0].Lat;
             poi.OpenTime = TimeSpan.Parse(model.StringOpenTime);
             poi.CloseTime = TimeSpan.Parse(model.StringCloseTime);
             poi.CreateDate = DateTime.Now;
