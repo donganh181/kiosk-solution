@@ -9,6 +9,7 @@ namespace kiosk_solution.Business.Services
 {
     public interface IAppCategoryPositionService
     {
-        public Task<AppCategoryPositionViewModel> Create(Guid id, AppCategoryPositionCreateViewModel model);
+        public Task<AppCategoryPositionViewModel> Create(Guid partyId, AppCategoryPositionCreateViewModel model);
+        public Task<AppCategoryPositionViewModel> Update(Guid partyId, AppCategoryPositionUpdateViewModel model);
     }
 }
