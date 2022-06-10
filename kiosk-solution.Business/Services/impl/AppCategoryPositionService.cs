@@ -109,7 +109,7 @@ namespace kiosk_solution.Business.Services.impl
                         newPosition.Id.Equals(checkPosition.Id);
                         try
                         {
-                            _unitOfWork.AppCategoryPositionRepository.Update(newPosition); //new cate will replace the old cate
+                            _unitOfWork.AppCategoryPositionRepository.Update(newPosition); //the new cate will replace the old cate
                             await _unitOfWork.SaveAsync();
                             var result = await _unitOfWork.AppCategoryPositionRepository
                                     .Get(p => p.Id.Equals(newPosition.Id))
@@ -140,13 +140,14 @@ namespace kiosk_solution.Business.Services.impl
                     _logger.LogInformation("Server Error.");
                     throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
                 }
-            }//case 2 cate replace position
+            }//case cate has already in template
             else if(model.Id != null)
             {
                 var pos1 = await _unitOfWork.AppCategoryPositionRepository.Get(p => p.Id.Equals(model.Id)).FirstOrDefaultAsync();
 
                 foreach (var pos2 in check)
                 {
+                    //case pos 1 and pos 2 change position
                     if (pos2.RowIndex == pos1.RowIndex && pos2.ColumnIndex == model.ColumnIndex)
                     {
                         pos2.RowIndex = pos1.RowIndex;
