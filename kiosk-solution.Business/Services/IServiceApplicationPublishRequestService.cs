@@ -15,5 +15,6 @@ namespace kiosk_solution.Business.Services
             UpdateServiceApplicationPublishRequestViewModel model);
         Task<DynamicModelResponse<ServiceApplicationPublishRequestSearchViewModel>> GetAllWithPaging(string role, Guid id, ServiceApplicationPublishRequestSearchViewModel model, int size, int pageNum);
         public Task<ServiceApplicationPublishRequestViewModel> GetById(Guid partyId, string role, Guid requestId);
+        public Task<ServiceApplicationPublishRequestViewModel> GetInprogressByAppId(Guid appId);
     }
 }

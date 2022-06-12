@@ -23,7 +23,10 @@ namespace kiosk_solution.Controllers
         private readonly IServiceApplicationPublishRequestService _requestPublishService;
         private readonly ILogger<ServiceApplicationPublishRequestController> _logger;
         private IConfiguration _configuration;
-        public ServiceApplicationPublishRequestController(IServiceApplicationPublishRequestService requestPublishService, ILogger<ServiceApplicationPublishRequestController> logger, IConfiguration configuration)
+
+        public ServiceApplicationPublishRequestController(
+            IServiceApplicationPublishRequestService requestPublishService,
+            ILogger<ServiceApplicationPublishRequestController> logger, IConfiguration configuration)
         {
             _requestPublishService = requestPublishService;
             _configuration = configuration;
@@ -44,9 +47,10 @@ namespace kiosk_solution.Controllers
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _requestPublishService.Create(token.Id, model);
             _logger.LogInformation($"Create publish request by party {token.Mail}");
-            return Ok(new SuccessResponse<ServiceApplicationPublishRequestViewModel>((int)HttpStatusCode.OK, "Create success.", result));
+            return Ok(new SuccessResponse<ServiceApplicationPublishRequestViewModel>((int) HttpStatusCode.OK,
+                "Create success.", result));
         }
-        
+
         [Authorize(Roles = "Admin")]
         [HttpPut]
         [MapToApiVersion("1")]
@@ -56,7 +60,8 @@ namespace kiosk_solution.Controllers
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _requestPublishService.Update(token.Id, model);
             _logger.LogInformation($"Update publish request by party {token.Mail}");
-            return Ok(new SuccessResponse<ServiceApplicationPublishRequestViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+            return Ok(new SuccessResponse<ServiceApplicationPublishRequestViewModel>((int) HttpStatusCode.OK,
+                "Update success.", result));
         }
 
         /// <summary>
@@ -69,7 +74,8 @@ namespace kiosk_solution.Controllers
         [Authorize(Roles = "Admin, Service Provider")]
         [HttpGet]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> Get([FromQuery] ServiceApplicationPublishRequestSearchViewModel model, int size, int page = CommonConstants.DefaultPage)
+        public async Task<IActionResult> Get([FromQuery] ServiceApplicationPublishRequestSearchViewModel model,
+            int size, int page = CommonConstants.DefaultPage)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
@@ -77,9 +83,10 @@ namespace kiosk_solution.Controllers
             string role = token.Role;
             var result = await _requestPublishService.GetAllWithPaging(role, id, model, size, page);
             _logger.LogInformation($"Get all Kiosks by party {token.Mail}");
-            return Ok(new SuccessResponse<DynamicModelResponse<ServiceApplicationPublishRequestSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+            return Ok(new SuccessResponse<DynamicModelResponse<ServiceApplicationPublishRequestSearchViewModel>>(
+                (int) HttpStatusCode.OK, "Search success.", result));
         }
-        
+
         /// <summary>
         /// Admin and their own service provider can get request publish by id.
         /// </summary>
@@ -94,7 +101,18 @@ namespace kiosk_solution.Controllers
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _requestPublishService.GetById(token.Id, token.Role, requestId);
             _logger.LogInformation($"Get request by id {requestId}");
-            return Ok(new SuccessResponse<ServiceApplicationPublishRequestViewModel>((int)HttpStatusCode.OK, "Get success.", result));
+            return Ok(new SuccessResponse<ServiceApplicationPublishRequestViewModel>((int) HttpStatusCode.OK,
+                "Get success.", result));
+        }
+
+        [Authorize(Roles = "Admin, Service Provider")]
+        [HttpGet("inprogress/appId/{appId}")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetInProgressByAppId(Guid appId)
+        {
+            var result = await _requestPublishService.GetInprogressByAppId(appId);
+            return Ok(new SuccessResponse<ServiceApplicationPublishRequestViewModel>((int) HttpStatusCode.OK,
+                "Get success.", result));
         }
     }
 }
