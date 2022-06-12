@@ -12,7 +12,6 @@ namespace kiosk_solution.Data.Models
         public Guid? AppCategoryId { get; set; }
         public int? RowIndex { get; set; }
         public int? ColumnIndex { get; set; }
-        public string Status { get; set; }
 
         public virtual AppCategory AppCategory { get; set; }
         public virtual Template Template { get; set; }

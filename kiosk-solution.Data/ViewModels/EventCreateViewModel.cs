@@ -19,8 +19,6 @@ namespace kiosk_solution.Data.ViewModels
         [Required]
         public DateTime? TimeEnd { get; set; }
         [Required]
-        public string Street { get; set; }
-        [Required]
         public string Ward { get; set; }
         [Required]
         public string District { get; set; }
