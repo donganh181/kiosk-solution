@@ -207,7 +207,7 @@ namespace kiosk_solution.Business.Services.impl
         {
             var users =  _unitOfWork.PartyRepository.Get().Include(u => u.Role).Include(u => u.Creator).ProjectTo<PartySearchViewModel>(_mapper)
                 .DynamicFilter(model)
-                .AsQueryable().OrderByDescending(r => r.LastName).ThenByDescending(r => r.Address);
+                .AsQueryable().OrderByDescending(r => r.CreateDate).ThenByDescending(r => r.Email);
 
             var listPaging = users
                 .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
