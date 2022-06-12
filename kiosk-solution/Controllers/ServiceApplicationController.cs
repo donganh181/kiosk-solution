@@ -65,7 +65,6 @@ namespace kiosk_solution.Controllers
         /// <param name="size"></param>
         /// <param name="page"></param>
         /// <returns></returns>
-        [Authorize(Roles = "Admin, Service Provider")]
         [HttpGet]
         [MapToApiVersion("1")]
         public async Task<IActionResult> Get([FromQuery] ServiceApplicationSearchViewModel model, int size, int page = CommonConstants.DefaultPage)
@@ -77,6 +76,13 @@ namespace kiosk_solution.Controllers
             var result = await _serviceApplicationService.GetAllWithPaging(role, id, model, size, page);
             _logger.LogInformation($"Get all applications by party {token.Mail}");
             return Ok(new SuccessResponse<DynamicModelResponse<ServiceApplicationSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+        }
+        [HttpGet("{id}")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetAppById(Guid id)
+        {
+            var result = await _serviceApplicationService.GetById(id);
+            return Ok(new SuccessResponse<ServiceApplicationViewModel>((int)HttpStatusCode.OK, "Search success.", result));
         }
     }
 }
