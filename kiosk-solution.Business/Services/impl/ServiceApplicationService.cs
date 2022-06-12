@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
+using Microsoft.Data.SqlClient;
 
 namespace kiosk_solution.Business.Services.impl
 {
@@ -161,10 +162,18 @@ namespace kiosk_solution.Business.Services.impl
                 var result = _mapper.Map<ServiceApplicationViewModel>(serviceApplicationNew);
                 return result;
             }
-            catch (Exception)
+            catch (SqlException e)
             {
-                _logger.LogInformation("Invalid data.");
-                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid data.");
+                if (e.Number == 2601)
+                {
+                    _logger.LogInformation("Name is duplicated.");
+                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Name is duplicated.");
+                }
+                else
+                {
+                    _logger.LogInformation("Invalid Data.");
+                    throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data.");
+                }
             }
         }
 

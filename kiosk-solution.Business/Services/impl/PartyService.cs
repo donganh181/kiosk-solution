@@ -14,6 +14,7 @@ using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
 using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -87,10 +88,18 @@ namespace kiosk_solution.Business.Services.impl
                 var result = _mapper.CreateMapper().Map<PartyViewModel>(account);
                 return result;
             }
-            catch (DbUpdateException)
+            catch (SqlException e)
             {
-                _logger.LogInformation("Invalid Data.");
-                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data.");
+                if (e.Number == 2601)
+                {
+                    _logger.LogInformation("Phone or email is duplicated.");
+                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Phone or email is duplicated.");
+                }
+                else
+                {
+                    _logger.LogInformation("Invalid Data.");
+                    throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid Data.");
+                }
             }
         }
 
