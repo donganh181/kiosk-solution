@@ -97,7 +97,6 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<AppCategoryPositionViewModel> Update(Guid partyId, AppCategoryPositionUpdateViewModel model)
         {
             AppCategoryPosition catePos = null;
-            List<AppCategoryPosition> listCheck = new List<AppCategoryPosition>();
             //check if there are 2 or more cate are in the same position
             if (model.ListPosition.GroupBy(x => new { x.RowIndex, x.ColumnIndex }).Where(x => x.Count() > 1).FirstOrDefault() != null)
             {
@@ -128,7 +127,6 @@ namespace kiosk_solution.Business.Services.impl
                     catePos.AppCategoryId = pos.AppCategoryId;
                     catePos.RowIndex = pos.RowIndex;
                     catePos.ColumnIndex = pos.ColumnIndex;
-                    listCheck.Add(catePos);
                     _unitOfWork.AppCategoryPositionRepository.Update(catePos);
                 }
                 await _unitOfWork.SaveAsync();
