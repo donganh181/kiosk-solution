@@ -87,6 +87,7 @@ namespace kiosk_solution.Business.Services.impl
             var geoCodeing = await _mapService.GetForwardGeocode(address);
             newEvent.Longtitude = geoCodeing.GeoMetries[0].Lng;
             newEvent.Latitude = geoCodeing.GeoMetries[0].Lat;
+            newEvent.CreateDate = DateTime.Now;
             try
             {                
                 await _unitOfWork.EventRepository.InsertAsync(newEvent);
@@ -146,7 +147,7 @@ namespace kiosk_solution.Business.Services.impl
                 item.Image = img;
             }
 
-            events = listEvent.AsQueryable().OrderByDescending(e => e.Name);
+            events = listEvent.AsQueryable().OrderByDescending(e => e.CreateDate);
 
             var listPaging = events
                 .DynamicFilter(model)

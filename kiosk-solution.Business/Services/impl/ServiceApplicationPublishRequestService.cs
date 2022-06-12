@@ -9,10 +9,8 @@ using kiosk_solution.Data.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace kiosk_solution.Business.Services.impl
@@ -58,6 +56,7 @@ namespace kiosk_solution.Business.Services.impl
             var request = _mapper.Map<ServiceApplicationPublishRequest>(model);
             request.CreatorId = creatorId;
             request.Status = StatusConstants.IN_PROGRESS;
+            request.CreateDate = DateTime.Now;
             try
             {
                 await _unitOfWork.ServiceApplicationPublishRequestRepository.InsertAsync(request);
@@ -78,8 +77,9 @@ namespace kiosk_solution.Business.Services.impl
                     .FirstOrDefaultAsync();
                 return result;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.LogError(e.Message);
                 _logger.LogInformation("Invalid data.");
                 throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid data.");
             }
@@ -99,7 +99,7 @@ namespace kiosk_solution.Business.Services.impl
                     .Include(r => r.ServiceApplication)
                     .ProjectTo<ServiceApplicationPublishRequestSearchViewModel>(_mapper.ConfigurationProvider)
                     .DynamicFilter(model)
-                    .AsQueryable().OrderByDescending(r => r.ServiceApplicationName);
+                    .AsQueryable().OrderByDescending(r => r.CreateDate);
             }
 
 
@@ -112,7 +112,7 @@ namespace kiosk_solution.Business.Services.impl
                     .Include(r => r.ServiceApplication)
                     .ProjectTo<ServiceApplicationPublishRequestSearchViewModel>(_mapper.ConfigurationProvider)
                     .DynamicFilter(model)
-                    .AsQueryable().OrderByDescending(r => r.ServiceApplicationName);
+                    .AsQueryable().OrderByDescending(r => r.CreateDate);
             }
 
             if (requests == null)

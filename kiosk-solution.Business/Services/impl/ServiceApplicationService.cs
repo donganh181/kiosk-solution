@@ -58,7 +58,7 @@ namespace kiosk_solution.Business.Services.impl
                     .Include(a => a.AppCategory)
                     .ProjectTo<ServiceApplicationSearchViewModel>(_mapper.ConfigurationProvider)
                     .DynamicFilter(model)
-                    .AsQueryable().OrderByDescending(a => a.Name);
+                    .AsQueryable().OrderByDescending(a => a.CreateDate);
             }
 
             if(apps == null)
@@ -142,6 +142,7 @@ namespace kiosk_solution.Business.Services.impl
             var serviceApplication = _mapper.Map<ServiceApplication>(model);
             serviceApplication.PartyId = partyId;
             serviceApplication.Status = StatusConstants.INCOMPLETE;
+            serviceApplication.CreateDate=DateTime.Now;
             try
             {
                 await _unitOfWork.ServiceApplicationRepository.InsertAsync(serviceApplication);

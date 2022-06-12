@@ -14,6 +14,7 @@ namespace kiosk_solution.Data.Models
         public string Status { get; set; }
         public string HandlerComment { get; set; }
 
+        public DateTime? CreateDate { get; set; }
         public virtual Party Creator { get; set; }
         public virtual Party Handler { get; set; }
         public virtual ServiceApplication ServiceApplication { get; set; }

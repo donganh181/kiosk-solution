@@ -10,29 +10,18 @@ namespace kiosk_solution.Data.ViewModels
 {
     public class ServiceApplicationSearchViewModel
     {
-        [BindNever]
-        public Guid? Id { get; set; }
-        [String]
-        public string Name { get; set; }
-        [BindNever]
-        public string Description { get; set; }
-        [BindNever]
-        public string Logo { get; set; }
-        [BindNever]
-        public string Link { get; set; }
-        [BindNever]
-        public Guid? PartyId { get; set; }
-        [String]
-        public string PartyName { get; set; }
-        [String]
-        public string PartyEmail { get; set; }
-        [BindNever]
-        public Guid? AppCategoryId { get; set; }
-        [String]
-        public string AppCategoryName { get; set; }
-        [BindNever]
-        public Guid? ApplicationMarketId { get; set; }
-        [String]
-        public string Status { get; set; }
+        [BindNever] public Guid? Id { get; set; }
+        [String] public string Name { get; set; }
+        [BindNever] public string Description { get; set; }
+        [BindNever] public string Logo { get; set; }
+        [BindNever] public string Link { get; set; }
+        [BindNever] public Guid? PartyId { get; set; }
+        [String] public string PartyName { get; set; }
+        [String] public string PartyEmail { get; set; }
+        [BindNever] public Guid? AppCategoryId { get; set; }
+        [String] public string AppCategoryName { get; set; }
+        [BindNever] public Guid? ApplicationMarketId { get; set; }
+        [String] public string Status { get; set; }
+        [BindNever] public DateTime? CreateDate { get; set; }
     }
 }
