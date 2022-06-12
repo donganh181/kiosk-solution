@@ -8,8 +8,12 @@ namespace kiosk_solution.Data.ViewModels
 {
     public class AppCategoryPositionUpdateViewModel
     {
-        public Guid? Id { get; set; }
         public Guid? TemplateId { get; set; }
+        public List<CategoryPositionDetailUpdateViewModel> ListPosition { get; set; }
+    }
+    public class CategoryPositionDetailUpdateViewModel
+    {
+        public Guid Id { get; set; }
         public Guid? AppCategoryId { get; set; }
         public int? RowIndex { get; set; }
         public int? ColumnIndex { get; set; }
