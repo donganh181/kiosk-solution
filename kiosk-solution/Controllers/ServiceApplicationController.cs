@@ -82,7 +82,7 @@ namespace kiosk_solution.Controllers
         public async Task<IActionResult> GetAppById(Guid id)
         {
             var result = await _serviceApplicationService.GetById(id);
-            return Ok(new SuccessResponse<DynamicModelResponse<ServiceApplicationSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+            return Ok(new SuccessResponse<ServiceApplicationViewModel>((int)HttpStatusCode.OK, "Search success.", result));
         }
     }
 }
