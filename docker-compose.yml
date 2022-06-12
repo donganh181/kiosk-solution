@@ -1,0 +1,29 @@
+version: '3'
+services:
+  mssql:
+    container_name: mssql
+    restart: always
+    user: root
+    image: 'mcr.microsoft.com/mssql/server:2019-latest'
+    ports:
+      - 1433:1433
+    volumes:
+      - ./data:/var/opt/mssql/data
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Goboi123
+    networks:
+      - capstone-docker-network
+  kiosk-solution:
+    container_name: kiosk-solution
+    restart: always
+    image: longpc/kiosk-solution
+    depends_on:
+      - mssql
+    ports:
+      - 5000:80
+    networks:
+      - capstone-docker-network
+networks:
+  capstone-docker-network:
+    driver: bridge

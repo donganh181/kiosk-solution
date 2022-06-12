@@ -33,28 +33,28 @@ namespace kiosk_solution.Business.Services.impl
             _appService = appService;
         }
 
-        public async Task<ServiceApplicationPublishRequestViewModel> Create(Guid creatorId, ServiceApplicationPublishRequestCreateViewModel model)
+        public async Task<ServiceApplicationPublishRequestViewModel> Create(Guid creatorId,
+            ServiceApplicationPublishRequestCreateViewModel model)
         {
-
             var app = await _appService.GetById(Guid.Parse(model.ServiceApplicationId + ""));
             if (app == null)
             {
                 _logger.LogInformation("Can not found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
             }
 
             if (!app.PartyId.Equals(creatorId))
             {
                 _logger.LogInformation("Cannot publish other user's application.");
-                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Cannot publish other user's application.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Cannot publish other user's application.");
             }
 
             if (app.Status.Equals(StatusConstants.AVAILABLE) || app.Status.Equals(StatusConstants.PENDING))
             {
                 _logger.LogInformation("App did not meet requirement to publish.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "App did not meet requirement to publish.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "App did not meet requirement to publish.");
             }
-            
+
             var request = _mapper.Map<ServiceApplicationPublishRequest>(model);
             request.CreatorId = creatorId;
             request.Status = StatusConstants.IN_PROGRESS;
@@ -64,11 +64,12 @@ namespace kiosk_solution.Business.Services.impl
                 await _unitOfWork.SaveAsync();
 
                 bool check = await _appService.SetStatus(app.Id, StatusConstants.PENDING);
-                if(check == false)
+                if (check == false)
                 {
                     _logger.LogInformation("Server Error.");
-                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
+                    throw new ErrorResponse((int) HttpStatusCode.InternalServerError, "Server Error.");
                 }
+
                 var result = await _unitOfWork.ServiceApplicationPublishRequestRepository
                     .Get(r => r.Id.Equals(request.Id))
                     .Include(r => r.Creator)
@@ -76,51 +77,51 @@ namespace kiosk_solution.Business.Services.impl
                     .ProjectTo<ServiceApplicationPublishRequestViewModel>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync();
                 return result;
-
             }
             catch (Exception)
             {
                 _logger.LogInformation("Invalid data.");
-                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
+                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid data.");
             }
         }
 
-        public async Task<DynamicModelResponse<ServiceApplicationPublishRequestSearchViewModel>> GetAllWithPaging(string role, Guid id, ServiceApplicationPublishRequestSearchViewModel model, int size, int pageNum)
+        public async Task<DynamicModelResponse<ServiceApplicationPublishRequestSearchViewModel>> GetAllWithPaging(
+            string role, Guid id, ServiceApplicationPublishRequestSearchViewModel model, int size, int pageNum)
         {
             object requests = null;
 
             if (role.Equals(RoleConstants.ADMIN))
             {
                 requests = _unitOfWork.ServiceApplicationPublishRequestRepository
-                .Get()
-                .Include(r => r.Creator)
-                .Include(r => r.Handler)
-                .Include(r => r.ServiceApplication)
-                .ProjectTo<ServiceApplicationPublishRequestSearchViewModel>(_mapper.ConfigurationProvider)
-                .DynamicFilter(model)
-                .AsQueryable().OrderByDescending(r => r.ServiceApplicationName);
+                    .Get()
+                    .Include(r => r.Creator)
+                    .Include(r => r.Handler)
+                    .Include(r => r.ServiceApplication)
+                    .ProjectTo<ServiceApplicationPublishRequestSearchViewModel>(_mapper.ConfigurationProvider)
+                    .DynamicFilter(model)
+                    .AsQueryable().OrderByDescending(r => r.ServiceApplicationName);
             }
-                
+
 
             if (role.Equals(RoleConstants.SERVICE_PROVIDER))
             {
                 requests = _unitOfWork.ServiceApplicationPublishRequestRepository
-                .Get(r => r.CreatorId.Equals(id))
-                .Include(r => r.Creator)
-                .Include(r => r.Handler)
-                .Include(r => r.ServiceApplication)
-                .ProjectTo<ServiceApplicationPublishRequestSearchViewModel>(_mapper.ConfigurationProvider)
-                .DynamicFilter(model)
-                .AsQueryable().OrderByDescending(r => r.ServiceApplicationName);
+                    .Get(r => r.CreatorId.Equals(id))
+                    .Include(r => r.Creator)
+                    .Include(r => r.Handler)
+                    .Include(r => r.ServiceApplication)
+                    .ProjectTo<ServiceApplicationPublishRequestSearchViewModel>(_mapper.ConfigurationProvider)
+                    .DynamicFilter(model)
+                    .AsQueryable().OrderByDescending(r => r.ServiceApplicationName);
             }
 
-            if(requests == null)
+            if (requests == null)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
-            
-            var listRequest = (IQueryable<ServiceApplicationPublishRequestSearchViewModel>)requests;
+
+            var listRequest = (IQueryable<ServiceApplicationPublishRequestSearchViewModel>) requests;
 
             var listPaging = listRequest
                 .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
@@ -128,7 +129,7 @@ namespace kiosk_solution.Business.Services.impl
             if (listPaging.Data.ToList().Count < 1)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
 
             var result = new DynamicModelResponse<ServiceApplicationPublishRequestSearchViewModel>
@@ -150,36 +151,40 @@ namespace kiosk_solution.Business.Services.impl
             if (role.Equals(RoleConstants.ADMIN))
             {
                 publishRequest = await _unitOfWork.ServiceApplicationPublishRequestRepository
-                .Get(p => p.Id.Equals(requestId))
-                .Include(r => r.Creator)
-                .Include(r => r.Handler)
-                .Include(r => r.ServiceApplication)
-                .ProjectTo<ServiceApplicationPublishRequestViewModel>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync();
-            }else if (role.Equals(RoleConstants.SERVICE_PROVIDER))
+                    .Get(p => p.Id.Equals(requestId))
+                    .Include(r => r.Creator)
+                    .Include(r => r.Handler)
+                    .Include(r => r.ServiceApplication)
+                    .ProjectTo<ServiceApplicationPublishRequestViewModel>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync();
+            }
+            else if (role.Equals(RoleConstants.SERVICE_PROVIDER))
             {
                 publishRequest = await _unitOfWork.ServiceApplicationPublishRequestRepository
-                .Get(p => p.Id.Equals(requestId) && p.CreatorId.Equals(partyId))
-                .Include(r => r.Creator)
-                .Include(r => r.Handler)
-                .Include(r => r.ServiceApplication)
-                .ProjectTo<ServiceApplicationPublishRequestViewModel>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync();
+                    .Get(p => p.Id.Equals(requestId) && p.CreatorId.Equals(partyId))
+                    .Include(r => r.Creator)
+                    .Include(r => r.Handler)
+                    .Include(r => r.ServiceApplication)
+                    .ProjectTo<ServiceApplicationPublishRequestViewModel>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync();
             }
             else
             {
                 _logger.LogInformation("Server Error");
-                throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
+                throw new ErrorResponse((int) HttpStatusCode.InternalServerError, "Server Error.");
             }
+
             if (publishRequest == null)
             {
                 _logger.LogInformation("Can not found.");
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
             }
+
             return publishRequest;
         }
 
-        public async Task<ServiceApplicationPublishRequestViewModel> Update(Guid handlerId, UpdateServiceApplicationPublishRequestViewModel model)
+        public async Task<ServiceApplicationPublishRequestViewModel> Update(Guid handlerId,
+            UpdateServiceApplicationPublishRequestViewModel model)
         {
             var publishRequest = await _unitOfWork.ServiceApplicationPublishRequestRepository
                 .Get(p => p.Id.Equals(model.Id)).FirstOrDefaultAsync();
@@ -188,11 +193,13 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Can not found.");
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
             }
+
             if (!publishRequest.Status.Equals(StatusConstants.IN_PROGRESS))
             {
                 _logger.LogInformation("Invalid status to use this feature.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid status to use this feature.");
             }
+
             publishRequest.HandlerId = handlerId;
             publishRequest.HandlerComment = model.HandlerComment;
             publishRequest.Status = model.Status;
@@ -202,18 +209,21 @@ namespace kiosk_solution.Business.Services.impl
                 await _unitOfWork.SaveAsync();
                 if (publishRequest.Status.Equals(StatusConstants.APPROVED))
                 {
-                    await _appService.SetStatus(Guid.Parse(publishRequest.ServiceApplicationId + ""), StatusConstants.AVAILABLE);
+                    await _appService.SetStatus(Guid.Parse(publishRequest.ServiceApplicationId + ""),
+                        StatusConstants.AVAILABLE);
                 }
                 else if (publishRequest.Status.Equals(StatusConstants.DENIED))
                 {
-                    await _appService.SetStatus(Guid.Parse(publishRequest.ServiceApplicationId + ""), StatusConstants.UNAVAILABLE);
+                    await _appService.SetStatus(Guid.Parse(publishRequest.ServiceApplicationId + ""),
+                        StatusConstants.UNAVAILABLE);
                 }
                 else
                 {
                     _logger.LogInformation("Server Error.");
-                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
+                    throw new ErrorResponse((int) HttpStatusCode.InternalServerError, "Server Error.");
                 }
-                    var result = await _unitOfWork.ServiceApplicationPublishRequestRepository
+
+                var result = await _unitOfWork.ServiceApplicationPublishRequestRepository
                     .Get(r => r.Id.Equals(publishRequest.Id))
                     .Include(r => r.Creator)
                     .Include(r => r.Handler)
@@ -225,9 +235,26 @@ namespace kiosk_solution.Business.Services.impl
             catch (Exception)
             {
                 _logger.LogInformation("Invalid data.");
-                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
+                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid data.");
+            }
+        }
+
+        public async Task<ServiceApplicationPublishRequestViewModel> GetInprogressByAppId(Guid appId)
+        {
+            var publishRequest = await _unitOfWork.ServiceApplicationPublishRequestRepository
+                .Get(p => p.ServiceApplicationId.Equals(appId) && p.Status.Equals(StatusConstants.IN_PROGRESS))
+                .Include(r => r.Creator)
+                .Include(r => r.Handler)
+                .Include(r => r.ServiceApplication)
+                .ProjectTo<ServiceApplicationPublishRequestViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+            if (publishRequest == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
             }
 
+            return publishRequest;
         }
     }
 }
