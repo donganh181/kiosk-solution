@@ -36,10 +36,11 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<AppCategoryPositionViewModel> Create(Guid partyId, AppCategoryPositionCreateViewModel model)
         {
+            //check if there are 2 or more cate are in the same position
             if(model.ListPosition.GroupBy(x => new {x.RowIndex, x.ColumnIndex}).Where(x => x.Count() > 1).FirstOrDefault() != null)
             {
-                _logger.LogInformation("There is 2 or more cate are in the same position.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "There is 2 or more cate are in the same position.");
+                _logger.LogInformation("There are 2 or more cate are in the same position.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "There are 2 or more cate are in the same position.");
             }
             //check if template owner
             if (!await _templateService.IsOwner(partyId, Guid.Parse(model.TemplateId + "")))
@@ -95,132 +96,62 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<AppCategoryPositionViewModel> Update(Guid partyId, AppCategoryPositionUpdateViewModel model)
         {
-            bool flag = false;
-            var check = await _unitOfWork.AppCategoryPositionRepository.Get(p => p.TemplateId.Equals(model.TemplateId)).ToListAsync();
-
+            AppCategoryPosition catePos = null;
+            List<AppCategoryPosition> listCheck = new List<AppCategoryPosition>();
+            //check if there are 2 or more cate are in the same position
+            if (model.ListPosition.GroupBy(x => new { x.RowIndex, x.ColumnIndex }).Where(x => x.Count() > 1).FirstOrDefault() != null)
+            {
+                _logger.LogInformation("There are 2 or more cate are in the same position.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "There are 2 or more cate are in the same position.");
+            }
+            //check if template owner
             if (!await _templateService.IsOwner(partyId, Guid.Parse(model.TemplateId + "")))
             {
                 _logger.LogInformation($"{partyId} account cannot use this feature.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
             }
-            if (!await _partyServiceApplicationService.CheckAppExist(partyId, Guid.Parse(model.AppCategoryId + "")))
+            //check if location owner did not have any app in cate
+            foreach (var cate in model.ListPosition)
             {
-                _logger.LogInformation($"{partyId} has no app in this category.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Your account has no app in this category.");
-            }
-
-            //case get a new cate and set it into another cate index
-            if(model.Id == null) //new cate
-            {
-                foreach (var checkPosition in check)
+                if (!await _partyServiceApplicationService.CheckAppExist(partyId, Guid.Parse(cate.AppCategoryId + "")))
                 {
-                    if (checkPosition.RowIndex == model.RowIndex && checkPosition.ColumnIndex == model.ColumnIndex)
-                    {
-                        var newPosition = _mapper.Map<AppCategoryPosition>(model);
-                        newPosition.Id.Equals(checkPosition.Id);
-                        try
-                        {
-                            _unitOfWork.AppCategoryPositionRepository.Update(newPosition); //the new cate will replace the old cate
-                            await _unitOfWork.SaveAsync();
-                            var result = await _unitOfWork.AppCategoryPositionRepository
-                                    .Get(p => p.Id.Equals(newPosition.Id))
-                                    .Include(p => p.Template)
-                                    .Include(p => p.AppCategory)
-                                    .ProjectTo<AppCategoryPositionViewModel>(_mapper.ConfigurationProvider)
-                                    .FirstOrDefaultAsync();
-                            return result;
-                        }
-                        catch (Exception)
-                        {
-                            _logger.LogInformation("Invalid data.");
-                            throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
-                        }
-                    }
-                    else
-                    {
-                        flag = true;
-                    }
-                }
-                if (flag)
-                {
-                    _logger.LogInformation("You cannot update new category into an empty position. (Please use Create function).");
-                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You cannot update new category into an empty position. (Please use Create function).");
-                }
-                else
-                {
-                    _logger.LogInformation("Server Error.");
-                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
-                }
-            }//case cate has already in template
-            else if(model.Id != null)
-            {
-                var pos1 = await _unitOfWork.AppCategoryPositionRepository.Get(p => p.Id.Equals(model.Id)).FirstOrDefaultAsync();
-
-                foreach (var pos2 in check)
-                {
-                    //case pos 1 and pos 2 change position
-                    if (pos2.RowIndex == pos1.RowIndex && pos2.ColumnIndex == model.ColumnIndex)
-                    {
-                        pos2.RowIndex = pos1.RowIndex;
-                        pos2.ColumnIndex = pos1.ColumnIndex;
-                        pos1.RowIndex = model.RowIndex;
-                        pos1.ColumnIndex = model.ColumnIndex;
-                        try
-                        {
-                            _unitOfWork.AppCategoryPositionRepository.Update(pos1); //new cate will replace the old cate
-                            _unitOfWork.AppCategoryPositionRepository.Update(pos2);
-                            await _unitOfWork.SaveAsync();
-                            var result = await _unitOfWork.AppCategoryPositionRepository
-                                    .Get(p => p.Id.Equals(pos1.Id))
-                                    .Include(p => p.Template)
-                                    .Include(p => p.AppCategory)
-                                    .ProjectTo<AppCategoryPositionViewModel>(_mapper.ConfigurationProvider)
-                                    .FirstOrDefaultAsync();
-                            return result;
-                        }
-                        catch (Exception)
-                        {
-                            _logger.LogInformation("Invalid data.");
-                            throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
-                        }
-                    }
-                    else
-                    {
-                        flag = true;
-                    }
-                }
-                //case replace cate into an empty position
-                if (flag)
-                {
-                    try
-                    {
-                        _unitOfWork.AppCategoryPositionRepository.Update(pos1);
-                        await _unitOfWork.SaveAsync();
-                        var result = await _unitOfWork.AppCategoryPositionRepository
-                                    .Get(p => p.Id.Equals(pos1.Id))
-                                    .Include(p => p.Template)
-                                    .Include(p => p.AppCategory)
-                                    .ProjectTo<AppCategoryPositionViewModel>(_mapper.ConfigurationProvider)
-                                    .FirstOrDefaultAsync();
-                        return result;
-                    }
-                    catch (Exception)
-                    {
-                        _logger.LogInformation("Invalid data.");
-                        throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
-                    }
-                }
-                else
-                {
-                    _logger.LogInformation("Server Error.");
-                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
+                    _logger.LogInformation($"{partyId} has no app in this category.");
+                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Your account has no app in this category.");
                 }
             }
-            else
+            try
             {
-                _logger.LogInformation("Server Error.");
-                throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
-            }      
+                foreach(var pos in model.ListPosition)
+                {
+                    catePos = await _unitOfWork.AppCategoryPositionRepository.Get(p => p.Id.Equals(pos.Id)).FirstOrDefaultAsync();
+
+                    catePos.AppCategoryId = pos.AppCategoryId;
+                    catePos.RowIndex = pos.RowIndex;
+                    catePos.ColumnIndex = pos.ColumnIndex;
+                    listCheck.Add(catePos);
+                    _unitOfWork.AppCategoryPositionRepository.Update(catePos);
+                }
+                await _unitOfWork.SaveAsync();
+
+                var listPos = await _unitOfWork.AppCategoryPositionRepository
+                    .Get(p => p.TemplateId.Equals(model.TemplateId))
+                    .Include(p => p.Template)
+                    .Include(p => p.AppCategory)
+                    .ProjectTo<CategoryPositionDetailViewModel>(_mapper.ConfigurationProvider)
+                    .ToListAsync();
+                var result = new AppCategoryPositionViewModel()
+                {
+                    TemplateId = model.TemplateId,
+                    TemplateName = listPos.FirstOrDefault().TemplateName,
+                    ListPosition = listPos
+                };
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
+            }
         }
     }
 }
