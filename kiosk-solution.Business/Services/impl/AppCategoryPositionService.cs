@@ -36,49 +36,60 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<AppCategoryPositionViewModel> Create(Guid partyId, AppCategoryPositionCreateViewModel model)
         {
+            if(model.ListPosition.GroupBy(x => new {x.RowIndex, x.ColumnIndex}).Where(x => x.Count() > 1).FirstOrDefault() != null)
+            {
+                _logger.LogInformation("There is 2 or more cate are in the same position.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "There is 2 or more cate are in the same position.");
+            }
+            //check if template owner
             if (!await _templateService.IsOwner(partyId, Guid.Parse(model.TemplateId + "")))
             {
                 _logger.LogInformation($"{partyId} account cannot use this feature.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
             }
-            if (!await _partyServiceApplicationService.CheckAppExist(partyId, Guid.Parse(model.AppCategoryId + "")))
+            //case this template has already set cate on it
+            if(await _unitOfWork.AppCategoryPositionRepository.Get(p => p.TemplateId.Equals(model.TemplateId)).FirstOrDefaultAsync() != null)
             {
-                _logger.LogInformation($"{partyId} has no app in this category.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Your account has no app in this category.");
+                _logger.LogInformation($"{model.TemplateId} has already set cate on it. Please use Update function.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, $"{model.TemplateId} has already set cate on it. Please use Update function.");
             }
-
-            var position = _mapper.Map<AppCategoryPosition>(model);
-
-            var check = await _unitOfWork.AppCategoryPositionRepository.Get(c => c.TemplateId.Equals(model.TemplateId)).ToListAsync();
-
-            if (check != null)
+            //check if location owner did not have any app in cate
+            foreach(var cate in model.ListPosition)
             {
-                //case this position already has cate
-                foreach(var checkPosition in check)
+                if (!await _partyServiceApplicationService.CheckAppExist(partyId, Guid.Parse(cate.AppCategoryId + "")))
                 {
-                    if(checkPosition.RowIndex == model.RowIndex && checkPosition.ColumnIndex == model.ColumnIndex)
-                    {
-                        _logger.LogInformation("This position has already had cate in template.");
-                        throw new ErrorResponse((int)HttpStatusCode.BadRequest, "This position has already had cate in template.");
-                    }
+                    _logger.LogInformation($"{partyId} has no app in this category.");
+                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Your account has no app in this category.");
                 }
-            }    
+            }
             try
             {
-                await _unitOfWork.AppCategoryPositionRepository.InsertAsync(position);
+                foreach(var pos in model.ListPosition)
+                {
+                    var position = _mapper.Map<AppCategoryPosition>(pos);
+                    position.TemplateId = model.TemplateId;
+
+                    await _unitOfWork.AppCategoryPositionRepository.InsertAsync(position);
+                }
                 await _unitOfWork.SaveAsync();
-                var result = await _unitOfWork.AppCategoryPositionRepository
-                    .Get(p => p.Id.Equals(position.Id))
+                var listPos = await _unitOfWork.AppCategoryPositionRepository
+                    .Get(p => p.TemplateId.Equals(model.TemplateId))
                     .Include(p => p.Template)
                     .Include(p => p.AppCategory)
-                    .ProjectTo<AppCategoryPositionViewModel>(_mapper.ConfigurationProvider)
-                    .FirstOrDefaultAsync();
+                    .ProjectTo<CategoryPositionDetailViewModel>(_mapper.ConfigurationProvider)
+                    .ToListAsync();
+                var result = new AppCategoryPositionViewModel()
+                {
+                    TemplateId = model.TemplateId,
+                    TemplateName = listPos.FirstOrDefault().TemplateName,
+                    ListPosition = listPos
+                };
                 return result;
             }
             catch (Exception)
             {
                 _logger.LogInformation("Invalid data.");
-                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
             }
         }
 

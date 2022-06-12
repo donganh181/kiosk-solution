@@ -42,11 +42,11 @@ namespace kiosk_solution.Controllers
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _appCategoryPositionService.Create(token.Id ,model);
-            _logger.LogInformation($"Take category {result.AppCategoryName} to template {result.TemplateName} by party {token.Mail}");
+            _logger.LogInformation($"Create successfuly to template {result.TemplateName} by party {token.Mail}");
             return Ok(new SuccessResponse<AppCategoryPositionViewModel>((int)HttpStatusCode.OK, "Take success.", result));
         }
 
-        [Authorize(Roles = "Location Owner")]
+        /*[Authorize(Roles = "Location Owner")]
         [HttpPut]
         [MapToApiVersion("1")]
         public async Task<IActionResult> UpdatePosition([FromBody] AppCategoryPositionUpdateViewModel model)
@@ -56,6 +56,6 @@ namespace kiosk_solution.Controllers
             var result = await _appCategoryPositionService.Update(token.Id,model);
             _logger.LogInformation($"Updated category {result.AppCategoryName} by party {token.Mail}");
             return Ok(new SuccessResponse<AppCategoryPositionViewModel>((int)HttpStatusCode.OK, "Update success.", result));
-        }
+        }*/
     }
 }

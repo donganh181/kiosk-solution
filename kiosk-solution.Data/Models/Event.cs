@@ -19,7 +19,6 @@ namespace kiosk_solution.Data.Models
         public DateTime? TimeEnd { get; set; }
         public string Longtitude { get; set; }
         public string Latitude { get; set; }
-        public string Street { get; set; }
         public string Ward { get; set; }
         public string District { get; set; }
         public string City { get; set; }
