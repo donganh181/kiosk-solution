@@ -34,6 +34,47 @@ namespace kiosk_solution.Business.Services.impl
             _mapService = mapService;
         }
 
+        public async Task<EventImageViewModel> AddImageToEvent(Guid partyId, string roleName, EventAddImageViewModel model)
+        {
+            List<ImageViewModel> listEventImage = new List<ImageViewModel>();
+            var myEvent = await _unitOfWork.EventRepository.Get(e => e.Id.Equals(model.Id)).FirstOrDefaultAsync();
+
+            if (myEvent == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            if (myEvent.Type.Equals(CommonConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+
+            if (myEvent.Type.Equals(CommonConstants.LOCAL_TYPE) && !myEvent.CreatorId.Equals(partyId))
+            {
+                _logger.LogInformation("You can not interact with event which is not your.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not interact with event which is not your.");
+            }
+
+            foreach(var img in model.ListImage)
+            {
+                ImageCreateViewModel imageModel = new ImageCreateViewModel(myEvent.Name, img.Image,
+                    myEvent.Id, CommonConstants.EVENT_IMAGE, CommonConstants.SOURCE_IMAGE);
+                var image = await _imageService.Create(imageModel);
+                listEventImage.Add(image);
+            }
+
+            var eventImage = _mapper.Map<List<EventImageDetailViewModel>>(listEventImage);
+            var result = await _unitOfWork.EventRepository
+                .Get(e => e.Id.Equals(model.Id))
+                .ProjectTo<EventImageViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+
+            result.ListImage = eventImage;
+            return result;
+        }
+
         public async Task<EventViewModel> Create(Guid creatorId, string role, EventCreateViewModel model)
         {
             
@@ -238,7 +279,7 @@ namespace kiosk_solution.Business.Services.impl
             try
             {
                 ImageUpdateViewModel imageUpdateModel = new ImageUpdateViewModel(model.ImageId,
-                    eventUpdate.Name, model.Image, model.ImageType);
+                    eventUpdate.Name, model.Image, CommonConstants.THUMBNAIL);
 
                 var imageModel = await _imageService.Update(imageUpdateModel);
                 _unitOfWork.EventRepository.Update(eventUpdate);
