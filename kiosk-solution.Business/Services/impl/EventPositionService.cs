@@ -1,4 +1,8 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
@@ -6,24 +10,18 @@ using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace kiosk_solution.Business.Services.impl
 {
-    public class AppCategoryPositionService : IAppCategoryPositionService
+    public class EventPositionService : IEventPositionService
     {
         private readonly IMapper _mapper;
-        private readonly ILogger<IAppCategoryPositionService> _logger;
+        private readonly ILogger _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITemplateService _templateService;
         private readonly IPartyServiceApplicationService _partyServiceApplicationService;
-
-        public AppCategoryPositionService(IMapper mapper, ILogger<IAppCategoryPositionService> logger, 
+        
+        public EventPositionService(IMapper mapper, ILogger<IEventPositionService> logger, 
             IUnitOfWork unitOfWork, IPartyServiceApplicationService partyServiceApplicationService,
             ITemplateService templateService)
         {
@@ -33,14 +31,14 @@ namespace kiosk_solution.Business.Services.impl
             _partyServiceApplicationService = partyServiceApplicationService;
             _templateService = templateService;
         }
-
-        public async Task<AppCategoryPositionViewModel> Create(Guid partyId, AppCategoryPositionCreateViewModel model)
+        
+        public async Task<EventPositionViewModel> Create(Guid partyId, EventPositionCreateViewModel model)
         {
-            //check if there are 2 or more cate are in the same position
+            //check if there are 2 or more event are in the same position
             if(model.ListPosition.GroupBy(x => new {x.RowIndex, x.ColumnIndex}).Where(x => x.Count() > 1).FirstOrDefault() != null)
             {
-                _logger.LogInformation("There are 2 or more cate are in the same position.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "There are 2 or more cate are in the same position.");
+                _logger.LogInformation("There are 2 or more event are in the same position.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "There are 2 or more event are in the same position.");
             }
             //check if template owner
             if (!await _templateService.IsOwner(partyId, Guid.Parse(model.TemplateId + "")))
@@ -48,38 +46,29 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation($"{partyId} account cannot use this feature.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
             }
-            //case this template has already set cate on it
-            if(await _unitOfWork.AppCategoryPositionRepository.Get(p => p.TemplateId.Equals(model.TemplateId)).FirstOrDefaultAsync() != null)
+            //case this template has already set event on it
+            if(await _unitOfWork.EventPositionRepository.Get(p => p.TemplateId.Equals(model.TemplateId)).FirstOrDefaultAsync() != null)
             {
-                _logger.LogInformation($"{model.TemplateId} has already set cate on it. Please use Update function.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, $"{model.TemplateId} has already set cate on it. Please use Update function.");
-            }
-            //check if location owner did not have any app in cate
-            foreach(var cate in model.ListPosition)
-            {
-                if (!await _partyServiceApplicationService.CheckAppExist(partyId, Guid.Parse(cate.AppCategoryId + "")))
-                {
-                    _logger.LogInformation($"{partyId} has no app in this category.");
-                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Your account has no app in this category.");
-                }
+                _logger.LogInformation($"{model.TemplateId} has already set event on it. Please use Update function.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, $"{model.TemplateId} has already set event on it. Please use Update function.");
             }
             try
             {
                 foreach(var pos in model.ListPosition)
                 {
-                    var position = _mapper.Map<AppCategoryPosition>(pos);
+                    var position = _mapper.Map<EventPosition>(pos);
                     position.TemplateId = model.TemplateId;
 
-                    await _unitOfWork.AppCategoryPositionRepository.InsertAsync(position);
+                    await _unitOfWork.EventPositionRepository.InsertAsync(position);
                 }
                 await _unitOfWork.SaveAsync();
-                var listPos = await _unitOfWork.AppCategoryPositionRepository
+                var listPos = await _unitOfWork.EventPositionRepository
                     .Get(p => p.TemplateId.Equals(model.TemplateId))
                     .Include(p => p.Template)
-                    .Include(p => p.AppCategory)
-                    .ProjectTo<CategoryPositionDetailViewModel>(_mapper.ConfigurationProvider)
+                    .Include(p => p.Event)
+                    .ProjectTo<EventPositionDetailViewModel>(_mapper.ConfigurationProvider)
                     .ToListAsync();
-                var result = new AppCategoryPositionViewModel()
+                var result = new EventPositionViewModel()
                 {
                     TemplateId = model.TemplateId,
                     TemplateName = listPos.FirstOrDefault().TemplateName,
@@ -94,14 +83,14 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<AppCategoryPositionViewModel> Update(Guid partyId, AppCategoryPositionUpdateViewModel model)
+        public async Task<EventPositionViewModel> Update(Guid partyId, EventPositionUpdateViewModel model)
         {
-            AppCategoryPosition catePos = null;
-            //check if there are 2 or more cate are in the same position
+            EventPosition eventPos = null;
+            //check if there are 2 or more event are in the same position
             if (model.ListPosition.GroupBy(x => new { x.RowIndex, x.ColumnIndex }).Where(x => x.Count() > 1).FirstOrDefault() != null)
             {
-                _logger.LogInformation("There are 2 or more cate are in the same position.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "There are 2 or more cate are in the same position.");
+                _logger.LogInformation("There are 2 or more event are in the same position.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "There are 2 or more event are in the same position.");
             }
             //check if template owner
             if (!await _templateService.IsOwner(partyId, Guid.Parse(model.TemplateId + "")))
@@ -109,38 +98,30 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation($"{partyId} account cannot use this feature.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
             }
-            //check if location owner did not have any app in cate
-            foreach (var cate in model.ListPosition)
-            {
-                if (!await _partyServiceApplicationService.CheckAppExist(partyId, Guid.Parse(cate.AppCategoryId + "")))
-                {
-                    _logger.LogInformation($"{partyId} has no app in this category.");
-                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Your account has no app in this category.");
-                }
-            }
             try
             {
-                var listDelete = await _unitOfWork.AppCategoryPositionRepository
+                var listDelete = await _unitOfWork.EventPositionRepository
                     .Get(e => e.TemplateId.Equals(model.TemplateId)).ToListAsync();
                 foreach (var pos in listDelete)
-                    _unitOfWork.AppCategoryPositionRepository.Delete(pos);
+                    _unitOfWork.EventPositionRepository.Delete(pos);
                 await _unitOfWork.SaveAsync();
-
+                
                 foreach(var pos in model.ListPosition)
                 {
-                    var position = _mapper.Map<AppCategoryPosition>(pos);
+                    var position = _mapper.Map<EventPosition>(pos);
                     position.TemplateId = model.TemplateId;
 
-                    await _unitOfWork.AppCategoryPositionRepository.InsertAsync(position);
+                    await _unitOfWork.EventPositionRepository.InsertAsync(position);
                 }
                 await _unitOfWork.SaveAsync();
-                var listPos = await _unitOfWork.AppCategoryPositionRepository
+                
+                var listPos = await _unitOfWork.EventPositionRepository
                     .Get(p => p.TemplateId.Equals(model.TemplateId))
                     .Include(p => p.Template)
-                    .Include(p => p.AppCategory)
-                    .ProjectTo<CategoryPositionDetailViewModel>(_mapper.ConfigurationProvider)
+                    .Include(p => p.Event)
+                    .ProjectTo<EventPositionDetailViewModel>(_mapper.ConfigurationProvider)
                     .ToListAsync();
-                var result = new AppCategoryPositionViewModel()
+                var result = new EventPositionViewModel()
                 {
                     TemplateId = model.TemplateId,
                     TemplateName = listPos.FirstOrDefault().TemplateName,
