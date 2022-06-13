@@ -59,6 +59,11 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<DynamicModelResponse<EventSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
         
+        /// <summary>
+        /// Update information of event
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [Authorize(Roles = "Admin, Location Owner")]
         [HttpPut]
         [MapToApiVersion("1")]
@@ -69,6 +74,23 @@ namespace kiosk_solution.Controllers
             var result = await _eventService.Update(token.Id, model, token.Role);
             _logger.LogInformation($"Update event by party {token.Mail}");
             return Ok(new SuccessResponse<EventViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+
+        /// <summary>
+        /// Add new image to event by admin or its own location owner
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Location Owner")]
+        [HttpPost("image")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> AddImage([FromBody] EventAddImageViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _eventService.AddImageToEvent(token.Id, token.Role, model);
+            _logger.LogInformation($"Add image to event {result.Name} by party {token.Mail}");
+            return Ok(new SuccessResponse<EventImageViewModel>((int)HttpStatusCode.OK, "Create success.", result));
         }
     }
 }

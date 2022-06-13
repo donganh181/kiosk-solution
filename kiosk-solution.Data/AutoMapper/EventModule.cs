@@ -28,6 +28,9 @@ namespace kiosk_solution.Data.AutoMapper
 
             mc.CreateMap<Event, EventUpdateViewModel>();
             mc.CreateMap<EventUpdateViewModel, Event>();
+
+            mc.CreateMap<Event, EventImageViewModel>();
+            mc.CreateMap<EventImageViewModel, Event>();
         }
     }
 }
