@@ -92,5 +92,22 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Add image to event {result.Name} by party {token.Mail}");
             return Ok(new SuccessResponse<EventImageViewModel>((int)HttpStatusCode.OK, "Create success.", result));
         }
+
+        /// <summary>
+        /// Update image to event by admin or its own location owner
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Location Owner")]
+        [HttpPatch("image")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateImage([FromBody] EventUpdateImageViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _eventService.UpdateImageToEvent(token.Id, token.Role, model);
+            _logger.LogInformation($"Update image success by party {token.Mail}");
+            return Ok(new SuccessResponse<ImageViewModel>((int)HttpStatusCode.OK, "Create success.", result));
+        }
     }
 }

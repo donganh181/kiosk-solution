@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,9 @@ namespace kiosk_solution.Data.ViewModels
 {
     public class ImageViewModel
     {
-        public Guid Id { get; set; }
-        public string Link { get; set; }
-        public Guid? KeyId { get; set; }
-        public string KeyType { get; set; }
+        [BindNever] public Guid Id { get; set; }
+        [BindNever] public string Link { get; set; }
+        [BindNever] public Guid? KeyId { get; set; }
+        [BindNever] public string KeyType { get; set; }
     }
 }

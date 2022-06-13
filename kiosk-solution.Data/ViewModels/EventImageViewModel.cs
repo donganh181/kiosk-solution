@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,7 @@ namespace kiosk_solution.Data.ViewModels
     }
     public class EventImageDetailViewModel
     {
-        public Guid Id { get; set; }
-        public string Link { get; set; }
+        [BindNever] public Guid Id { get; set; }
+        [BindNever] public string Link { get; set; }
     }
 }

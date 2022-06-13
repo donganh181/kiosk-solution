@@ -179,13 +179,30 @@ namespace kiosk_solution.Business.Services.impl
 
             foreach (var item in listEvent)
             {
-                var img = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(item.Id + ""), CommonConstants.EVENT_IMAGE);
-                if (img == null)
+                var listImage = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(item.Id + ""), CommonConstants.EVENT_IMAGE);
+                if (listImage == null)
                 {
-                    _logger.LogInformation($"{item.Name} has no image.");
-                    throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
+                    _logger.LogInformation($"{item.Name} has lost image.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
                 }
-                item.Image = img;
+                var listSourceImage = new List<ImageViewModel>();
+                foreach(var img in listImage)
+                {
+                    if(img.Link == null)
+                    {
+                        _logger.LogInformation($"{item.Name} has lost image.");
+                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                    }
+                    if (img.Link.Contains(CommonConstants.THUMBNAIL))
+                    {
+                        item.Image = img;
+                    }
+                    else if (img.Link.Contains(CommonConstants.SOURCE_IMAGE))
+                    {
+                        listSourceImage.Add(img);
+                    }
+                }
+                item.ListImage = _mapper.Map<List<EventImageDetailViewModel>>(listSourceImage);
             }
 
             events = listEvent.AsQueryable().OrderByDescending(e => e.CreateDate);
@@ -293,6 +310,34 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Invalid data.");
                 throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid data.");
             }
+        }
+
+        public async Task<ImageViewModel> UpdateImageToEvent(Guid partyId, string roleName, EventUpdateImageViewModel model)
+        {
+            var img = await _imageService.GetById(model.Id);
+            var myEvent = await _unitOfWork.EventRepository.Get(e => e.Id.Equals(img.KeyId)).FirstOrDefaultAsync();
+           
+            if (myEvent == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            if (myEvent.Type.Equals(CommonConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+
+            if (myEvent.Type.Equals(CommonConstants.LOCAL_TYPE) && !myEvent.CreatorId.Equals(partyId))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+
+            ImageUpdateViewModel updateModel = new ImageUpdateViewModel(img.Id, myEvent.Name, model.Image, CommonConstants.SOURCE_IMAGE);
+            var result = await _imageService.Update(updateModel);
+            return result;
         }
     }
 }
