@@ -9,7 +9,7 @@ namespace kiosk_solution.Data.ViewModels
     {
         [BindNever] public Guid? Id { get; set; }
         [String] public string Name { get; set; }
-        [BindNever] public ImageViewModel Image { get; set; }
+        [BindNever] public ImageViewModel Thumbnail { get; set; }
         [BindNever] public string Description { get; set; }
         [BindNever] public DateTime? TimeStart { get; set; }
         [BindNever] public DateTime? TimeEnd { get; set; }

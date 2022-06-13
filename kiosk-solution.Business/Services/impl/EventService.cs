@@ -77,7 +77,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<EventViewModel> Create(Guid creatorId, string role, EventCreateViewModel model)
         {
-            
+            List<ImageViewModel> listEventImage = new List<ImageViewModel>();
             var newEvent = _mapper.Map<Event>(model);
 
             newEvent.CreatorId = creatorId;
@@ -134,17 +134,27 @@ namespace kiosk_solution.Business.Services.impl
                 await _unitOfWork.EventRepository.InsertAsync(newEvent);
                 await _unitOfWork.SaveAsync();
 
-                ImageCreateViewModel imageModel = new ImageCreateViewModel(newEvent.Name, model.Image, newEvent.Id, CommonConstants.EVENT_IMAGE, CommonConstants.THUMBNAIL);
+                ImageCreateViewModel thumbnailModel = new ImageCreateViewModel(newEvent.Name,
+                    model.Thumbnail, newEvent.Id, CommonConstants.EVENT_IMAGE, CommonConstants.THUMBNAIL);
 
-                var img = await _imageService.Create(imageModel);
-
+                var thumbnail = await _imageService.Create(thumbnailModel);
+                
                 var result = await _unitOfWork.EventRepository
                     .Get(e => e.Id.Equals(newEvent.Id))
                     .Include(e => e.Creator)
                     .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync();
+                foreach (var img in model.ListImage)
+                {
+                    ImageCreateViewModel imageModel = new ImageCreateViewModel(result.Name, img.Image,
+                    result.Id, CommonConstants.EVENT_IMAGE, CommonConstants.SOURCE_IMAGE);
+                    var image = await _imageService.Create(imageModel);
+                    listEventImage.Add(image);
+                }
+                var eventImage = _mapper.Map<List<EventImageDetailViewModel>>(listEventImage);
 
-                result.Image = img;
+                result.Thumbnail = thumbnail;
+                result.ListImage = eventImage;
                 return result;
             }
             catch (Exception)
@@ -195,7 +205,7 @@ namespace kiosk_solution.Business.Services.impl
                     }
                     if (img.Link.Contains(CommonConstants.THUMBNAIL))
                     {
-                        item.Image = img;
+                        item.Thumbnail = img;
                     }
                     else if (img.Link.Contains(CommonConstants.SOURCE_IMAGE))
                     {
@@ -302,7 +312,7 @@ namespace kiosk_solution.Business.Services.impl
                 _unitOfWork.EventRepository.Update(eventUpdate);
                 await _unitOfWork.SaveAsync();
                 var result = _mapper.Map<EventViewModel>(eventUpdate);
-                result.Image = imageModel;
+                result.Thumbnail = imageModel;
                 return result;
             }
             catch (Exception)
