@@ -59,6 +59,20 @@ namespace kiosk_solution.Business.Services.impl
             throw new NotImplementedException();
         }
 
+        public async Task<ImageViewModel> GetById(Guid id)
+        {
+            var result = await _unitOfWork.ImageRepository
+                .Get(i => i.Id.Equals(id))
+                .ProjectTo<ImageViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+            if(result == null)
+            {
+                _logger.LogInformation("Cannot found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Cannot found.");
+            }
+            return result;
+        }
+
         public async Task<List<ImageViewModel>> GetByKeyIdAndKeyType(Guid keyId, string keyType)
         {
             var result = await _unitOfWork.ImageRepository
@@ -91,7 +105,6 @@ namespace kiosk_solution.Business.Services.impl
 
                 var result = _mapper.Map<ImageViewModel>(img);
                 return result;
-
             }
             catch (Exception)
             {

@@ -311,5 +311,33 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid data.");
             }
         }
+
+        public async Task<ImageViewModel> UpdateImageToEvent(Guid partyId, string roleName, EventUpdateImageViewModel model)
+        {
+            var img = await _imageService.GetById(model.Id);
+            var myEvent = await _unitOfWork.EventRepository.Get(e => e.Id.Equals(img.KeyId)).FirstOrDefaultAsync();
+           
+            if (myEvent == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            if (myEvent.Type.Equals(CommonConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+
+            if (myEvent.Type.Equals(CommonConstants.LOCAL_TYPE) && !myEvent.CreatorId.Equals(partyId))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+
+            ImageUpdateViewModel updateModel = new ImageUpdateViewModel(img.Id, myEvent.Name, model.Image, CommonConstants.SOURCE_IMAGE);
+            var result = await _imageService.Update(updateModel);
+            return result;
+        }
     }
 }
