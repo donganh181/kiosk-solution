@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using kiosk_solution.Data.Attributes;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -25,5 +26,6 @@ namespace kiosk_solution.Data.ViewModels
         [String] public string Type { get; set; }
         [String] public string Status { get; set; }
         [BindNever] public DateTime? CreateDate { get; set; }
+        [BindNever] public List<EventImageDetailViewModel> ListImage { get; set; }
     }
 }

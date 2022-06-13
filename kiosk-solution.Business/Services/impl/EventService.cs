@@ -179,13 +179,30 @@ namespace kiosk_solution.Business.Services.impl
 
             foreach (var item in listEvent)
             {
-                var img = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(item.Id + ""), CommonConstants.EVENT_IMAGE);
-                if (img == null)
+                var listImage = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(item.Id + ""), CommonConstants.EVENT_IMAGE);
+                if (listImage == null)
                 {
-                    _logger.LogInformation($"{item.Name} has no image.");
-                    throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
+                    _logger.LogInformation($"{item.Name} has lost image.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
                 }
-                item.Image = img;
+                var listSourceImage = new List<ImageViewModel>();
+                foreach(var img in listImage)
+                {
+                    if(img.Link == null)
+                    {
+                        _logger.LogInformation($"{item.Name} has lost image.");
+                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                    }
+                    if (img.Link.Contains(CommonConstants.THUMBNAIL))
+                    {
+                        item.Image = img;
+                    }
+                    else if (img.Link.Contains(CommonConstants.SOURCE_IMAGE))
+                    {
+                        listSourceImage.Add(img);
+                    }
+                }
+                item.ListImage = _mapper.Map<List<EventImageDetailViewModel>>(listSourceImage);
             }
 
             events = listEvent.AsQueryable().OrderByDescending(e => e.CreateDate);
