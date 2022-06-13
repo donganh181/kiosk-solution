@@ -47,7 +47,7 @@ namespace kiosk_solution.Business.Services.impl
             catch (Exception)
             {
                 _logger.LogInformation("Invalid Data.");
-                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
             }
         }
 
@@ -102,7 +102,7 @@ namespace kiosk_solution.Business.Services.impl
             catch (Exception)
             {
                 _logger.LogInformation("Invalid Data.");
-                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
             }
         }
 
@@ -135,7 +135,7 @@ namespace kiosk_solution.Business.Services.impl
             else
             {
                 _logger.LogInformation("Status format is not valid.");
-                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Status format is not valid.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Status format is not valid.");
             }
 
             try
@@ -149,7 +149,7 @@ namespace kiosk_solution.Business.Services.impl
             catch (Exception)
             {
                 _logger.LogInformation("Invalid Data.");
-                throw new ErrorResponse((int)HttpStatusCode.UnprocessableEntity, "Invalid Data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
             }
         }
     }

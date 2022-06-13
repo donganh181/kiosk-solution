@@ -55,7 +55,7 @@ namespace kiosk_solution.Business.Services.impl
             catch (Exception)
             {
                 _logger.LogInformation("Invalid data.");
-                throw new ErrorResponse((int) HttpStatusCode.UnprocessableEntity, "Invalid data.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid data.");
             }
         }
 
