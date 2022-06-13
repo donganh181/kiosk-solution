@@ -39,7 +39,7 @@ namespace kiosk_solution.Data.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Console.WriteLine(ex.Message);
                 Console.WriteLine("Email sending failed");
             }
         }
