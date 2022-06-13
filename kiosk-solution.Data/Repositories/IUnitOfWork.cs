@@ -20,6 +20,7 @@ namespace kiosk_solution.Data.Repositories
         IAppCategoryRepository AppCategoryRepository { get; }
         IImageRepository ImageRepository { get; }
         IAppCategoryPositionRepository AppCategoryPositionRepository { get; }
+        IEventPositionRepository EventPositionRepository { get; }
         void Save();
         Task SaveAsync();
     }

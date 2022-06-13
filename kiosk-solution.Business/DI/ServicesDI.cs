@@ -65,6 +65,9 @@ namespace kiosk_solution.Business.DI
 
             services.AddScoped<IAppCategoryPositionRepository, AppCategoryPositionRepository>();
             services.AddScoped<IAppCategoryPositionService, AppCategoryPositionService>();
+
+            services.AddScoped<IEventPositionRepository, EventPositionRepository>();
+            services.AddScoped<IEventPositionService, EventPositionService>();
         }
     }
 }
