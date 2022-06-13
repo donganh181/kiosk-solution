@@ -30,5 +30,6 @@ namespace kiosk_solution.Data.Constants
         public static string POI_IMAGE = "poi_image";
 
         public static string THUMBNAIL = "thumbnail";
+        public static string SOURCE_IMAGE = "source_image";
     }
 }
