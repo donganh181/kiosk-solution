@@ -14,5 +14,6 @@ namespace kiosk_solution.Business.Services
         public Task<DynamicModelResponse<EventSearchViewModel>> GetAllWithPaging(Guid partyId, string roleName, EventSearchViewModel model, int size, int pageNum);
         public Task<EventViewModel> Update(Guid partyId, EventUpdateViewModel model, string roleName);
         public Task<EventImageViewModel> AddImageToEvent(Guid partyId, string roleName, EventAddImageViewModel model);
+        public Task<ImageViewModel> UpdateImageToEvent(Guid partyId, string roleName, EventUpdateImageViewModel model);
     }
 }
