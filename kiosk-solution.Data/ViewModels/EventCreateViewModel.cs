@@ -13,7 +13,7 @@ namespace kiosk_solution.Data.ViewModels
         public string Name { get; set; }
         public string Description { get; set; }
         [Required]
-        public string Image { get; set; }
+        public string Thumbnail { get; set; }
         [Required]
         public DateTime? TimeStart { get; set; }
         [Required]
@@ -26,5 +26,7 @@ namespace kiosk_solution.Data.ViewModels
         public string City { get; set; }
         [Required]
         public string Address { get; set; }
+        [Required]
+        public List<EventImageDetailCreateViewModel> ListImage { get; set; }
     }
 }

@@ -77,7 +77,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<EventViewModel> Create(Guid creatorId, string role, EventCreateViewModel model)
         {
-            
+            List<ImageViewModel> listEventImage = new List<ImageViewModel>();
             var newEvent = _mapper.Map<Event>(model);
 
             newEvent.CreatorId = creatorId;
@@ -134,23 +134,99 @@ namespace kiosk_solution.Business.Services.impl
                 await _unitOfWork.EventRepository.InsertAsync(newEvent);
                 await _unitOfWork.SaveAsync();
 
-                ImageCreateViewModel imageModel = new ImageCreateViewModel(newEvent.Name, model.Image, newEvent.Id, CommonConstants.EVENT_IMAGE, CommonConstants.THUMBNAIL);
+                ImageCreateViewModel thumbnailModel = new ImageCreateViewModel(newEvent.Name,
+                    model.Thumbnail, newEvent.Id, CommonConstants.EVENT_IMAGE, CommonConstants.THUMBNAIL);
 
-                var img = await _imageService.Create(imageModel);
-
+                var thumbnail = await _imageService.Create(thumbnailModel);
+                
                 var result = await _unitOfWork.EventRepository
                     .Get(e => e.Id.Equals(newEvent.Id))
                     .Include(e => e.Creator)
                     .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync();
+                foreach (var img in model.ListImage)
+                {
+                    ImageCreateViewModel imageModel = new ImageCreateViewModel(result.Name, img.Image,
+                    result.Id, CommonConstants.EVENT_IMAGE, CommonConstants.SOURCE_IMAGE);
+                    var image = await _imageService.Create(imageModel);
+                    listEventImage.Add(image);
+                }
+                var eventImage = _mapper.Map<List<EventImageDetailViewModel>>(listEventImage);
 
-                result.Image = img;
+                result.Thumbnail = thumbnail;
+                result.ListImage = eventImage;
                 return result;
             }
             catch (Exception)
             {
                 _logger.LogInformation("Invalid Data.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
+            }
+        }
+
+        public async Task<EventViewModel> DeleteImageFromEvent(Guid partyId, string roleName, Guid imageId)
+        {
+            var image = await _imageService.GetById(imageId);
+            var myEvent = await _unitOfWork.EventRepository
+                .Get(e => e.Id.Equals(image.KeyId))
+                .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+
+            if (myEvent == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            if (myEvent.Type.Equals(CommonConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+
+            if (myEvent.Type.Equals(CommonConstants.LOCAL_TYPE) && !myEvent.CreatorId.Equals(partyId))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+            if (image.Link.Contains(CommonConstants.THUMBNAIL))
+            {
+                _logger.LogInformation("You can not delete thumbnail. You can only change thumbnail.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not delete thumbnail. You can only change thumbnail.");
+            }
+            bool delete = await _imageService.Delete(imageId);
+            if (delete)
+            {
+                var listImage = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(myEvent.Id + ""), CommonConstants.EVENT_IMAGE);
+                if (listImage == null)
+                {
+                    _logger.LogInformation($"{myEvent.Name} has lost image.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                }
+                var listSourceImage = new List<ImageViewModel>();
+                foreach (var img in listImage)
+                {
+                    if (img.Link == null)
+                    {
+                        _logger.LogInformation($"{myEvent.Name} has lost image.");
+                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                    }
+                    if (img.Link.Contains(CommonConstants.THUMBNAIL))
+                    {
+                        myEvent.Thumbnail = img;
+                    }
+                    else if (img.Link.Contains(CommonConstants.SOURCE_IMAGE))
+                    {
+                        listSourceImage.Add(img);
+                    }
+                }
+                myEvent.ListImage = _mapper.Map<List<EventImageDetailViewModel>>(listSourceImage);
+                return myEvent;
+            }
+            else
+            {
+                _logger.LogInformation("Server Error.");
+                throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
             }
         }
 
@@ -195,7 +271,7 @@ namespace kiosk_solution.Business.Services.impl
                     }
                     if (img.Link.Contains(CommonConstants.THUMBNAIL))
                     {
-                        item.Image = img;
+                        item.Thumbnail = img;
                     }
                     else if (img.Link.Contains(CommonConstants.SOURCE_IMAGE))
                     {
@@ -302,7 +378,7 @@ namespace kiosk_solution.Business.Services.impl
                 _unitOfWork.EventRepository.Update(eventUpdate);
                 await _unitOfWork.SaveAsync();
                 var result = _mapper.Map<EventViewModel>(eventUpdate);
-                result.Image = imageModel;
+                result.Thumbnail = imageModel;
                 return result;
             }
             catch (Exception)

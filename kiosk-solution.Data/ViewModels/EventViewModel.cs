@@ -9,7 +9,7 @@ namespace kiosk_solution.Data.ViewModels
     public class EventViewModel
     {
         public Guid Id { get; set; }
-        public ImageViewModel Image { get; set; }
+        public ImageViewModel Thumbnail { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime? TimeStart { get; set; }
@@ -26,5 +26,6 @@ namespace kiosk_solution.Data.ViewModels
         public string CreatorEmail { get; set; }
         public string Type { get; set; }
         public string Status { get; set; }
+        public List<EventImageDetailViewModel> ListImage { get; set; }
     }
 }
