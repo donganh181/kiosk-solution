@@ -164,6 +164,72 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
+        public async Task<EventViewModel> DeleteImageFromEvent(Guid partyId, string roleName, Guid imageId)
+        {
+            var image = await _imageService.GetById(imageId);
+            var myEvent = await _unitOfWork.EventRepository
+                .Get(e => e.Id.Equals(image.KeyId))
+                .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+
+            if (myEvent == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            if (myEvent.Type.Equals(CommonConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+
+            if (myEvent.Type.Equals(CommonConstants.LOCAL_TYPE) && !myEvent.CreatorId.Equals(partyId))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+            if (image.Link.Contains(CommonConstants.THUMBNAIL))
+            {
+                _logger.LogInformation("You can not delete thumbnail. You can only change thumbnail.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not delete thumbnail. You can only change thumbnail.");
+            }
+            bool delete = await _imageService.Delete(imageId);
+            if (delete)
+            {
+                var listImage = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(myEvent.Id + ""), CommonConstants.EVENT_IMAGE);
+                if (listImage == null)
+                {
+                    _logger.LogInformation($"{myEvent.Name} has lost image.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                }
+                var listSourceImage = new List<ImageViewModel>();
+                foreach (var img in listImage)
+                {
+                    if (img.Link == null)
+                    {
+                        _logger.LogInformation($"{myEvent.Name} has lost image.");
+                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                    }
+                    if (img.Link.Contains(CommonConstants.THUMBNAIL))
+                    {
+                        myEvent.Thumbnail = img;
+                    }
+                    else if (img.Link.Contains(CommonConstants.SOURCE_IMAGE))
+                    {
+                        listSourceImage.Add(img);
+                    }
+                }
+                myEvent.ListImage = _mapper.Map<List<EventImageDetailViewModel>>(listSourceImage);
+                return myEvent;
+            }
+            else
+            {
+                _logger.LogInformation("Server Error.");
+                throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
+            }
+        }
+
         public async Task<DynamicModelResponse<EventSearchViewModel>> GetAllWithPaging(Guid partyId, string roleName,
             EventSearchViewModel model, int size, int pageNum)
         {

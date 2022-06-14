@@ -107,7 +107,24 @@ namespace kiosk_solution.Controllers
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _eventService.UpdateImageToEvent(token.Id, token.Role, model);
             _logger.LogInformation($"Update image success by party {token.Mail}");
-            return Ok(new SuccessResponse<ImageViewModel>((int)HttpStatusCode.OK, "Create success.", result));
+            return Ok(new SuccessResponse<ImageViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+
+        /// <summary>
+        /// Delete image from event by admin or its location owner
+        /// </summary>
+        /// <param name="imageId"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Location Owner")]
+        [HttpDelete("image")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> DeleteImage([FromBody] Guid imageId)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _eventService.DeleteImageFromEvent(token.Id, token.Role, imageId);
+            _logger.LogInformation($"Delete image success by party {token.Mail}");
+            return Ok(new SuccessResponse<EventViewModel>((int)HttpStatusCode.OK, "Delete success.", result));
         }
     }
 }
