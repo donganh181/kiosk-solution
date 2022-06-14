@@ -54,6 +54,23 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
+        public async Task<bool> Delete(Guid imageId)
+        {
+            var img = await _unitOfWork.ImageRepository.Get(i => i.Id.Equals(imageId)).FirstOrDefaultAsync();
+
+            try
+            {
+                _unitOfWork.ImageRepository.Delete(img);
+                await _unitOfWork.SaveAsync();
+                return true;
+            }
+            catch(Exception)
+            {
+                _logger.LogInformation("Invalid Data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
+            }
+        }
+
         public async Task<DynamicModelResponse<ImageSearchViewModel>> GetAllWithPaging(ImageSearchViewModel model)
         {
             throw new NotImplementedException();
