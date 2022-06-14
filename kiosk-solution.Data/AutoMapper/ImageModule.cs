@@ -27,6 +27,9 @@ namespace kiosk_solution.Data.AutoMapper
 
             mc.CreateMap<ImageViewModel, EventImageDetailViewModel>();
             mc.CreateMap<EventImageDetailViewModel, ImageViewModel>();
+
+            mc.CreateMap<ImageViewModel, PoiImageDetailViewModel>();
+            mc.CreateMap<PoiImageDetailViewModel, ImageViewModel>();
         }
     }
 }

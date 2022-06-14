@@ -34,6 +34,47 @@ namespace kiosk_solution.Business.Services.impl
             _imageService = imageService;
         }
 
+        public async Task<PoiImageViewModel> AddImageToPoi(Guid partyId, string roleName, PoiAddImageViewModel model)
+        {
+            List<ImageViewModel> listPoiImage = new List<ImageViewModel>();
+            var poi = await _unitOfWork.PoiRepository
+                .Get(p => p.Id.Equals(model.Id))
+                .FirstOrDefaultAsync();
+
+            if(poi == null)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+            if (poi.Type.Equals(TypeConstants.CREATE_BY_ADMIN) && !roleName.Equals(RoleConstants.ADMIN))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+            if(poi.Type.Equals(TypeConstants.CREATE_BY_LOCATION_OWNER) && !poi.CreatorId.Equals(partyId))
+            {
+                _logger.LogInformation("You can not interact with poi which is not your.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not interact with poi which is not your.");
+            }
+
+            foreach (var img in model.ListImage)
+            {
+                ImageCreateViewModel imageModel = new ImageCreateViewModel(poi.Name, img.Image,
+                    poi.Id, CommonConstants.POI_IMAGE, CommonConstants.SOURCE_IMAGE);
+                var image = await _imageService.Create(imageModel);
+                listPoiImage.Add(image);
+            }
+
+            var poiImage = _mapper.Map<List<PoiImageDetailViewModel>>(listPoiImage);
+            var result = await _unitOfWork.EventRepository
+                .Get(e => e.Id.Equals(model.Id))
+                .ProjectTo<PoiImageViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+
+            result.ListImage = poiImage;
+            return result;
+        }
+
         public async Task<PoiViewModel> Create(Guid partyId, string roleName, PoiCreateViewModel model)
         {
             List<ImageViewModel> listPoiImage = new List<ImageViewModel>();
