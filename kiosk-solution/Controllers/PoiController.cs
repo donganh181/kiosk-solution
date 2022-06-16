@@ -53,5 +53,22 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<DynamicModelResponse<PoiSearchViewModel>>((int) HttpStatusCode.OK,
                 "Search success.", result));
         }
+
+        /// <summary>
+        /// Add image to poi API
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Location Owner")]
+        [HttpPost("image")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> AddImage([FromBody] PoiAddImageViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _poiService.AddImageToPoi(token.Id, token.Role, model);
+            _logger.LogInformation($"Add image to poi {result.Name} by party {token.Mail}");
+            return Ok(new SuccessResponse<PoiImageViewModel>((int)HttpStatusCode.OK, "Create success.", result));
+        }
     }
 }

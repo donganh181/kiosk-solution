@@ -66,7 +66,7 @@ namespace kiosk_solution.Business.Services.impl
             }
 
             var poiImage = _mapper.Map<List<PoiImageDetailViewModel>>(listPoiImage);
-            var result = await _unitOfWork.EventRepository
+            var result = await _unitOfWork.PoiRepository
                 .Get(e => e.Id.Equals(model.Id))
                 .ProjectTo<PoiImageViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
