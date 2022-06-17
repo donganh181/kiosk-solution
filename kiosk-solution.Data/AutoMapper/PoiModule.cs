@@ -11,11 +11,17 @@ namespace kiosk_solution.Data.AutoMapper
             mc.CreateMap<Poi, PoiCreateViewModel>();
             mc.CreateMap<PoiCreateViewModel, Poi>();
 
-            mc.CreateMap<Poi, PoiViewModel>();
+            mc.CreateMap<Poi, PoiViewModel>()
+                .ForMember(src => src.CreatorName, opt => opt.MapFrom(des => des.Creator.FirstName))
+                .ForMember(src => src.CreatorEmail, opt => opt.MapFrom(des => des.Creator.Email))
+                .ForMember(src => src.PoicategoryName, opt => opt.MapFrom(des => des.Poicategory.Name));
             mc.CreateMap<PoiViewModel, Poi>();
 
             mc.CreateMap<Poi, PoiSearchViewModel>();
             mc.CreateMap<PoiSearchViewModel, Poi>();
+
+            mc.CreateMap<Poi, PoiImageViewModel>();
+            mc.CreateMap<PoiImageViewModel, Poi>();
 
         }
     }
