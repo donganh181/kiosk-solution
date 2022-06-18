@@ -85,7 +85,6 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<EventPositionViewModel> Update(Guid partyId, EventPositionUpdateViewModel model)
         {
-            EventPosition eventPos = null;
             //check if there are 2 or more event are in the same position
             if (model.ListPosition.GroupBy(x => new { x.RowIndex, x.ColumnIndex }).Where(x => x.Count() > 1).FirstOrDefault() != null)
             {
