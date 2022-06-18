@@ -55,7 +55,7 @@ namespace kiosk_solution.Controllers
         }
 
         /// <summary>
-        /// Add image to poi API
+        /// Add image to poi
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
@@ -69,6 +69,23 @@ namespace kiosk_solution.Controllers
             var result = await _poiService.AddImageToPoi(token.Id, token.Role, model);
             _logger.LogInformation($"Add image to poi {result.Name} by party {token.Mail}");
             return Ok(new SuccessResponse<PoiImageViewModel>((int)HttpStatusCode.OK, "Create success.", result));
+        }
+
+        /// <summary>
+        /// Update image to poi
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Location Owner")]
+        [HttpPatch("image")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateImage([FromBody] PoiUpdateImageViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _poiService.UpdateImageToPoi(token.Id, token.Role, model);
+            _logger.LogInformation($"Update image success by party {token.Mail}");
+            return Ok(new SuccessResponse<ImageViewModel>((int)HttpStatusCode.OK, "Update success.", result));
         }
     }
 }

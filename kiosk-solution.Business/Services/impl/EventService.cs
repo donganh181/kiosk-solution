@@ -391,6 +391,12 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<ImageViewModel> UpdateImageToEvent(Guid partyId, string roleName, EventUpdateImageViewModel model)
         {
             var img = await _imageService.GetById(model.Id);
+
+            if (!img.KeyType.Equals(CommonConstants.EVENT_IMAGE))
+            {
+                _logger.LogInformation("You can not update poi image.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not update poi image.");
+            }
             var myEvent = await _unitOfWork.EventRepository.Get(e => e.Id.Equals(img.KeyId)).FirstOrDefaultAsync();
            
             if (myEvent == null)
@@ -411,7 +417,9 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
             }
 
-            ImageUpdateViewModel updateModel = new ImageUpdateViewModel(img.Id, myEvent.Name, model.Image, CommonConstants.SOURCE_IMAGE);
+            ImageUpdateViewModel updateModel = 
+                new ImageUpdateViewModel(img.Id, myEvent.Name, model.Image, CommonConstants.SOURCE_IMAGE);
+           
             var result = await _imageService.Update(updateModel);
             return result;
         }
