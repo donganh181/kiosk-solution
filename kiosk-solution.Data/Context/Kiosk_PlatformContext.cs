@@ -1,7 +1,7 @@
 ﻿using System;
-using kiosk_solution.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using kiosk_solution.Data.Models;
 
 #nullable disable
 
@@ -41,7 +41,6 @@ namespace kiosk_solution.Data.Context
         public virtual DbSet<ServiceOrder> ServiceOrders { get; set; }
         public virtual DbSet<Template> Templates { get; set; }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
@@ -50,7 +49,7 @@ namespace kiosk_solution.Data.Context
             {
                 entity.ToTable("AppCategory");
 
-                entity.HasIndex(e => e.Name, "UQ__AppCateg__737584F6707218DE")
+                entity.HasIndex(e => e.Name, "UQ__AppCateg__737584F69F3613E8")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
@@ -81,7 +80,7 @@ namespace kiosk_solution.Data.Context
             {
                 entity.ToTable("ApplicationMarket");
 
-                entity.HasIndex(e => e.Name, "UQ__Applicat__737584F622020019")
+                entity.HasIndex(e => e.Name, "UQ__Applicat__737584F6A435BF70")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
@@ -107,15 +106,9 @@ namespace kiosk_solution.Data.Context
 
                 entity.Property(e => e.City).HasMaxLength(50);
 
+                entity.Property(e => e.CreateDate).HasColumnType("datetime");
+
                 entity.Property(e => e.District).HasMaxLength(50);
-
-                entity.Property(e => e.Latitude)
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Longtitude)
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
 
                 entity.Property(e => e.Name).HasMaxLength(255);
 
@@ -136,7 +129,7 @@ namespace kiosk_solution.Data.Context
                 entity.HasOne(d => d.Creator)
                     .WithMany(p => p.Events)
                     .HasForeignKey(d => d.CreatorId)
-                    .HasConstraintName("FK__Event__Status__5165187F");
+                    .HasConstraintName("FK__Event__CreatorId__5165187F");
             });
 
             modelBuilder.Entity<EventPosition>(entity =>
@@ -180,14 +173,6 @@ namespace kiosk_solution.Data.Context
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
-
-                entity.Property(e => e.Latitude)
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Longtitude)
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
 
                 entity.Property(e => e.Name).HasMaxLength(255);
 
@@ -257,10 +242,10 @@ namespace kiosk_solution.Data.Context
             {
                 entity.ToTable("Party");
 
-                entity.HasIndex(e => e.PhoneNumber, "UQ__Party__85FB4E388FCA361C")
+                entity.HasIndex(e => e.PhoneNumber, "UQ__Party__85FB4E3886BF3FEA")
                     .IsUnique();
 
-                entity.HasIndex(e => e.Email, "UQ__Party__A9D105340AF8B955")
+                entity.HasIndex(e => e.Email, "UQ__Party__A9D105347E298C3D")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
@@ -355,14 +340,6 @@ namespace kiosk_solution.Data.Context
 
                 entity.Property(e => e.District).HasMaxLength(50);
 
-                entity.Property(e => e.Latitude)
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Longtitude)
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
                 entity.Property(e => e.Name).HasMaxLength(255);
 
                 entity.Property(e => e.PoicategoryId).HasColumnName("POICategoryId");
@@ -393,6 +370,8 @@ namespace kiosk_solution.Data.Context
                 entity.ToTable("POICategory");
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+
+                entity.Property(e => e.Logo).IsUnicode(false);
 
                 entity.Property(e => e.Name).HasMaxLength(255);
             });
@@ -453,10 +432,12 @@ namespace kiosk_solution.Data.Context
             {
                 entity.ToTable("ServiceApplication");
 
-                entity.HasIndex(e => e.Name, "UQ__ServiceA__737584F62517A937")
+                entity.HasIndex(e => e.Name, "UQ__ServiceA__737584F6A84012A4")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+
+                entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Link).IsUnicode(false);
 
@@ -489,6 +470,8 @@ namespace kiosk_solution.Data.Context
                 entity.ToTable("ServiceApplicationPublishRequest");
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+
+                entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Status)
                     .HasMaxLength(20)

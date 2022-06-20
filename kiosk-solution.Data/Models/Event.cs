@@ -17,8 +17,8 @@ namespace kiosk_solution.Data.Models
         public string Description { get; set; }
         public DateTime? TimeStart { get; set; }
         public DateTime? TimeEnd { get; set; }
-        public string Longtitude { get; set; }
-        public string Latitude { get; set; }
+        public long? Longtitude { get; set; }
+        public long? Latitude { get; set; }
         public string Ward { get; set; }
         public string District { get; set; }
         public string City { get; set; }
@@ -26,8 +26,8 @@ namespace kiosk_solution.Data.Models
         public Guid? CreatorId { get; set; }
         public string Type { get; set; }
         public string Status { get; set; }
-        
         public DateTime? CreateDate { get; set; }
+
         public virtual Party Creator { get; set; }
         public virtual ICollection<EventPosition> EventPositions { get; set; }
     }
