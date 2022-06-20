@@ -144,5 +144,17 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
             }
         }
+
+        public async Task<TemplateViewModel> GetById(Guid templateId)
+        {
+            var template = await _unitOfWork.TemplateRepository.Get(t => t.Id.Equals(templateId)).FirstOrDefaultAsync();
+            if(template == null)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found.");
+            }
+            var result = _mapper.Map<TemplateViewModel>(template);
+            return result;
+        }
     }
 }
