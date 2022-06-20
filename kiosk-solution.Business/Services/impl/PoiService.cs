@@ -166,5 +166,42 @@ namespace kiosk_solution.Business.Services.impl
             };
             return result;
         }
+
+        public async Task<ImageViewModel> UpdateImageToPoi(Guid partyId, string roleName, PoiUpdateImageViewModel model)
+        {
+            var img = await _imageService.GetById(model.Id);
+
+            if (!img.KeyType.Equals(CommonConstants.POI_IMAGE))
+            {
+                _logger.LogInformation("You can not update event image.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not update event image.");
+            }
+
+            var poi = await _unitOfWork.PoiRepository
+                .Get(p => p.Id.Equals(img.KeyId))
+                .FirstOrDefaultAsync();
+
+            if (poi == null)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+            if (poi.Type.Equals(TypeConstants.CREATE_BY_ADMIN) && !roleName.Equals(RoleConstants.ADMIN))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+            if (poi.Type.Equals(TypeConstants.CREATE_BY_LOCATION_OWNER) && !poi.CreatorId.Equals(partyId))
+            {
+                _logger.LogInformation("You can not interact with poi which is not your.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not interact with poi which is not your.");
+            }
+
+            ImageUpdateViewModel updateModel = 
+                new ImageUpdateViewModel(img.Id, poi.Name, model.Image, CommonConstants.SOURCE_IMAGE);
+
+            var result = await _imageService.Update(updateModel);
+            return result;
+        }
     }
 }
