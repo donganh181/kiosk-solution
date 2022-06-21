@@ -24,14 +24,16 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<IAppCategoryService> _logger;
         private readonly IFileService _fileService;
+        private readonly IPartyServiceApplicationService _partyServiceApplicationService;
 
         public AppCategoryService(IMapper mapper, IUnitOfWork unitOfWork, ILogger<IAppCategoryService> logger
-            ,IFileService fileService)
+            ,IFileService fileService, IPartyServiceApplicationService partyServiceApplicationService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _fileService = fileService;
+            _partyServiceApplicationService = partyServiceApplicationService;
         }
 
         public async Task<AppCategoryViewModel> Create(AppCategoryCreateViewModel model)
@@ -73,13 +75,40 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<DynamicModelResponse<AppCategorySearchViewModel>> GetAllWithPaging(AppCategorySearchViewModel model, int size, int pageNum)
+        public async Task<DynamicModelResponse<AppCategorySearchViewModel>> GetAllWithPaging(Guid? id,string role, AppCategorySearchViewModel model, int size, int pageNum)
         {
-            var cates = _unitOfWork.AppCategoryRepository
+            IQueryable<AppCategorySearchViewModel> cates = null;
+            List<AppCategorySearchViewModel> listCate = new List<AppCategorySearchViewModel>();           
+            if(string.IsNullOrEmpty(role) || role.Equals(RoleConstants.ADMIN))
+            {
+                cates = _unitOfWork.AppCategoryRepository
                 .Get()
-                .ProjectTo<AppCategorySearchViewModel>(_mapper.ConfigurationProvider)
-                .DynamicFilter(model)
-                .AsQueryable().OrderByDescending(c => c.Name);
+                .ProjectTo<AppCategorySearchViewModel>(_mapper.ConfigurationProvider);
+                listCate = await cates.ToListAsync();
+            }
+            else if (!string.IsNullOrEmpty(role) && role.Equals(RoleConstants.LOCATION_OWNER))
+            {
+                cates = _unitOfWork.AppCategoryRepository
+                .Get()
+                .ProjectTo<AppCategorySearchViewModel>(_mapper.ConfigurationProvider);
+                var listCheck = await cates.ToListAsync();
+
+                foreach (var item in listCheck)
+                {
+                    var check = await _partyServiceApplicationService.CheckAppExist(Guid.Parse(id + ""), Guid.Parse(item.Id + ""));
+                    if (check)
+                    {
+                        listCate.Add(item);
+                    }
+                }
+                if (listCate.Count() < 1)
+                {
+                    _logger.LogInformation("Can not Found.");
+                    throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                }
+            }
+
+            cates = listCate.AsQueryable().OrderByDescending(c => c.Name);
 
             var listPaging = cates.PagingIQueryable(pageNum, size,
                 CommonConstants.LimitPaging, CommonConstants.DefaultPaging);

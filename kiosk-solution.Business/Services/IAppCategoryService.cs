@@ -12,6 +12,6 @@ namespace kiosk_solution.Business.Services
     {
         public Task<AppCategoryViewModel> Create(AppCategoryCreateViewModel model);
         public Task<AppCategoryViewModel> Update(AppCategoryUpdateViewModel model);
-        public Task<DynamicModelResponse<AppCategorySearchViewModel>> GetAllWithPaging(AppCategorySearchViewModel model, int size, int pageNum);
+        public Task<DynamicModelResponse<AppCategorySearchViewModel>> GetAllWithPaging(Guid? id,string role, AppCategorySearchViewModel model, int size, int pageNum);
     }
 }
