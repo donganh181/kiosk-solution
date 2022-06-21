@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using kiosk_solution.Business.Services;
 using kiosk_solution.Data.Constants;
@@ -53,7 +54,17 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<DynamicModelResponse<PoiSearchViewModel>>((int) HttpStatusCode.OK,
                 "Search success.", result));
         }
-
+        [HttpGet("{id}")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var request = Request;
+            
+            var result = await _poiService.GetById(id);
+            _logger.LogInformation($"Get POIs");
+            return Ok(new SuccessResponse<PoiSearchViewModel>((int) HttpStatusCode.OK,
+                "Search success.", result));
+        }
         /// <summary>
         /// Add image to poi
         /// </summary>

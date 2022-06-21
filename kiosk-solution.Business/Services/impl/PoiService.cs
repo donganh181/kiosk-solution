@@ -41,20 +41,23 @@ namespace kiosk_solution.Business.Services.impl
                 .Get(p => p.Id.Equals(model.Id))
                 .FirstOrDefaultAsync();
 
-            if(poi == null)
+            if (poi == null)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
+
             if (poi.Type.Equals(TypeConstants.CREATE_BY_ADMIN) && !roleName.Equals(RoleConstants.ADMIN))
             {
                 _logger.LogInformation("You can not use this feature.");
-                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");
             }
-            if(poi.Type.Equals(TypeConstants.CREATE_BY_LOCATION_OWNER) && !poi.CreatorId.Equals(partyId))
+
+            if (poi.Type.Equals(TypeConstants.CREATE_BY_LOCATION_OWNER) && !poi.CreatorId.Equals(partyId))
             {
                 _logger.LogInformation("You can not interact with poi which is not your.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not interact with poi which is not your.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest,
+                    "You can not interact with poi which is not your.");
             }
 
             foreach (var img in model.ListImage)
@@ -108,13 +111,14 @@ namespace kiosk_solution.Business.Services.impl
                     .Include(p => p.Poicategory)
                     .ProjectTo<PoiViewModel>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync();
-                foreach(var img in model.ListImage)
+                foreach (var img in model.ListImage)
                 {
                     ImageCreateViewModel imageModel = new ImageCreateViewModel(result.Name, img.Image,
-                    result.Id, CommonConstants.EVENT_IMAGE, CommonConstants.SOURCE_IMAGE);
+                        result.Id, CommonConstants.EVENT_IMAGE, CommonConstants.SOURCE_IMAGE);
                     var image = await _imageService.Create(imageModel);
                     listPoiImage.Add(image);
                 }
+
                 var poiImage = _mapper.Map<List<PoiImageDetailViewModel>>(listPoiImage);
                 result.Thumbnail = thumbnail;
                 result.ListImage = poiImage;
@@ -127,7 +131,8 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<DynamicModelResponse<PoiSearchViewModel>> GetWithPaging(PoiSearchViewModel model, int size, int pageNum)
+        public async Task<DynamicModelResponse<PoiSearchViewModel>> GetWithPaging(PoiSearchViewModel model, int size,
+            int pageNum)
         {
             IOrderedQueryable<PoiSearchViewModel> pois;
             if (string.IsNullOrEmpty(model.Type))
@@ -167,6 +172,15 @@ namespace kiosk_solution.Business.Services.impl
             return result;
         }
 
+        public async Task<PoiSearchViewModel> GetById(Guid id)
+        {
+            return _unitOfWork.PoiRepository
+                .Get(poi => poi.Id.Equals(id))
+                .Include(poi => poi.Poicategory)
+                .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefault();
+        }
+
         public async Task<ImageViewModel> UpdateImageToPoi(Guid partyId, string roleName, PoiUpdateImageViewModel model)
         {
             var img = await _imageService.GetById(model.Id);
@@ -174,7 +188,7 @@ namespace kiosk_solution.Business.Services.impl
             if (!img.KeyType.Equals(CommonConstants.POI_IMAGE))
             {
                 _logger.LogInformation("You can not update event image.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not update event image.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You can not update event image.");
             }
 
             var poi = await _unitOfWork.PoiRepository
@@ -184,20 +198,23 @@ namespace kiosk_solution.Business.Services.impl
             if (poi == null)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
+
             if (poi.Type.Equals(TypeConstants.CREATE_BY_ADMIN) && !roleName.Equals(RoleConstants.ADMIN))
             {
                 _logger.LogInformation("You can not use this feature.");
-                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");
             }
+
             if (poi.Type.Equals(TypeConstants.CREATE_BY_LOCATION_OWNER) && !poi.CreatorId.Equals(partyId))
             {
                 _logger.LogInformation("You can not interact with poi which is not your.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not interact with poi which is not your.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest,
+                    "You can not interact with poi which is not your.");
             }
 
-            ImageUpdateViewModel updateModel = 
+            ImageUpdateViewModel updateModel =
                 new ImageUpdateViewModel(img.Id, poi.Name, model.Image, CommonConstants.SOURCE_IMAGE);
 
             var result = await _imageService.Update(updateModel);
