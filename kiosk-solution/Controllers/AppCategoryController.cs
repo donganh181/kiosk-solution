@@ -23,7 +23,9 @@ namespace kiosk_solution.Controllers
         private readonly IAppCategoryService _appCategoryService;
         private readonly ILogger<AppCategoryController> _logger;
         private IConfiguration _configuration;
-        public AppCategoryController(IAppCategoryService appCategoryService, ILogger<AppCategoryController> logger, IConfiguration configuration)
+
+        public AppCategoryController(IAppCategoryService appCategoryService, ILogger<AppCategoryController> logger,
+            IConfiguration configuration)
         {
             _logger = logger;
             _appCategoryService = appCategoryService;
@@ -44,7 +46,7 @@ namespace kiosk_solution.Controllers
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _appCategoryService.Create(model);
             _logger.LogInformation($"Create category {result.Name} by party {token.Mail}");
-            return Ok(new SuccessResponse<AppCategoryViewModel>((int)HttpStatusCode.OK, "Create success.", result));
+            return Ok(new SuccessResponse<AppCategoryViewModel>((int) HttpStatusCode.OK, "Create success.", result));
         }
 
         /// <summary>
@@ -61,7 +63,7 @@ namespace kiosk_solution.Controllers
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _appCategoryService.Update(model);
             _logger.LogInformation($"Updated category {result.Name} by party {token.Mail}");
-            return Ok(new SuccessResponse<AppCategoryViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+            return Ok(new SuccessResponse<AppCategoryViewModel>((int) HttpStatusCode.OK, "Update success.", result));
         }
 
         /// <summary>
@@ -73,24 +75,15 @@ namespace kiosk_solution.Controllers
         /// <returns></returns>
         [HttpGet]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> Get([FromQuery] AppCategorySearchViewModel model, int size, int page = CommonConstants.DefaultPage)
+        public async Task<IActionResult> Get([FromQuery] AppCategorySearchViewModel model, int size,
+            int page = CommonConstants.DefaultPage)
         {
             var request = Request;
-            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            if(token == null)
-            {
-                var result = await _appCategoryService.GetAllWithPaging(null,null, model, size, page);
-                _logger.LogInformation($"Get all categories by guest");
-                return Ok(new SuccessResponse<DynamicModelResponse<AppCategorySearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
-            }
-            else
-            {
-                Guid id = token.Id;
-                string role = token.Role;
-                var result = await _appCategoryService.GetAllWithPaging(id, role, model, size, page);
-                _logger.LogInformation($"Get all categories by party {token.Mail}");
-                return Ok(new SuccessResponse<DynamicModelResponse<AppCategorySearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
-            }
+            var token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _appCategoryService.GetAllWithPaging(null, null, model, size, page);
+            _logger.LogInformation($"Get all categories by guest");
+            return Ok(new SuccessResponse<DynamicModelResponse<AppCategorySearchViewModel>>((int) HttpStatusCode.OK,
+                "Search success.", result));
         }
     }
 }
