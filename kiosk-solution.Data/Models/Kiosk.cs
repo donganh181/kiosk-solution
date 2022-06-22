@@ -19,8 +19,8 @@ namespace kiosk_solution.Data.Models
         public Guid? PartyId { get; set; }
         public Guid? KioskLocationId { get; set; }
         public string Status { get; set; }
-        public long? Longtitude { get; set; }
-        public long? Latitude { get; set; }
+        public double? Longtitude { get; set; }
+        public double? Latitude { get; set; }
 
         public virtual KioskLocation KioskLocation { get; set; }
         public virtual Party Party { get; set; }

@@ -167,6 +167,11 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<EventViewModel> DeleteImageFromEvent(Guid partyId, string roleName, Guid imageId)
         {
             var image = await _imageService.GetById(imageId);
+            if (!image.KeyType.Equals(CommonConstants.EVENT_IMAGE))
+            {
+                _logger.LogInformation("You can not delete poi image.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not delete poi image.");
+            }
             var myEvent = await _unitOfWork.EventRepository
                 .Get(e => e.Id.Equals(image.KeyId))
                 .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)

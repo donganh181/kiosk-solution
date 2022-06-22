@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using kiosk_solution.Data.Models;
-
 #nullable disable
 
 namespace kiosk_solution.Data.Context
@@ -49,7 +48,7 @@ namespace kiosk_solution.Data.Context
             {
                 entity.ToTable("AppCategory");
 
-                entity.HasIndex(e => e.Name, "UQ__AppCateg__737584F69F3613E8")
+                entity.HasIndex(e => e.Name, "UQ__AppCateg__737584F6B4A6BC00")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
@@ -80,7 +79,7 @@ namespace kiosk_solution.Data.Context
             {
                 entity.ToTable("ApplicationMarket");
 
-                entity.HasIndex(e => e.Name, "UQ__Applicat__737584F6A435BF70")
+                entity.HasIndex(e => e.Name, "UQ__Applicat__737584F683DADB8B")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
@@ -242,10 +241,10 @@ namespace kiosk_solution.Data.Context
             {
                 entity.ToTable("Party");
 
-                entity.HasIndex(e => e.PhoneNumber, "UQ__Party__85FB4E3886BF3FEA")
+                entity.HasIndex(e => e.PhoneNumber, "UQ__Party__85FB4E38B9DB3B06")
                     .IsUnique();
 
-                entity.HasIndex(e => e.Email, "UQ__Party__A9D105347E298C3D")
+                entity.HasIndex(e => e.Email, "UQ__Party__A9D1053400DB32D2")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
@@ -432,7 +431,7 @@ namespace kiosk_solution.Data.Context
             {
                 entity.ToTable("ServiceApplication");
 
-                entity.HasIndex(e => e.Name, "UQ__ServiceA__737584F6A84012A4")
+                entity.HasIndex(e => e.Name, "UQ__ServiceA__737584F6329365B9")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");

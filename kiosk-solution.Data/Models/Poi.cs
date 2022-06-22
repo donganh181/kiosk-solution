@@ -13,8 +13,8 @@ namespace kiosk_solution.Data.Models
         public TimeSpan? OpenTime { get; set; }
         public TimeSpan? CloseTime { get; set; }
         public string DayOfWeek { get; set; }
-        public long? Longtitude { get; set; }
-        public long? Latitude { get; set; }
+        public double? Longtitude { get; set; }
+        public double? Latitude { get; set; }
         public string Ward { get; set; }
         public string District { get; set; }
         public string City { get; set; }
