@@ -47,16 +47,33 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<EventViewModel>((int)HttpStatusCode.OK, "Create success.", result));
         }
         
-        [Authorize(Roles = "Admin, Location Owner")]
+        /// <summary>
+        /// get all event
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="size"></param>
+        /// <param name="pageNum"></param>
+        /// <returns></returns>
         [HttpGet]
         [MapToApiVersion("1")]
         public async Task<IActionResult> Get([FromQuery] EventSearchViewModel model, int size, int pageNum = CommonConstants.DefaultPage)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _eventService.GetAllWithPaging(token.Id, token.Role, model, size, pageNum);
-            _logger.LogInformation($"Get event by party {token.Mail}");
-            return Ok(new SuccessResponse<DynamicModelResponse<EventSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+            if(token == null)
+            {
+                var result = await _eventService.GetAllWithPaging(null,null, model, size, pageNum);
+                _logger.LogInformation("Get event by guest");
+                return Ok(new SuccessResponse<DynamicModelResponse<EventSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+
+            }
+            else
+            {
+                var result = await _eventService.GetAllWithPaging(token.Id, token.Role, model, size, pageNum);
+                _logger.LogInformation($"Get event by party {token.Mail}");
+                return Ok(new SuccessResponse<DynamicModelResponse<EventSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+
+            }
         }
         
         /// <summary>
@@ -125,6 +142,23 @@ namespace kiosk_solution.Controllers
             var result = await _eventService.DeleteImageFromEvent(token.Id, token.Role, imageId);
             _logger.LogInformation($"Delete image success by party {token.Mail}");
             return Ok(new SuccessResponse<EventViewModel>((int)HttpStatusCode.OK, "Delete success.", result));
+        }
+
+        /// <summary>
+        /// Get event by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("{id}")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var request = Request;
+
+            var result = await _eventService.GetById(id);
+            _logger.LogInformation("Get Id");
+            return Ok(new SuccessResponse<EventViewModel>((int)HttpStatusCode.OK,
+                "Search success.", result));
         }
     }
 }
