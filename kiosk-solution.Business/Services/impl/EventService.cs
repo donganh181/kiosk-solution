@@ -235,6 +235,41 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
+        public async Task<EventViewModel> Delete(Guid partyId, string roleName, Guid eventId)
+        {
+            var evt = await _unitOfWork.EventRepository.Get(e => e.Id.Equals(eventId)).FirstOrDefaultAsync();
+            if (evt == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            if (evt.Type.Equals(CommonConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+
+            if (evt.Type.Equals(CommonConstants.LOCAL_TYPE) && !evt.CreatorId.Equals(partyId))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+
+            try
+            {
+                _unitOfWork.EventRepository.Delete(evt);
+                await _unitOfWork.SaveAsync();
+                var result = _mapper.Map<EventViewModel>(evt);
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid data.");
+            }
+        }
+
         public async Task<DynamicModelResponse<EventSearchViewModel>> GetAllWithPaging(Guid? partyId, string roleName,
             EventSearchViewModel model, int size, int pageNum)
         {
