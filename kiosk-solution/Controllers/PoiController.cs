@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using kiosk_solution.Business.Services;
@@ -41,19 +42,33 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Create POI by party {token.Mail}");
             return Ok(new SuccessResponse<PoiViewModel>((int) HttpStatusCode.OK, "Create success.", result));
         }
-        
+
+        /// <summary>
+        /// Get all poi by admin or its location owner
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="size"></param>
+        /// <param name="pageNum"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Location Owner")]
         [HttpGet]
         [MapToApiVersion("1")]
         public async Task<IActionResult> Get([FromQuery] PoiSearchViewModel model, int size,
             int pageNum = CommonConstants.DefaultPage)
         {
             var request = Request;
-            
-            var result = await _poiService.GetWithPaging(model, size, pageNum);
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _poiService.GetAllWithPaging(token.Id, token.Role, model, size, pageNum);
             _logger.LogInformation($"Get POIs");
             return Ok(new SuccessResponse<DynamicModelResponse<PoiSearchViewModel>>((int) HttpStatusCode.OK,
                 "Search success.", result));
         }
+
+        /// <summary>
+        /// Get poi by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetById(Guid id)
@@ -65,6 +80,7 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<PoiSearchViewModel>((int) HttpStatusCode.OK,
                 "Search success.", result));
         }
+
         /// <summary>
         /// Add image to poi
         /// </summary>
@@ -97,6 +113,34 @@ namespace kiosk_solution.Controllers
             var result = await _poiService.UpdateImageToPoi(token.Id, token.Role, model);
             _logger.LogInformation($"Update image success by party {token.Mail}");
             return Ok(new SuccessResponse<ImageViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+
+        /// <summary>
+        /// Delete image from poi by admin or its location owner
+        /// </summary>
+        /// <param name="imageId"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Location Owner")]
+        [HttpDelete("image")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> DeleteImage([FromBody] Guid imageId)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _poiService.DeleteImageFromPoi(token.Id, token.Role, imageId);
+            _logger.LogInformation($"Delete image success by party {token.Mail}");
+            return Ok(new SuccessResponse<PoiViewModel>((int)HttpStatusCode.OK, "Delete success.", result));
+        }
+
+        [HttpGet("nearby")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetPoiNearby([FromQuery] Guid kioskId, double lng, double lat)
+        {
+            
+            var result = await _poiService.GetLocationNearby(kioskId,lng,lat);
+            _logger.LogInformation($"Get POIs");
+            return Ok(new SuccessResponse<List<PoiViewModel>>((int)HttpStatusCode.OK,
+                "Search success.", result));
         }
     }
 }

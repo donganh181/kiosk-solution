@@ -11,5 +11,6 @@ namespace kiosk_solution.Business.Services
         Task<KioskViewModel> CreateNewKiosk(CreateKioskViewModel model);
         Task<KioskViewModel> UpdateInformation(Guid updaterId, UpdateKioskViewModel model);
         Task<DynamicModelResponse<KioskSearchViewModel>> GetAllWithPaging(string role, Guid id, KioskSearchViewModel model, int size, int pageNum);
+        Task<KioskViewModel> GetById(Guid kioskId);
     }
 }

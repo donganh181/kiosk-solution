@@ -109,6 +109,16 @@ namespace kiosk_solution.Business.Services.impl
             return result;
         }
 
+        public async Task<KioskViewModel> GetById(Guid kioskId)
+        {
+            var result = await _unitOfWork.KioskRepository
+                .Get(k => k.Id.Equals(kioskId))
+                .ProjectTo<KioskViewModel>(_mapper)
+                .FirstOrDefaultAsync();
+
+            return result;
+        }
+
         public async Task<KioskViewModel> UpdateInformation(Guid updaterId, UpdateKioskViewModel model)
         {
             var kiosk = await _unitOfWork.KioskRepository.Get(k => k.Id.Equals(model.Id)).FirstOrDefaultAsync();

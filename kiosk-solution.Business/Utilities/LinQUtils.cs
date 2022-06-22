@@ -43,6 +43,9 @@ namespace kiosk_solution.Business.Utilities
                 {
                     source = source.Where($"{item.Name} == \"{((Guid) propertyVal)}\"");
                 }
+                else if (item.CustomAttributes.Any(a => a.AttributeType == typeof(SpecificAttribute)))
+                {      
+                }
                 else
                 {
                     source = source.Where($"{item.Name} = {propertyVal}");
