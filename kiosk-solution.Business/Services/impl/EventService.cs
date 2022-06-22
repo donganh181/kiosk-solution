@@ -235,11 +235,11 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<DynamicModelResponse<EventSearchViewModel>> GetAllWithPaging(Guid partyId, string roleName,
+        public async Task<DynamicModelResponse<EventSearchViewModel>> GetAllWithPaging(Guid? partyId, string roleName,
             EventSearchViewModel model, int size, int pageNum)
         {
             IQueryable<EventSearchViewModel> events = null;
-            if (roleName.Equals(RoleConstants.LOCATION_OWNER))
+            if (!string.IsNullOrEmpty(roleName) && roleName.Equals(RoleConstants.LOCATION_OWNER))
             {
                 events = _unitOfWork.EventRepository
                     .Get(e => (e.CreatorId.Equals(partyId) &&
@@ -248,12 +248,17 @@ namespace kiosk_solution.Business.Services.impl
                     .Include(e => e.Creator)
                     .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider);
             }
-            else if(roleName.Equals(RoleConstants.ADMIN))
+            else if(string.IsNullOrEmpty(roleName) || roleName.Equals(RoleConstants.ADMIN))
             {
                 events = _unitOfWork.EventRepository
                     .Get()
                     .Include(e => e.Creator)
                     .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider);
+            }
+            else if(!string.IsNullOrEmpty(roleName) && roleName.Equals(RoleConstants.SERVICE_PROVIDER))
+            {
+                _logger.LogInformation("Your role can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your role can not use this feature.");
             }
 
             var listEvent = events.ToList();
@@ -309,6 +314,40 @@ namespace kiosk_solution.Business.Services.impl
                 Data = listPaging.Data.ToList()
             };
             return result;
+        }
+
+        public async Task<EventViewModel> GetById(Guid id)
+        {
+            var myEvent = await _unitOfWork.EventRepository
+                .Get(e => e.Id.Equals(id))
+                .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+
+            var listImage = await _imageService.GetByKeyIdAndKeyType(id, CommonConstants.EVENT_IMAGE);
+            if (listImage == null)
+            {
+                _logger.LogInformation($"{myEvent.Name} has lost image.");
+                throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+            }
+            var listSourceImage = new List<ImageViewModel>();
+            foreach (var img in listImage)
+            {
+                if (img.Link == null)
+                {
+                    _logger.LogInformation($"{myEvent.Name} has lost image.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                }
+                if (img.Link.Contains(CommonConstants.THUMBNAIL))
+                {
+                    myEvent.Thumbnail = img;
+                }
+                else if (img.Link.Contains(CommonConstants.SOURCE_IMAGE))
+                {
+                    listSourceImage.Add(img);
+                }
+            }
+            myEvent.ListImage = _mapper.Map<List<EventImageDetailViewModel>>(listSourceImage);
+            return myEvent;
         }
 
         public async Task<EventViewModel> Update(Guid partyId, EventUpdateViewModel model, string roleName)
