@@ -20,4 +20,8 @@ namespace kiosk_solution.Data.Attributes
     public class GuidAttribute : System.Attribute
     {
     }
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+    public class SpecificAttribute : System.Attribute
+    {
+    }
 }

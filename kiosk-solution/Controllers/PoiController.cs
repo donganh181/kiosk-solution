@@ -41,15 +41,16 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Create POI by party {token.Mail}");
             return Ok(new SuccessResponse<PoiViewModel>((int) HttpStatusCode.OK, "Create success.", result));
         }
-        
+
+        [Authorize(Roles = "Admin, Location Owner")]
         [HttpGet]
         [MapToApiVersion("1")]
         public async Task<IActionResult> Get([FromQuery] PoiSearchViewModel model, int size,
             int pageNum = CommonConstants.DefaultPage)
         {
             var request = Request;
-            
-            var result = await _poiService.GetWithPaging(model, size, pageNum);
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _poiService.GetAllWithPaging(token.Id, token.Role, model, size, pageNum);
             _logger.LogInformation($"Get POIs");
             return Ok(new SuccessResponse<DynamicModelResponse<PoiSearchViewModel>>((int) HttpStatusCode.OK,
                 "Search success.", result));
@@ -97,6 +98,23 @@ namespace kiosk_solution.Controllers
             var result = await _poiService.UpdateImageToPoi(token.Id, token.Role, model);
             _logger.LogInformation($"Update image success by party {token.Mail}");
             return Ok(new SuccessResponse<ImageViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+
+        /// <summary>
+        /// Delete image from poi by admin or its location owner
+        /// </summary>
+        /// <param name="imageId"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Location Owner")]
+        [HttpDelete("image")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> DeleteImage([FromBody] Guid imageId)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _poiService.DeleteImageFromPoi(token.Id, token.Role, imageId);
+            _logger.LogInformation($"Delete image success by party {token.Mail}");
+            return Ok(new SuccessResponse<PoiViewModel>((int)HttpStatusCode.OK, "Delete success.", result));
         }
     }
 }
