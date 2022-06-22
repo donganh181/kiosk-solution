@@ -79,7 +79,7 @@ namespace kiosk_solution.Business.Services.impl
         {
             IQueryable<AppCategorySearchViewModel> cates = null;
             List<AppCategorySearchViewModel> listCate = new List<AppCategorySearchViewModel>();           
-            if(string.IsNullOrEmpty(role) || role.Equals(RoleConstants.ADMIN))
+            if(string.IsNullOrEmpty(role) || role.Equals(RoleConstants.ADMIN) || role.Equals(RoleConstants.SERVICE_PROVIDER))
             {
                 cates = _unitOfWork.AppCategoryRepository
                 .Get()
