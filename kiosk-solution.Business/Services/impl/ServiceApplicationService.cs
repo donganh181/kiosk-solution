@@ -36,10 +36,10 @@ namespace kiosk_solution.Business.Services.impl
         }
 
         public async Task<DynamicModelResponse<ServiceApplicationSearchViewModel>> GetAllWithPaging(string role,
-            Guid id, ServiceApplicationSearchViewModel model, int size, int pageNum)
+            Guid? id, ServiceApplicationSearchViewModel model, int size, int pageNum)
         {
             object apps = null;
-            if (role.Equals(RoleConstants.ADMIN))
+            if (string.IsNullOrEmpty(role) || role.Equals(RoleConstants.ADMIN) || role.Equals(RoleConstants.LOCATION_OWNER))
             {
                 apps = _unitOfWork.ServiceApplicationRepository
                     .Get()
@@ -50,7 +50,7 @@ namespace kiosk_solution.Business.Services.impl
                     .AsQueryable().OrderByDescending(a => a.Name);
             
             }
-            if (role.Equals(RoleConstants.SERVICE_PROVIDER))
+            if (!string.IsNullOrEmpty(role) && role.Equals(RoleConstants.SERVICE_PROVIDER))
             {
                 apps = _unitOfWork.ServiceApplicationRepository
                     .Get(a => a.PartyId.Equals(id))

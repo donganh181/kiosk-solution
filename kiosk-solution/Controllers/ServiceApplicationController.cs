@@ -71,11 +71,22 @@ namespace kiosk_solution.Controllers
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            Guid id = token.Id;
-            string role = token.Role;
-            var result = await _serviceApplicationService.GetAllWithPaging(role, id, model, size, page);
-            _logger.LogInformation($"Get all applications by party {token.Mail}");
-            return Ok(new SuccessResponse<DynamicModelResponse<ServiceApplicationSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+            if(token == null)
+            {
+                var result = await _serviceApplicationService.GetAllWithPaging(null, null, model, size, page);
+                _logger.LogInformation("Get all applications by guest");
+                return Ok(new SuccessResponse<DynamicModelResponse<ServiceApplicationSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+
+            }
+            else
+            {
+                Guid id = token.Id;
+                string role = token.Role;
+                var result = await _serviceApplicationService.GetAllWithPaging(role, id, model, size, page);
+                _logger.LogInformation($"Get all applications by party {token.Mail}");
+                return Ok(new SuccessResponse<DynamicModelResponse<ServiceApplicationSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+
+            }
         }
         [HttpGet("{id}")]
         [MapToApiVersion("1")]
