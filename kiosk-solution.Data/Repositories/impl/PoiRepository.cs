@@ -1,4 +1,5 @@
-﻿using kiosk_solution.Data.Context;
+﻿using kiosk_solution.Data.Constants;
+using kiosk_solution.Data.Context;
 using kiosk_solution.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -14,12 +15,13 @@ namespace kiosk_solution.Data.Repositories.impl
         {
         }
 
-        public IQueryable<Poi> GetPoiNearBy(double longitude, double latitude)
+        public IQueryable<Poi> GetPoiNearBy(Guid partyId, double longitude, double latitude)
         {
             var result = dbContext.Pois.Where(x =>
                             (Math.Sqrt(Math.Pow(69.1 * (latitude - (double)x.Latitude), 2) +
-                            Math.Pow(69.1 * (double)(x.Longtitude - longitude) * Math.Cos(latitude / 57.3), 2))) * 1.609344 < 5)
-                
+                            Math.Pow(69.1 * (double)(x.Longtitude - longitude) * Math.Cos(latitude / 57.3), 2))) * 1.609344 < 5
+                            && x.Type.Equals(TypeConstants.CREATE_BY_ADMIN) || (x.Type.Equals(TypeConstants.CREATE_BY_LOCATION_OWNER) && x.CreatorId.Equals(partyId)))
+              
                         .OrderByDescending(x => 
                             (Math.Sqrt(Math.Pow(69.1 * (latitude - (double)x.Latitude), 2) +
                             Math.Pow(69.1 * (double)(x.Longtitude - longitude) * Math.Cos(latitude / 57.3), 2))) * 1.609344);

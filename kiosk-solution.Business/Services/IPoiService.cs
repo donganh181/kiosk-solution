@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
@@ -13,5 +14,6 @@ namespace kiosk_solution.Business.Services
         public Task<PoiImageViewModel> AddImageToPoi(Guid partyId, string roleName, PoiAddImageViewModel model);
         public Task<ImageViewModel> UpdateImageToPoi(Guid partyId, string roleName, PoiUpdateImageViewModel model);
         public Task<PoiViewModel> DeleteImageFromPoi(Guid partyId, string roleName, Guid imageId);
+        public Task<List<PoiViewModel>> GetLocationNearby(Guid kioskId, double lng, double lat);
     }
 }
