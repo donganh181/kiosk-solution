@@ -23,15 +23,18 @@ namespace kiosk_solution.Business.Services.impl
         private readonly ILogger<IPoiService> _logger;
         private readonly IMapService _mapService;
         private readonly IImageService _imageService;
+        private readonly IKioskService _kioskService;
 
         public PoiService(IUnitOfWork unitOfWork, IMapper mapper,
-            ILogger<IPoiService> logger, IMapService mapService, IImageService imageService)
+            ILogger<IPoiService> logger, IMapService mapService, IImageService imageService,
+            IKioskService kioskService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _mapService = mapService;
             _imageService = imageService;
+            _kioskService = kioskService;
         }
 
         public async Task<PoiImageViewModel> AddImageToPoi(Guid partyId, string roleName, PoiAddImageViewModel model)
@@ -277,6 +280,50 @@ namespace kiosk_solution.Business.Services.impl
                 .Include(poi => poi.Poicategory)
                 .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefault();
+        }
+
+        public async Task<List<PoiViewModel>> GetLocationNearby(Guid kioskId, double lng, double lat)
+        {
+            var kiosk = await _kioskService.GetById(kioskId);
+            var pois = _unitOfWork.PoiRepository
+                .GetPoiNearBy(Guid.Parse(kiosk.PartyId+""), lng, lat)
+                .ProjectTo<PoiViewModel>(_mapper.ConfigurationProvider);
+            var listPoi = pois.ToList();
+            if (listPoi.Count() < 1)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+
+            }
+            foreach (var item in listPoi)
+            {
+                var listImage = await _imageService
+                    .GetByKeyIdAndKeyType(Guid.Parse(item.Id + ""), CommonConstants.POI_IMAGE);
+                if (listImage == null)
+                {
+                    _logger.LogInformation($"{item.Name} has lost image.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                }
+                var listSourceImage = new List<ImageViewModel>();
+                foreach (var img in listImage)
+                {
+                    if (img.Link == null)
+                    {
+                        _logger.LogInformation($"{item.Name} has lost image.");
+                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                    }
+                    if (img.Link.Contains(CommonConstants.THUMBNAIL))
+                    {
+                        item.Thumbnail = img;
+                    }
+                    else if (img.Link.Contains(CommonConstants.SOURCE_IMAGE))
+                    {
+                        listSourceImage.Add(img);
+                    }
+                }
+                item.ListImage = _mapper.Map<List<PoiImageDetailViewModel>>(listSourceImage);
+            }
+            return listPoi;
         }
 
         public async Task<ImageViewModel> UpdateImageToPoi(Guid partyId, string roleName, PoiUpdateImageViewModel model)
