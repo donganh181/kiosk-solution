@@ -66,7 +66,7 @@ namespace kiosk_solution.Business.Services.impl
 
             foreach (var img in model.ListImage)
             {
-                ImageCreateViewModel imageModel = new ImageCreateViewModel(poi.Name, img.Image,
+                ImageCreateViewModel imageModel = new ImageCreateViewModel(poi.Name, img,
                     poi.Id, CommonConstants.POI_IMAGE, CommonConstants.SOURCE_IMAGE);
                 var image = await _imageService.Create(imageModel);
                 listPoiImage.Add(image);
@@ -117,7 +117,7 @@ namespace kiosk_solution.Business.Services.impl
                     .FirstOrDefaultAsync();
                 foreach (var img in model.ListImage)
                 {
-                    ImageCreateViewModel imageModel = new ImageCreateViewModel(result.Name, img.Image,
+                    ImageCreateViewModel imageModel = new ImageCreateViewModel(result.Name, img,
                     result.Id, CommonConstants.POI_IMAGE, CommonConstants.SOURCE_IMAGE);
                     var image = await _imageService.Create(imageModel);
                     listPoiImage.Add(image);

@@ -27,6 +27,6 @@ namespace kiosk_solution.Data.ViewModels
         [Required]
         public string Address { get; set; }
         [Required]
-        public List<EventImageDetailCreateViewModel> ListImage { get; set; }
+        public List<string> ListImage { get; set; }
     }
 }
