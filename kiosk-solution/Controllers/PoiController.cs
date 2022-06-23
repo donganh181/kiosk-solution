@@ -142,5 +142,18 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<List<PoiViewModel>>((int)HttpStatusCode.OK,
                 "Search success.", result));
         }
+        
+        [Authorize(Roles = "Admin, Location Owner")]
+        [HttpPut]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateInformation([FromBody] PoiInfomationUpdateViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _poiService.UpdateInformation(token.Id, token.Role, model);
+            _logger.LogInformation($"Update poi info success by party {token.Mail}");
+            return Ok(new SuccessResponse<PoiViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+        
     }
 }

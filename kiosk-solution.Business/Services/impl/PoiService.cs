@@ -11,6 +11,7 @@ using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
 using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -126,6 +127,53 @@ namespace kiosk_solution.Business.Services.impl
                 result.Thumbnail = thumbnail;
                 result.ListImage = poiImage;
                 return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid data.");
+            }
+        }
+
+        public async Task<PoiViewModel> UpdateInformation(Guid partyId, string roleName, PoiInfomationUpdateViewModel model)
+        {
+            var poi = await _unitOfWork.PoiRepository
+                .Get(p => p.Id.Equals(model.Id))
+                .FirstOrDefaultAsync();
+            if (poi == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            if (poi.Type.Equals(TypeConstants.CREATE_BY_ADMIN) && !roleName.Equals(RoleConstants.ADMIN))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+
+            if (poi.Type.Equals(TypeConstants.CREATE_BY_LOCATION_OWNER) && !poi.CreatorId.Equals(partyId))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+
+            poi.Name = model.Name;
+            poi.Description = model.Description;
+            var address = $"{model.Address}, {model.Ward}, {model.District}, {model.City}";
+            var geoCodeing = await _mapService.GetForwardGeocode(address);
+            poi.Longtitude = geoCodeing.GeoMetries[0].Lng;
+            poi.Latitude = geoCodeing.GeoMetries[0].Lat;
+            poi.OpenTime = TimeSpan.Parse(model.StringOpenTime);
+            poi.CloseTime = TimeSpan.Parse(model.StringCloseTime);
+            poi.PoicategoryId = model.PoicategoryId;
+            poi.DayOfWeek = model.DayOfWeek;
+            try
+            {
+                 _unitOfWork.PoiRepository.Update(poi);
+                 await _unitOfWork.SaveAsync();
+                 var result = _mapper.Map<PoiViewModel>(poi);
+                 return result;
             }
             catch (Exception)
             {
