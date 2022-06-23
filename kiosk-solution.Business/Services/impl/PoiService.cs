@@ -325,11 +325,37 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<PoiSearchViewModel> GetById(Guid id)
         {
-            return _unitOfWork.PoiRepository
+            var item = _unitOfWork.PoiRepository
                 .Get(poi => poi.Id.Equals(id))
                 .Include(poi => poi.Poicategory)
                 .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefault();
+            var listImage = await _imageService
+                .GetByKeyIdAndKeyType(Guid.Parse(item.Id + ""), CommonConstants.POI_IMAGE);
+            if(listImage == null)
+            {
+                _logger.LogInformation($"{item.Name} has lost image.");
+                throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+            }
+            var listSourceImage = new List<ImageViewModel>();
+            foreach(var img in listImage)
+            {
+                if(img.Link == null)
+                {
+                    _logger.LogInformation($"{item.Name} has lost image.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                }
+                if (img.Link.Contains(CommonConstants.THUMBNAIL))
+                {
+                    item.Thumbnail = img;
+                }
+                else if (img.Link.Contains(CommonConstants.SOURCE_IMAGE))
+                {
+                    listSourceImage.Add(img);
+                }
+            }
+            item.ListImage = _mapper.Map<List<PoiImageDetailViewModel>>(listSourceImage);
+            return item;
         }
 
         public async Task<List<PoiViewModel>> GetLocationNearby(Guid kioskId, double lng, double lat)
