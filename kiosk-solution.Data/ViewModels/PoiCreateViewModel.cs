@@ -16,7 +16,7 @@ namespace kiosk_solution.Data.ViewModels
         public string Address { get; set; }
         public Guid? PoicategoryId { get; set; }
         public string Thumbnail { get; set; }
-        public List<PoiImageDetailCreateViewModel> ListImage { get; set; }
+        public List<string> ListImage { get; set; }
 
     }
 }
