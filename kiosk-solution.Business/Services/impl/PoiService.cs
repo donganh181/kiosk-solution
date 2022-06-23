@@ -258,12 +258,14 @@ namespace kiosk_solution.Business.Services.impl
             if(role.Equals(RoleConstants.ADMIN))
             {
                 pois = _unitOfWork.PoiRepository.Get()
-                    .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider);
+                    .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
+                    .DynamicFilter(model);
             }
             else if(role.Equals(RoleConstants.LOCATION_OWNER))
             {
                 pois = _unitOfWork.PoiRepository.Get(p => p.CreatorId.Equals(partyId))
-                    .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider);
+                    .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
+                    .DynamicFilter(model);
             }
 
             var listPoi = pois.ToList();

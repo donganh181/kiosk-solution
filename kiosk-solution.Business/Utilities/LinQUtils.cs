@@ -45,6 +45,7 @@ namespace kiosk_solution.Business.Utilities
                 }
                 else if (item.CustomAttributes.Any(a => a.AttributeType == typeof(SpecificAttribute)))
                 {      
+
                 }
                 else
                 {
