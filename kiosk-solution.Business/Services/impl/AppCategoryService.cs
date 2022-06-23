@@ -79,34 +79,34 @@ namespace kiosk_solution.Business.Services.impl
         {
             IQueryable<AppCategorySearchViewModel> cates = null;
             List<AppCategorySearchViewModel> listCate = new List<AppCategorySearchViewModel>();           
-            if(string.IsNullOrEmpty(role) || role.Equals(RoleConstants.ADMIN) || role.Equals(RoleConstants.SERVICE_PROVIDER))
-            {
-                cates = _unitOfWork.AppCategoryRepository
-                .Get()
-                .ProjectTo<AppCategorySearchViewModel>(_mapper.ConfigurationProvider);
-                listCate = await cates.ToListAsync();
-            }
-            else if (!string.IsNullOrEmpty(role) && role.Equals(RoleConstants.LOCATION_OWNER))
-            {
-                cates = _unitOfWork.AppCategoryRepository
-                .Get()
-                .ProjectTo<AppCategorySearchViewModel>(_mapper.ConfigurationProvider);
-                var listCheck = await cates.ToListAsync();
-
-                foreach (var item in listCheck)
-                {
-                    var check = await _partyServiceApplicationService.CheckAppExist(Guid.Parse(id + ""), Guid.Parse(item.Id + ""));
-                    if (check)
-                    {
-                        listCate.Add(item);
-                    }
-                }
-                if (listCate.Count() < 1)
-                {
-                    _logger.LogInformation("Can not Found.");
-                    throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
-                }
-            }
+            // if(string.IsNullOrEmpty(role) || role.Equals(RoleConstants.ADMIN) || role.Equals(RoleConstants.SERVICE_PROVIDER))
+            // {
+            //     cates = _unitOfWork.AppCategoryRepository
+            //     .Get()
+            //     .ProjectTo<AppCategorySearchViewModel>(_mapper.ConfigurationProvider);
+            //     listCate = await cates.ToListAsync();
+            // }
+            // else if (!string.IsNullOrEmpty(role) && role.Equals(RoleConstants.LOCATION_OWNER))
+            // {
+            //     cates = _unitOfWork.AppCategoryRepository
+            //     .Get()
+            //     .ProjectTo<AppCategorySearchViewModel>(_mapper.ConfigurationProvider);
+            //     var listCheck = await cates.ToListAsync();
+            //
+            //     foreach (var item in listCheck)
+            //     {
+            //         var check = await _partyServiceApplicationService.CheckAppExist(Guid.Parse(id + ""), Guid.Parse(item.Id + ""));
+            //         if (check)
+            //         {
+            //             listCate.Add(item);
+            //         }
+            //     }
+            //     if (listCate.Count() < 1)
+            //     {
+            //         _logger.LogInformation("Can not Found.");
+            //         throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            //     }
+            // }
 
             cates = listCate.AsQueryable().OrderByDescending(c => c.Name);
 
