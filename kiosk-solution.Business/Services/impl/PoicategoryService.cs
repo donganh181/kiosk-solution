@@ -65,7 +65,7 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<PoicategoryViewModel> UpdateName(PoiCategoryNameUpdateViewModel model)
+        public async Task<PoicategoryViewModel> Update(PoiCategoryUpdateViewModel model)
         {
             var cate = await _unitOfWork.PoicategoryRepository.Get(c => c.Id.Equals(model.Id)).FirstOrDefaultAsync();
             if(cate == null)
@@ -74,6 +74,12 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found.");
             }
             cate.Name = model.Name;
+            if (!cate.Logo.Equals(model.Logo))
+            {
+                var newLogo = await _fileService.UploadImageToFirebase(model.Logo,
+                    CommonConstants.POI_CATE_IMAGE, cate.Name, cate.Id, "Poi Cate");
+                cate.Logo = newLogo;
+            }
             try
             {
                 _unitOfWork.PoicategoryRepository.Update(cate);
@@ -94,34 +100,6 @@ namespace kiosk_solution.Business.Services.impl
                     _logger.LogInformation("Invalid Data.");
                     throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
                 }
-            }
-        }
-
-        public async Task<PoicategoryViewModel> UpdateLogo(PoiCategoryLogoUpdateViewModel model)
-        {
-            var cate = await _unitOfWork.PoicategoryRepository.Get(c => c.Id.Equals(model.Id)).FirstOrDefaultAsync();
-            if(cate == null)
-            {
-                _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found.");
-            }
-            try
-            {
-                var newLogo = await _fileService.UploadImageToFirebase(model.Logo,
-                    CommonConstants.POI_CATE_IMAGE, cate.Name, cate.Id, "Poi Cate");
-
-                cate.Logo = newLogo;
-                _unitOfWork.PoicategoryRepository.Update(cate);
-                await _unitOfWork.SaveAsync();
-
-                var result = _mapper.Map<PoicategoryViewModel>(cate);
-                return result;
-            }
-            catch (SqlException e)
-            {
-                _logger.LogInformation("Invalid Data.");
-                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
-                
             }
         }
 
