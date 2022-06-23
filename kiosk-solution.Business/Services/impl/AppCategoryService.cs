@@ -77,6 +77,8 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<DynamicModelResponse<AppCategorySearchViewModel>> GetAllWithPaging(Guid? id,string role, AppCategorySearchViewModel model, int size, int pageNum)
         {
+            
+            //
             IQueryable<AppCategorySearchViewModel> cates = null;
             List<AppCategorySearchViewModel> listCate = new List<AppCategorySearchViewModel>();           
             if(string.IsNullOrEmpty(role) || role.Equals(RoleConstants.ADMIN) || role.Equals(RoleConstants.SERVICE_PROVIDER))
