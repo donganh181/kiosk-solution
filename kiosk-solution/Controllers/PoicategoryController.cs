@@ -41,29 +41,17 @@ namespace kiosk_solution.Controllers
         }
         
         [Authorize(Roles = "Admin")]
-        [HttpPatch("name")]
+        [HttpPut]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> UpdateName([FromBody] PoiCategoryNameUpdateViewModel model)
+        public async Task<IActionResult> Update([FromBody] PoiCategoryUpdateViewModel model)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _poicategoryService.UpdateName(model);
+            var result = await _poicategoryService.Update(model);
             _logger.LogInformation($"Update category {result.Name} by party {token.Mail}");
             return Ok(new SuccessResponse<PoicategoryViewModel>((int)HttpStatusCode.OK, "Update success.", result));
         }
-        
-        [Authorize(Roles = "Admin")]
-        [HttpPatch("logo")]
-        [MapToApiVersion("1")]
-        public async Task<IActionResult> UpdateLogo([FromBody] PoiCategoryLogoUpdateViewModel model)
-        {
-            var request = Request;
-            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _poicategoryService.UpdateLogo(model);
-            _logger.LogInformation($"Update category {result.Name} by party {token.Mail}");
-            return Ok(new SuccessResponse<PoicategoryViewModel>((int)HttpStatusCode.OK, "Update success.", result));
-        }
-        
+
         [Authorize(Roles = "Admin")]
         [HttpDelete]
         [MapToApiVersion("1")]
