@@ -34,7 +34,7 @@ namespace kiosk_solution.Business.Services.impl
         {
             var kioskLocation = _mapper.CreateMapper().Map<KioskLocation>(model);
             kioskLocation.CreateDate = DateTime.Now;
-            kioskLocation.Status = StatusConstants.ACTIVE;
+            kioskLocation.Status = StatusConstants.ACTIVATE;
             
             try
             {
@@ -116,7 +116,7 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
             }
 
-            if (kioskLocation.Status.Equals(StatusConstants.ACTIVE))
+            if (kioskLocation.Status.Equals(StatusConstants.ACTIVATE))
             {
                 if (kioskLocation.Kiosks.ToList().Count == 0) {
                     kioskLocation.Status = StatusConstants.DEACTIVATE;
@@ -130,7 +130,7 @@ namespace kiosk_solution.Business.Services.impl
             }
             else if (kioskLocation.Status.Equals(StatusConstants.DEACTIVATE))
             {
-                kioskLocation.Status = StatusConstants.ACTIVE;
+                kioskLocation.Status = StatusConstants.ACTIVATE;
             }
             else
             {

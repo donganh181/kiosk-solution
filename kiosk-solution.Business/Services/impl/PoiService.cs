@@ -94,7 +94,7 @@ namespace kiosk_solution.Business.Services.impl
             poi.CloseTime = TimeSpan.Parse(model.StringCloseTime);
             poi.CreateDate = DateTime.Now;
             poi.CreatorId = partyId;
-            poi.Status = StatusConstants.ACTIVE;
+            poi.Status = StatusConstants.ACTIVATE;
             if (roleName.Equals(RoleConstants.ADMIN))
                 poi.Type = TypeConstants.CREATE_BY_ADMIN;
             else

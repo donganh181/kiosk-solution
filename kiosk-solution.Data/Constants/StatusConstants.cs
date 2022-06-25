@@ -6,7 +6,7 @@ namespace kiosk_solution.Data.Constants
 {
     public class StatusConstants
     {
-        public static string ACTIVE = "active";
+        public static string ACTIVATE = "activate";
         public static string DEACTIVATE = "deactivate";
         
         public static string AVAILABLE = "available";
