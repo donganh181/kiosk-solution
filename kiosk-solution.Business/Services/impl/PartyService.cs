@@ -74,7 +74,7 @@ namespace kiosk_solution.Business.Services.impl
             var account = _mapper.CreateMapper().Map<Party>(model);
             account.Password = BCrypt.Net.BCrypt.HashPassword(DefaultConstants.DEFAULT_PASSWORD);
             account.CreatorId = creatorId;
-            account.Status = StatusConstants.ACTIVE;
+            account.Status = StatusConstants.ACTIVATE;
             account.CreateDate = DateTime.Now;
             try
             {
@@ -179,18 +179,18 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Your account cannot use this feature.");
             }
 
-            if (user.Status.Equals(StatusConstants.ACTIVE))
+            if (user.Status.Equals(StatusConstants.ACTIVATE))
                 user.Status = StatusConstants.DEACTIVATE;
             else
-                user.Status = StatusConstants.ACTIVE;
+                user.Status = StatusConstants.ACTIVATE;
             try
             {
                 _unitOfWork.PartyRepository.Update(user);
                 await _unitOfWork.SaveAsync();
 
-                string subject = EmailUtil.getUpdateStatusSubject(user.Status.Equals(StatusConstants.ACTIVE));
+                string subject = EmailUtil.getUpdateStatusSubject(user.Status.Equals(StatusConstants.ACTIVATE));
                 string content =
-                    EmailUtil.getUpdateStatusContent(user.Email, user.Status.Equals(StatusConstants.ACTIVE));
+                    EmailUtil.getUpdateStatusContent(user.Email, user.Status.Equals(StatusConstants.ACTIVATE));
                 await EmailUtil.SendEmail(user.Email, subject, content);
 
                 var result = _mapper.CreateMapper().Map<PartyViewModel>(user);

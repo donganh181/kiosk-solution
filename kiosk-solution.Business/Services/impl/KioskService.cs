@@ -162,10 +162,10 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
             }
 
-            if (kiosk.Status.Equals(StatusConstants.ACTIVE))
+            if (kiosk.Status.Equals(StatusConstants.ACTIVATE))
                 kiosk.Status = StatusConstants.DEACTIVATE;
             else
-                kiosk.Status = StatusConstants.ACTIVE;
+                kiosk.Status = StatusConstants.ACTIVATE;
             try
             {
                 _unitOfWork.KioskRepository.Update(kiosk);
