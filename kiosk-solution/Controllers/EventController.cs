@@ -172,5 +172,22 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<EventViewModel>((int)HttpStatusCode.OK,
                 "Search success.", result));
         }
+
+        /// <summary>
+        /// Replace event image by admin or location owner
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Location Owner")]
+        [HttpPut("replace")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> ReplaceImage([FromBody] ImageReplaceViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _eventService.ReplaceImage(token.Id, token.Role, model);
+            _logger.LogInformation($"Update event images success by party {token.Mail}");
+            return Ok(new SuccessResponse<EventViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
     }
 }

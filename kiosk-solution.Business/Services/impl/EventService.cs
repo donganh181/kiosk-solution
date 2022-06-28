@@ -502,5 +502,93 @@ namespace kiosk_solution.Business.Services.impl
             var result = await _imageService.Update(updateModel);
             return result;
         }
+
+        public async Task<EventViewModel> ReplaceImage(Guid partyId, string roleName, ImageReplaceViewModel model)
+        {
+            var checkEvent = await _unitOfWork.EventRepository
+                .Get(p => p.Id.Equals(model.Id))
+                .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+            if (checkEvent == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            foreach (var imageId in model.RemoveFields)
+            {
+                var img = await _imageService.GetById(imageId);
+                if (!img.KeyType.Equals(CommonConstants.EVENT_IMAGE))
+                {
+                    _logger.LogInformation("You can not delete poi image.");
+                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not delete poi image.");
+                }
+                var myEvent = await _unitOfWork.EventRepository
+                .Get(p => p.Id.Equals(img.KeyId))
+                .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+                if (myEvent == null)
+                {
+                    _logger.LogInformation("Can not found.");
+                    throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+                }
+
+                if (myEvent.Type.Equals(TypeConstants.CREATE_BY_ADMIN) && !roleName.Equals(RoleConstants.ADMIN))
+                {
+                    _logger.LogInformation("You can not use this feature.");
+                    throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+                }
+
+                if (myEvent.Type.Equals(TypeConstants.CREATE_BY_LOCATION_OWNER) && !myEvent.CreatorId.Equals(partyId))
+                {
+                    _logger.LogInformation("You can not use this feature.");
+                    throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+                }
+                if (img.Link.Contains(CommonConstants.THUMBNAIL))
+                {
+                    _logger.LogInformation("You can not delete thumbnail. You can only change thumbnail.");
+                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not delete thumbnail. You can only change thumbnail.");
+                }
+                bool delete = await _imageService.Delete(imageId);
+                if (!delete)
+                {
+                    _logger.LogInformation("Server Error.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
+                }
+            }
+            foreach (var image in model.AddFields)
+            {
+                ImageCreateViewModel imageModel = new ImageCreateViewModel(checkEvent.Name, image,
+                    checkEvent.Id, CommonConstants.EVENT_IMAGE, CommonConstants.SOURCE_IMAGE);
+                var newImage = await _imageService.Create(imageModel);
+            }
+
+            var listImage = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(checkEvent.Id + ""), CommonConstants.EVENT_IMAGE);
+            if (listImage == null)
+            {
+                _logger.LogInformation($"{checkEvent.Name} has lost image.");
+                throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+            }
+            var listSourceImage = new List<ImageViewModel>();
+            foreach (var img in listImage)
+            {
+                if (img.Link == null)
+                {
+                    _logger.LogInformation($"{checkEvent.Name} has lost image.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                }
+                if (img.Link.Contains(CommonConstants.THUMBNAIL))
+                {
+                    checkEvent.Thumbnail = img;
+                }
+                else if (img.Link.Contains(CommonConstants.SOURCE_IMAGE))
+                {
+                    listSourceImage.Add(img);
+                }
+            }
+            checkEvent.ListImage = _mapper.Map<List<EventImageDetailViewModel>>(listSourceImage);
+            return checkEvent;
+        }
+    
     }
 }
