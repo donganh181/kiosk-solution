@@ -450,15 +450,69 @@ namespace kiosk_solution.Business.Services.impl
 
             try
             {
-                ImageUpdateViewModel imageUpdateModel = new ImageUpdateViewModel(model.ImageId,
-                    eventUpdate.Name, model.Image, CommonConstants.THUMBNAIL);
-
-                var imageModel = await _imageService.Update(imageUpdateModel);
                 _unitOfWork.EventRepository.Update(eventUpdate);
                 await _unitOfWork.SaveAsync();
                 var result = _mapper.Map<EventViewModel>(eventUpdate);
-                result.Thumbnail = imageModel;
-                return result;
+                if (model.ImageId == null)
+                {
+                    var listImage = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(result.Id + ""), CommonConstants.EVENT_IMAGE);
+                    if (listImage == null)
+                    {
+                        _logger.LogInformation($"{result.Name} has lost image.");
+                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                    }
+                    var listSourceImage = new List<ImageViewModel>();
+                    foreach (var img in listImage)
+                    {
+                        if (img.Link == null)
+                        {
+                            _logger.LogInformation($"{result.Name} has lost image.");
+                            throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                        }
+                        if (img.Link.Contains(CommonConstants.THUMBNAIL))
+                        {
+                            result.Thumbnail = img;
+                        }
+                        else if (img.Link.Contains(CommonConstants.SOURCE_IMAGE))
+                        {
+                            listSourceImage.Add(img);
+                        }
+                    }
+                    result.ListImage = _mapper.Map<List<EventImageDetailViewModel>>(listSourceImage);
+                    return result;
+                }
+                else
+                {
+                    ImageUpdateViewModel imageUpdateModel = new ImageUpdateViewModel(Guid.Parse(model.ImageId + ""),
+                    eventUpdate.Name, model.Image, CommonConstants.THUMBNAIL);
+
+                    var imageModel = await _imageService.Update(imageUpdateModel);
+                    var listImage = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(result.Id + ""), CommonConstants.EVENT_IMAGE);
+                    if (listImage == null)
+                    {
+                        _logger.LogInformation($"{result.Name} has lost image.");
+                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                    }
+                    var listSourceImage = new List<ImageViewModel>();
+                    foreach (var img in listImage)
+                    {
+                        if (img.Link == null)
+                        {
+                            _logger.LogInformation($"{result.Name} has lost image.");
+                            throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                        }
+                        if (img.Link.Contains(CommonConstants.THUMBNAIL))
+                        {
+                            result.Thumbnail = img;
+                        }
+                        else if (img.Link.Contains(CommonConstants.SOURCE_IMAGE))
+                        {
+                            listSourceImage.Add(img);
+                        }
+                    }
+                    result.ListImage = _mapper.Map<List<EventImageDetailViewModel>>(listSourceImage);
+                    return result;
+                }
             }
             catch (Exception)
             {
