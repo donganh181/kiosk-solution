@@ -8,7 +8,7 @@ namespace kiosk_solution.Data.ViewModels
 {
     public class ImageReplaceViewModel
     {
-        public Guid PoiId { get; set; }
+        public Guid Id { get; set; }
         public List<Guid> RemoveFields { get; set; }
         public List<string> AddFields { get; set; }
     }

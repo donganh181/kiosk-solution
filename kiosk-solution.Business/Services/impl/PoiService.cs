@@ -445,7 +445,7 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<PoiViewModel> ReplaceImage(Guid partyId, string roleName, ImageReplaceViewModel model)
         {
             var checkPoi = await _unitOfWork.PoiRepository
-                .Get(p => p.Id.Equals(model.PoiId))
+                .Get(p => p.Id.Equals(model.Id))
                 .ProjectTo<PoiViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
             if (checkPoi == null)
