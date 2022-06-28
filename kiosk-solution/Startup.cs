@@ -11,18 +11,19 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using kiosk_solution.Business.SystemSchedule.Jobs;
+using Quartz;
 
 namespace kiosk_solution
 {
     public class Startup
     {
-
         private readonly IConfiguration _configuration;
+
         public Startup(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -33,8 +34,8 @@ namespace kiosk_solution
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-            services.AddDbContext<Kiosk_PlatformContext>(options => options.UseSqlServer(_configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<Kiosk_PlatformContext>(options =>
+                options.UseSqlServer(_configuration.GetConnectionString("DefaultConnection")));
 
             services.AddControllers();
 
@@ -46,6 +47,50 @@ namespace kiosk_solution
             JWTBearerConfig.ConfigAuthentication(services, _configuration);
 
             services.ConfigureFilter<ErrorHandlingFilter>();
+
+            // services.Configure<QuartzOptions>(Configuration.GetSection("Quartz"));
+            // services.Configure<QuartzOptions>(options =>
+            // {
+            //     options.Scheduling.IgnoreDuplicates = true; // default: false
+            //     options.Scheduling.OverWriteExistingData = true; // default: true
+            // });
+
+
+            //
+            services.AddQuartz(q =>
+            {
+                // handy when part of cluster or you want to otherwise identify multiple schedulers
+                q.SchedulerId = "Scheduler-Core";
+
+                // we take this from appsettings.json, just show it's possible
+                // q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
+
+                // as of 3.3.2 this also injects scoped services (like EF DbContext) without problems
+                q.UseMicrosoftDependencyInjectionJobFactory();
+
+                // or for scoped service support like EF Core DbContext
+                // q.UseMicrosoftDependencyInjectionScopedJobFactory();
+
+                // these are the defaults
+                q.UseSimpleTypeLoader();
+                q.UseInMemoryStore();
+                q.UseDefaultThreadPool(tp => { tp.MaxConcurrency = 10; });
+
+                // quickest way to create a job with single trigger is to use ScheduleJob
+                // (requires version 3.2)
+                q.ScheduleJob<CheckTemplateJob>(trigger => trigger
+                    .WithIdentity("Combined Configuration Trigger")
+                    .StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddSeconds(7)))
+                    .WithCronSchedule("* * * ? * *")
+                    .WithDescription("my awesome trigger configured for a job with single call")
+                );
+            });
+            // Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle
+            services.AddQuartzHostedService(options =>
+            {
+                // when shutting down we want jobs to complete gracefully
+                options.WaitForJobsToComplete = true;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -55,18 +100,13 @@ namespace kiosk_solution
             {
                 app.UseDeveloperExceptionPage();
             }
+
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseCors(builder =>
-            {
-                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-            });
+            app.UseCors(builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); });
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
             app.ConfigureSwagger(provider);
         }
     }

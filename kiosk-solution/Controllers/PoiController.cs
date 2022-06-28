@@ -154,6 +154,22 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Update poi info success by party {token.Mail}");
             return Ok(new SuccessResponse<PoiViewModel>((int)HttpStatusCode.OK, "Update success.", result));
         }
-        
+
+        /// <summary>
+        /// Replace image (add or delete) by admin or location owner
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Location Owner")]
+        [HttpPut("replace")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> ReplaceImage([FromBody] ImageReplaceViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _poiService.ReplaceImage(token.Id, token.Role, model);
+            _logger.LogInformation($"Update poi images success by party {token.Mail}");
+            return Ok(new SuccessResponse<PoiViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
     }
 }
