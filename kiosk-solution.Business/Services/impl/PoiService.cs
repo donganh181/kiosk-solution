@@ -268,11 +268,11 @@ namespace kiosk_solution.Business.Services.impl
             if (role.Equals(RoleConstants.ADMIN))
             {
                 if (dayOfWeek != null)
-                    pois = _unitOfWork.PoiRepository.Get(p => p.DayOfWeek.Contains(dayOfWeek))
+                    pois = _unitOfWork.PoiRepository.Get(p => p.DayOfWeek.Contains(dayOfWeek) && p.Type.Equals(TypeConstants.CREATE_BY_ADMIN))
                         .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
                         .DynamicFilter(model);
                 else
-                    pois = _unitOfWork.PoiRepository.Get()
+                    pois = _unitOfWork.PoiRepository.Get(p => p.Type.Equals(TypeConstants.CREATE_BY_ADMIN))
                         .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
                         .DynamicFilter(model);
             }

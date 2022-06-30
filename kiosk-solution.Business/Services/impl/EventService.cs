@@ -278,8 +278,7 @@ namespace kiosk_solution.Business.Services.impl
             {
                 events = _unitOfWork.EventRepository
                     .Get(e => (e.CreatorId.Equals(partyId) &&
-                               e.Type.Equals(CommonConstants.LOCAL_TYPE)) ||
-                              e.Type.Equals(CommonConstants.SERVER_TYPE))
+                               e.Type.Equals(CommonConstants.LOCAL_TYPE)))
                     .Include(e => e.Creator)
                     .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider);
             }
