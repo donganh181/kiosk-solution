@@ -51,13 +51,13 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
 
-            if (poi.Type.Equals(TypeConstants.CREATE_BY_ADMIN) && !roleName.Equals(RoleConstants.ADMIN))
+            if (poi.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
             {
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");
             }
 
-            if (poi.Type.Equals(TypeConstants.CREATE_BY_LOCATION_OWNER) && !poi.CreatorId.Equals(partyId))
+            if (poi.Type.Equals(TypeConstants.LOCAL_TYPE) && !poi.CreatorId.Equals(partyId))
             {
                 _logger.LogInformation("You can not interact with poi which is not your.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest,
@@ -91,7 +91,7 @@ namespace kiosk_solution.Business.Services.impl
             poi.Longtitude = geoCodeing.GeoMetries[0].Lng;
             poi.Latitude = geoCodeing.GeoMetries[0].Lat;
             var checkPoi = await _unitOfWork.PoiRepository.Get(p =>
-                (p.Type.Equals(TypeConstants.CREATE_BY_ADMIN) && p.Latitude.Equals(poi.Latitude) &&
+                (p.Type.Equals(TypeConstants.SERVER_TYPE) && p.Latitude.Equals(poi.Latitude) &&
                  p.Longtitude.Equals(poi.Longtitude)) ||
                 (p.CreatorId.Equals(partyId) && p.Latitude.Equals(poi.Latitude) &&
                  p.Longtitude.Equals(poi.Longtitude))).FirstOrDefaultAsync();
@@ -106,9 +106,9 @@ namespace kiosk_solution.Business.Services.impl
             poi.CreatorId = partyId;
             poi.Status = StatusConstants.ACTIVATE;
             if (roleName.Equals(RoleConstants.ADMIN))
-                poi.Type = TypeConstants.CREATE_BY_ADMIN;
+                poi.Type = TypeConstants.SERVER_TYPE;
             else
-                poi.Type = TypeConstants.CREATE_BY_LOCATION_OWNER;
+                poi.Type = TypeConstants.LOCAL_TYPE;
             try
             {
                 await _unitOfWork.PoiRepository.InsertAsync(poi);
@@ -157,13 +157,13 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
             }
 
-            if (poi.Type.Equals(TypeConstants.CREATE_BY_ADMIN) && !roleName.Equals(RoleConstants.ADMIN))
+            if (poi.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
             {
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");
             }
 
-            if (poi.Type.Equals(TypeConstants.CREATE_BY_LOCATION_OWNER) && !poi.CreatorId.Equals(partyId))
+            if (poi.Type.Equals(TypeConstants.LOCAL_TYPE) && !poi.CreatorId.Equals(partyId))
             {
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");
@@ -176,7 +176,7 @@ namespace kiosk_solution.Business.Services.impl
             poi.Longtitude = geoCodeing.GeoMetries[0].Lng;
             poi.Latitude = geoCodeing.GeoMetries[0].Lat;
             var checkPoi = await _unitOfWork.PoiRepository.Get(p =>
-                (p.Type.Equals(TypeConstants.CREATE_BY_ADMIN) && p.Latitude.Equals(poi.Latitude) &&
+                (p.Type.Equals(TypeConstants.SERVER_TYPE) && p.Latitude.Equals(poi.Latitude) &&
                  p.Longtitude.Equals(poi.Longtitude)) ||
                 (p.CreatorId.Equals(partyId) && p.Latitude.Equals(poi.Latitude) &&
                  p.Longtitude.Equals(poi.Longtitude))).FirstOrDefaultAsync();
@@ -222,13 +222,13 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
             }
 
-            if (poi.Type.Equals(TypeConstants.CREATE_BY_ADMIN) && !roleName.Equals(RoleConstants.ADMIN))
+            if (poi.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
             {
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");
             }
 
-            if (poi.Type.Equals(TypeConstants.CREATE_BY_LOCATION_OWNER) && !poi.CreatorId.Equals(partyId))
+            if (poi.Type.Equals(TypeConstants.LOCAL_TYPE) && !poi.CreatorId.Equals(partyId))
             {
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");
@@ -289,11 +289,11 @@ namespace kiosk_solution.Business.Services.impl
             {
                 if (dayOfWeek != null)
                     pois = _unitOfWork.PoiRepository.Get(p =>
-                            p.DayOfWeek.Contains(dayOfWeek) && p.Type.Equals(TypeConstants.CREATE_BY_ADMIN))
+                            p.DayOfWeek.Contains(dayOfWeek) && p.Type.Equals(TypeConstants.SERVER_TYPE))
                         .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
                         .DynamicFilter(model);
                 else
-                    pois = _unitOfWork.PoiRepository.Get(p => p.Type.Equals(TypeConstants.CREATE_BY_ADMIN))
+                    pois = _unitOfWork.PoiRepository.Get(p => p.Type.Equals(TypeConstants.SERVER_TYPE))
                         .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
                         .DynamicFilter(model);
             }
@@ -474,13 +474,13 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
 
-            if (poi.Type.Equals(TypeConstants.CREATE_BY_ADMIN) && !roleName.Equals(RoleConstants.ADMIN))
+            if (poi.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
             {
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");
             }
 
-            if (poi.Type.Equals(TypeConstants.CREATE_BY_LOCATION_OWNER) && !poi.CreatorId.Equals(partyId))
+            if (poi.Type.Equals(TypeConstants.LOCAL_TYPE) && !poi.CreatorId.Equals(partyId))
             {
                 _logger.LogInformation("You can not interact with poi which is not your.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest,
@@ -525,13 +525,13 @@ namespace kiosk_solution.Business.Services.impl
                     throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
                 }
 
-                if (poi.Type.Equals(TypeConstants.CREATE_BY_ADMIN) && !roleName.Equals(RoleConstants.ADMIN))
+                if (poi.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
                 {
                     _logger.LogInformation("You can not use this feature.");
                     throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");
                 }
 
-                if (poi.Type.Equals(TypeConstants.CREATE_BY_LOCATION_OWNER) && !poi.CreatorId.Equals(partyId))
+                if (poi.Type.Equals(TypeConstants.LOCAL_TYPE) && !poi.CreatorId.Equals(partyId))
                 {
                     _logger.LogInformation("You can not use this feature.");
                     throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");

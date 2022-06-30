@@ -45,13 +45,13 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
             }
 
-            if (myEvent.Type.Equals(CommonConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
+            if (myEvent.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
             {
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
             }
 
-            if (myEvent.Type.Equals(CommonConstants.LOCAL_TYPE) && !myEvent.CreatorId.Equals(partyId))
+            if (myEvent.Type.Equals(TypeConstants.LOCAL_TYPE) && !myEvent.CreatorId.Equals(partyId))
             {
                 _logger.LogInformation("You can not interact with event which is not your.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not interact with event which is not your.");
@@ -113,11 +113,11 @@ namespace kiosk_solution.Business.Services.impl
 
             if (role.Equals(RoleConstants.ADMIN))
             {
-                newEvent.Type = CommonConstants.SERVER_TYPE;
+                newEvent.Type = TypeConstants.SERVER_TYPE;
             }
             else if (role.Equals(RoleConstants.LOCATION_OWNER))
             {
-                newEvent.Type = CommonConstants.LOCAL_TYPE;
+                newEvent.Type = TypeConstants.LOCAL_TYPE;
             }
             else
             {
@@ -183,13 +183,13 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
             }
 
-            if (myEvent.Type.Equals(CommonConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
+            if (myEvent.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
             {
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
             }
 
-            if (myEvent.Type.Equals(CommonConstants.LOCAL_TYPE) && !myEvent.CreatorId.Equals(partyId))
+            if (myEvent.Type.Equals(TypeConstants.LOCAL_TYPE) && !myEvent.CreatorId.Equals(partyId))
             {
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
@@ -244,13 +244,13 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
             }
 
-            if (evt.Type.Equals(CommonConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
+            if (evt.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
             {
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
             }
 
-            if (evt.Type.Equals(CommonConstants.LOCAL_TYPE) && !evt.CreatorId.Equals(partyId))
+            if (evt.Type.Equals(TypeConstants.LOCAL_TYPE) && !evt.CreatorId.Equals(partyId))
             {
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
@@ -278,7 +278,7 @@ namespace kiosk_solution.Business.Services.impl
             {
                 events = _unitOfWork.EventRepository
                     .Get(e => (e.CreatorId.Equals(partyId) &&
-                               e.Type.Equals(CommonConstants.LOCAL_TYPE)) || e.Type.Equals(CommonConstants.SERVER_TYPE))
+                               e.Type.Equals(TypeConstants.LOCAL_TYPE)) || e.Type.Equals(TypeConstants.SERVER_TYPE))
                     .Include(e => e.Creator)
                     .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider);
             }
@@ -395,12 +395,12 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
             }
 
-            if (eventUpdate.Type.Equals(CommonConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
+            if (eventUpdate.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
             {
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");
             }
-            if (eventUpdate.Type.Equals(CommonConstants.LOCAL_TYPE) && !eventUpdate.CreatorId.Equals(partyId))
+            if (eventUpdate.Type.Equals(TypeConstants.LOCAL_TYPE) && !eventUpdate.CreatorId.Equals(partyId))
             {
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");
@@ -537,13 +537,13 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
             }
 
-            if (myEvent.Type.Equals(CommonConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
+            if (myEvent.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
             {
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
             }
 
-            if (myEvent.Type.Equals(CommonConstants.LOCAL_TYPE) && !myEvent.CreatorId.Equals(partyId))
+            if (myEvent.Type.Equals(TypeConstants.LOCAL_TYPE) && !myEvent.CreatorId.Equals(partyId))
             {
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
@@ -586,13 +586,13 @@ namespace kiosk_solution.Business.Services.impl
                     throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
                 }
 
-                if (myEvent.Type.Equals(TypeConstants.CREATE_BY_ADMIN) && !roleName.Equals(RoleConstants.ADMIN))
+                if (myEvent.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
                 {
                     _logger.LogInformation("You can not use this feature.");
                     throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
                 }
 
-                if (myEvent.Type.Equals(TypeConstants.CREATE_BY_LOCATION_OWNER) && !myEvent.CreatorId.Equals(partyId))
+                if (myEvent.Type.Equals(TypeConstants.LOCAL_TYPE) && !myEvent.CreatorId.Equals(partyId))
                 {
                     _logger.LogInformation("You can not use this feature.");
                     throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
