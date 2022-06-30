@@ -9,8 +9,7 @@ namespace kiosk_solution.Data.Models
     {
         public Schedule()
         {
-            KioskSchedules = new HashSet<KioskSchedule>();
-            ScheduleTemplates = new HashSet<ScheduleTemplate>();
+            KioskScheduleTemplates = new HashSet<KioskScheduleTemplate>();
         }
 
         public Guid Id { get; set; }
@@ -24,7 +23,6 @@ namespace kiosk_solution.Data.Models
         public string Status { get; set; }
 
         public virtual Party Party { get; set; }
-        public virtual ICollection<KioskSchedule> KioskSchedules { get; set; }
-        public virtual ICollection<ScheduleTemplate> ScheduleTemplates { get; set; }
+        public virtual ICollection<KioskScheduleTemplate> KioskScheduleTemplates { get; set; }
     }
 }

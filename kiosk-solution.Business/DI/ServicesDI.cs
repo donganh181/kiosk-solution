@@ -18,6 +18,7 @@ namespace kiosk_solution.Business.DI
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IFileService, FirebaseStorageService>();
             services.AddScoped<IMapService, GoongMapService>();
+            services.AddScoped<INotiService, FCMService>();
 
             services.AddScoped<IPartyRepository, PartyRepository>();
             services.AddScoped<IPartyService, PartyService>();

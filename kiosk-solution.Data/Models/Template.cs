@@ -11,7 +11,7 @@ namespace kiosk_solution.Data.Models
         {
             AppCategoryPositions = new HashSet<AppCategoryPosition>();
             EventPositions = new HashSet<EventPosition>();
-            ScheduleTemplates = new HashSet<ScheduleTemplate>();
+            KioskScheduleTemplates = new HashSet<KioskScheduleTemplate>();
         }
 
         public Guid Id { get; set; }
@@ -24,6 +24,6 @@ namespace kiosk_solution.Data.Models
         public virtual Party Party { get; set; }
         public virtual ICollection<AppCategoryPosition> AppCategoryPositions { get; set; }
         public virtual ICollection<EventPosition> EventPositions { get; set; }
-        public virtual ICollection<ScheduleTemplate> ScheduleTemplates { get; set; }
+        public virtual ICollection<KioskScheduleTemplate> KioskScheduleTemplates { get; set; }
     }
 }

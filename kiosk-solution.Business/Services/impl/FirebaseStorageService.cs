@@ -19,7 +19,7 @@ namespace kiosk_solution.Business.Services.impl
     {
         private readonly ILogger<IFileService> _logger;
 
-        public FirebaseStorageService(ILogger<FirebaseStorageService> logger)
+        public FirebaseStorageService(ILogger<IFileService> logger)
         {
             _logger = logger;
         }
