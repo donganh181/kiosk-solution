@@ -90,6 +90,16 @@ namespace kiosk_solution.Business.Services.impl
             var geoCodeing = await _mapService.GetForwardGeocode(address);
             poi.Longtitude = geoCodeing.GeoMetries[0].Lng;
             poi.Latitude = geoCodeing.GeoMetries[0].Lat;
+            var checkPoi = await _unitOfWork.PoiRepository.Get(p =>
+                (p.Type.Equals(TypeConstants.CREATE_BY_ADMIN) && p.Latitude.Equals(poi.Latitude) &&
+                 p.Longtitude.Equals(poi.Longtitude)) ||
+                (p.CreatorId.Equals(partyId) && p.Latitude.Equals(poi.Latitude) &&
+                 p.Longtitude.Equals(poi.Longtitude))).FirstOrDefaultAsync();
+            if (checkPoi != null)
+            {
+                _logger.LogInformation("Duplicated long lat");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "A POI already exists at this location");
+            }
             poi.OpenTime = TimeSpan.Parse(model.StringOpenTime);
             poi.CloseTime = TimeSpan.Parse(model.StringCloseTime);
             poi.CreateDate = DateTime.Now;
@@ -165,6 +175,16 @@ namespace kiosk_solution.Business.Services.impl
             var geoCodeing = await _mapService.GetForwardGeocode(address);
             poi.Longtitude = geoCodeing.GeoMetries[0].Lng;
             poi.Latitude = geoCodeing.GeoMetries[0].Lat;
+            var checkPoi = await _unitOfWork.PoiRepository.Get(p =>
+                (p.Type.Equals(TypeConstants.CREATE_BY_ADMIN) && p.Latitude.Equals(poi.Latitude) &&
+                 p.Longtitude.Equals(poi.Longtitude)) ||
+                (p.CreatorId.Equals(partyId) && p.Latitude.Equals(poi.Latitude) &&
+                 p.Longtitude.Equals(poi.Longtitude))).FirstOrDefaultAsync();
+            if (checkPoi != null)
+            {
+                _logger.LogInformation("Duplicated long lat");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "A POI already exists at this location");
+            }
             poi.OpenTime = TimeSpan.Parse(model.StringOpenTime);
             poi.CloseTime = TimeSpan.Parse(model.StringCloseTime);
             poi.PoicategoryId = model.PoicategoryId;
@@ -268,7 +288,8 @@ namespace kiosk_solution.Business.Services.impl
             if (role.Equals(RoleConstants.ADMIN))
             {
                 if (dayOfWeek != null)
-                    pois = _unitOfWork.PoiRepository.Get(p => p.DayOfWeek.Contains(dayOfWeek) && p.Type.Equals(TypeConstants.CREATE_BY_ADMIN))
+                    pois = _unitOfWork.PoiRepository.Get(p =>
+                            p.DayOfWeek.Contains(dayOfWeek) && p.Type.Equals(TypeConstants.CREATE_BY_ADMIN))
                         .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
                         .DynamicFilter(model);
                 else
@@ -279,7 +300,8 @@ namespace kiosk_solution.Business.Services.impl
             else if (role.Equals(RoleConstants.LOCATION_OWNER))
             {
                 if (dayOfWeek != null)
-                    pois = _unitOfWork.PoiRepository.Get(p => p.CreatorId.Equals(partyId) && p.DayOfWeek.Contains(dayOfWeek))
+                    pois = _unitOfWork.PoiRepository
+                        .Get(p => p.CreatorId.Equals(partyId) && p.DayOfWeek.Contains(dayOfWeek))
                         .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
                         .DynamicFilter(model);
                 else
