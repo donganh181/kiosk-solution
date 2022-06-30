@@ -2,7 +2,7 @@
 {
     public class TypeConstants
     {
-        public static string CREATE_BY_ADMIN = "default";
-        public static string CREATE_BY_LOCATION_OWNER = "manual";
+        public static string SERVER_TYPE = "server";
+        public static string LOCAL_TYPE = "local";
     }
 }

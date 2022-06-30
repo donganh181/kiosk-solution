@@ -16,12 +16,6 @@ namespace kiosk_solution.Data.Constants
         public const int DefaultPage = 1;
 
         /// <summary>
-        /// Event Zone
-        /// </summary>
-        public static string SERVER_TYPE = "server";
-        public static string LOCAL_TYPE = "local";
-
-        /// <summary>
         /// Upload File Zone
         /// </summary>
         public static string APP_IMAGE = "app_image";
