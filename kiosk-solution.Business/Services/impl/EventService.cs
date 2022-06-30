@@ -453,7 +453,7 @@ namespace kiosk_solution.Business.Services.impl
                 _unitOfWork.EventRepository.Update(eventUpdate);
                 await _unitOfWork.SaveAsync();
                 var result = _mapper.Map<EventViewModel>(eventUpdate);
-                if (model.ImageId == null)
+                if (model.ImageId == null || string.IsNullOrEmpty(model.Image))
                 {
                     var listImage = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(result.Id + ""), CommonConstants.EVENT_IMAGE);
                     if (listImage == null)
