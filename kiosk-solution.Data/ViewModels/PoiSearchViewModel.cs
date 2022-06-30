@@ -19,7 +19,7 @@ namespace kiosk_solution.Data.ViewModels
         public TimeSpan? OpenTime { get; set; }
         [BindNever]
         public TimeSpan? CloseTime { get; set; }
-        [String]
+        [BindNever]
         public string DayOfWeek { get; set; }
         [Specific]
         public double Longtitude { get; set; }

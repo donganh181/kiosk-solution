@@ -53,12 +53,12 @@ namespace kiosk_solution.Controllers
         [Authorize(Roles = "Admin, Location Owner")]
         [HttpGet]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> Get([FromQuery] PoiSearchViewModel model, int size,
+        public async Task<IActionResult> Get([FromQuery] PoiSearchViewModel model, string dayOfWeek, int size,
             int pageNum = CommonConstants.DefaultPage)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _poiService.GetAllWithPaging(token.Id, token.Role, model, size, pageNum);
+            var result = await _poiService.GetAllWithPaging(token.Id, token.Role, model, size, pageNum, dayOfWeek);
             _logger.LogInformation($"Get POIs");
             return Ok(new SuccessResponse<DynamicModelResponse<PoiSearchViewModel>>((int) HttpStatusCode.OK,
                 "Search success.", result));
