@@ -66,6 +66,7 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<AppCategoryViewModel>((int) HttpStatusCode.OK, "Update success.", result));
         }
 
+
         /// <summary>
         /// Get all categories
         /// </summary>
@@ -79,10 +80,20 @@ namespace kiosk_solution.Controllers
             int page = CommonConstants.DefaultPage)
         {
             var request = Request;
-            var token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            if (token == null)
             {
                 var result = await _appCategoryService.GetAllWithPaging(null, null, model, size, page);
                 _logger.LogInformation($"Get all categories by guest");
+                return Ok(new SuccessResponse<DynamicModelResponse<AppCategorySearchViewModel>>((int) HttpStatusCode.OK,
+                    "Search success.", result));
+            }
+            else
+            {
+                Guid id = token.Id;
+                string role = token.Role;
+                var result = await _appCategoryService.GetAllWithPaging(id, role, model, size, page);
+                _logger.LogInformation($"Get all categories by party {token.Mail}");
                 return Ok(new SuccessResponse<DynamicModelResponse<AppCategorySearchViewModel>>((int) HttpStatusCode.OK,
                     "Search success.", result));
             }
