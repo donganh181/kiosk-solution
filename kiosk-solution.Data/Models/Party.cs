@@ -16,6 +16,7 @@ namespace kiosk_solution.Data.Models
             PartyServiceApplications = new HashSet<PartyServiceApplication>();
             Pois = new HashSet<Poi>();
             Schedules = new HashSet<Schedule>();
+            ServiceApplicationFeedBacks = new HashSet<ServiceApplicationFeedBack>();
             ServiceApplicationPublishRequestCreators = new HashSet<ServiceApplicationPublishRequest>();
             ServiceApplicationPublishRequestHandlers = new HashSet<ServiceApplicationPublishRequest>();
             ServiceApplications = new HashSet<ServiceApplication>();
@@ -35,6 +36,7 @@ namespace kiosk_solution.Data.Models
         public Guid? RoleId { get; set; }
         public DateTime? CreateDate { get; set; }
         public string Status { get; set; }
+        public string DeviceId { get; set; }
 
         public virtual Party Creator { get; set; }
         public virtual Role Role { get; set; }
@@ -45,6 +47,7 @@ namespace kiosk_solution.Data.Models
         public virtual ICollection<PartyServiceApplication> PartyServiceApplications { get; set; }
         public virtual ICollection<Poi> Pois { get; set; }
         public virtual ICollection<Schedule> Schedules { get; set; }
+        public virtual ICollection<ServiceApplicationFeedBack> ServiceApplicationFeedBacks { get; set; }
         public virtual ICollection<ServiceApplicationPublishRequest> ServiceApplicationPublishRequestCreators { get; set; }
         public virtual ICollection<ServiceApplicationPublishRequest> ServiceApplicationPublishRequestHandlers { get; set; }
         public virtual ICollection<ServiceApplication> ServiceApplications { get; set; }
