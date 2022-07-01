@@ -8,7 +8,14 @@ using System.Threading.Tasks;
 namespace kiosk_solution.Data.ViewModels
 {
     public class AppCategoryPositionViewModel
-    {   
+    {
+        public AppCategoryPositionViewModel(Guid? templateId, string templateName, List<CategoryPositionDetailViewModel> listPosition)
+        {
+            TemplateId = templateId;
+            TemplateName = templateName;
+            ListPosition = listPosition;
+        }
+
         public Guid? TemplateId { get; set; }
         public string TemplateName { get; set; }
         public List<CategoryPositionDetailViewModel> ListPosition { get; set; }
@@ -18,7 +25,6 @@ namespace kiosk_solution.Data.ViewModels
         public Guid Id { get; set; }
         public Guid? AppCategoryId { get; set; }
         public string AppCategoryName { get; set; }
-        public string TemplateName { get; set; }
         public int? RowIndex { get; set; }
         public int? ColumnIndex { get; set; }
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using kiosk_solution.Data.Responses;
 
 namespace kiosk_solution.Business.Services
 {
@@ -11,5 +12,6 @@ namespace kiosk_solution.Business.Services
     {
         public Task<AppCategoryPositionViewModel> Create(Guid partyId, AppCategoryPositionCreateViewModel model);
         public Task<AppCategoryPositionViewModel> Update(Guid partyId, AppCategoryPositionUpdateViewModel model);
+        public Task<AppCategoryPositionViewModel> GetById(Guid partyId, Guid templateId);
     }
 }

@@ -57,5 +57,17 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Update successfuly to template {result.TemplateName} by party {token.Mail}");
             return Ok(new SuccessResponse<AppCategoryPositionViewModel>((int)HttpStatusCode.OK, "Update success.", result));
         }
+        
+        [Authorize(Roles = "Location Owner")]
+        [HttpGet]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetPosition([FromQuery] Guid templateId)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _appCategoryPositionService.GetById(token.Id, templateId);
+            _logger.LogInformation($"Get template position {result.TemplateName} by party {token.Mail} successful");
+            return Ok(new SuccessResponse<AppCategoryPositionViewModel>((int)HttpStatusCode.OK, "Get success.", result));
+        }
     }
 }
