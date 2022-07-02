@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using kiosk_solution.Data.Models;
 
 namespace kiosk_solution.Data.ViewModels
 {
@@ -20,7 +21,7 @@ namespace kiosk_solution.Data.ViewModels
         [String] public string PartyEmail { get; set; }
         [BindNever] public Guid? AppCategoryId { get; set; }
         [String] public string AppCategoryName { get; set; }
-        [BindNever] public Guid? ApplicationMarketId { get; set; }
+        [BindNever] public virtual ICollection<PartyServiceApplication> PartyServiceApplications { get; set; }
         [String] public string Status { get; set; }
         [BindNever] public DateTime? CreateDate { get; set; }
     }

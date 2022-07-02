@@ -36,10 +36,10 @@ namespace kiosk_solution.Business.Services.impl
         }
 
         public async Task<DynamicModelResponse<ServiceApplicationSearchViewModel>> GetAllWithPaging(string role,
-            Guid? id, ServiceApplicationSearchViewModel model, int size, int pageNum)
+            Guid? partyId, ServiceApplicationSearchViewModel model, int size, int pageNum)
         {
             object apps = null;
-            if (string.IsNullOrEmpty(role) || role.Equals(RoleConstants.ADMIN) || role.Equals(RoleConstants.LOCATION_OWNER))
+            if (string.IsNullOrEmpty(role) || role.Equals(RoleConstants.ADMIN))
             {
                 apps = _unitOfWork.ServiceApplicationRepository
                     .Get()
@@ -48,12 +48,12 @@ namespace kiosk_solution.Business.Services.impl
                     .ProjectTo<ServiceApplicationSearchViewModel>(_mapper.ConfigurationProvider)
                     .DynamicFilter(model)
                     .AsQueryable().OrderByDescending(a => a.Name);
-            
             }
+
             if (!string.IsNullOrEmpty(role) && role.Equals(RoleConstants.SERVICE_PROVIDER))
             {
                 apps = _unitOfWork.ServiceApplicationRepository
-                    .Get(a => a.PartyId.Equals(id))
+                    .Get(a => a.PartyId.Equals(partyId))
                     .Include(a => a.Party)
                     .Include(a => a.AppCategory)
                     .ProjectTo<ServiceApplicationSearchViewModel>(_mapper.ConfigurationProvider)
@@ -61,12 +61,25 @@ namespace kiosk_solution.Business.Services.impl
                     .AsQueryable().OrderByDescending(a => a.CreateDate);
             }
 
-            if(apps == null)
+            if (!string.IsNullOrEmpty(role) && role.Equals(RoleConstants.LOCATION_OWNER))
+            {
+                apps = _unitOfWork.ServiceApplicationRepository
+                    .Get()
+                    .Include(a => a.Party)
+                    .Include(a => a.AppCategory)
+                    .Include(a => a.PartyServiceApplications.Where(p => p.PartyId.Equals(partyId)))
+                    .ProjectTo<ServiceApplicationSearchViewModel>(_mapper.ConfigurationProvider)
+                    .DynamicFilter(model)
+                    .AsQueryable().OrderByDescending(a => a.CreateDate);
+            }
+
+            if (apps == null)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
-            var listApp = (IQueryable<ServiceApplicationSearchViewModel>)apps;
+
+            var listApp = (IQueryable<ServiceApplicationSearchViewModel>) apps;
 
             var listPaging =
                 listApp.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
@@ -76,6 +89,7 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Can not Found.");
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
+
 
             var result = new DynamicModelResponse<ServiceApplicationSearchViewModel>
             {
@@ -119,14 +133,16 @@ namespace kiosk_solution.Business.Services.impl
             {
                 _unitOfWork.ServiceApplicationRepository.Update(app);
                 await _unitOfWork.SaveAsync();
-                if(model.Logo != null)
+                if (model.Logo != null)
                 {
                     var newLogo =
-                   await _fileService.UploadImageToFirebase(model.Logo, CommonConstants.APP_IMAGE, app.AppCategory.Name, model.Id, "Logo");
+                        await _fileService.UploadImageToFirebase(model.Logo, CommonConstants.APP_IMAGE,
+                            app.AppCategory.Name, model.Id, "Logo");
                     app.Logo = newLogo;
                     _unitOfWork.ServiceApplicationRepository.Update(app);
                     await _unitOfWork.SaveAsync();
                 }
+
                 var result = _mapper.Map<ServiceApplicationViewModel>(app);
                 return result;
             }
@@ -142,24 +158,25 @@ namespace kiosk_solution.Business.Services.impl
             var serviceApplication = _mapper.Map<ServiceApplication>(model);
             serviceApplication.PartyId = partyId;
             serviceApplication.Status = StatusConstants.INCOMPLETE;
-            serviceApplication.CreateDate=DateTime.Now;
+            serviceApplication.CreateDate = DateTime.Now;
             try
             {
                 await _unitOfWork.ServiceApplicationRepository.InsertAsync(serviceApplication);
                 await _unitOfWork.SaveAsync();
-                
+
                 var serviceApplicationNew = await _unitOfWork.ServiceApplicationRepository
                     .Get(a => a.Id.Equals(serviceApplication.Id))
                     .Include(a => a.AppCategory)
                     .Include(a => a.Party)
                     .FirstOrDefaultAsync();
-                var logo = await _fileService.UploadImageToFirebase(model.Logo,CommonConstants.APP_IMAGE, serviceApplicationNew.AppCategory.Name,
+                var logo = await _fileService.UploadImageToFirebase(model.Logo, CommonConstants.APP_IMAGE,
+                    serviceApplicationNew.AppCategory.Name,
                     serviceApplication.Id, "Logo");
                 serviceApplication.Logo = logo;
                 serviceApplication.Status = StatusConstants.UNAVAILABLE;
                 _unitOfWork.ServiceApplicationRepository.Update(serviceApplicationNew);
                 await _unitOfWork.SaveAsync();
-                
+
                 var result = _mapper.Map<ServiceApplicationViewModel>(serviceApplicationNew);
                 return result;
             }
@@ -191,11 +208,12 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<bool> SetStatus(Guid id, string status)
         {
             var app = await _unitOfWork.ServiceApplicationRepository.Get(a => a.Id.Equals(id)).FirstOrDefaultAsync();
-            if(app == null)
+            if (app == null)
             {
                 _logger.LogInformation("Can not found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
             }
+
             app.Status = status;
 
             try
@@ -207,7 +225,7 @@ namespace kiosk_solution.Business.Services.impl
             catch (Exception)
             {
                 _logger.LogInformation("Invalid data.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid data.");
             }
         }
     }
