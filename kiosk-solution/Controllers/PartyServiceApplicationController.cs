@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace kiosk_solution.Controllers
 {
-    [Route("api/v{version:apiVersion}/appMarket")]
+    [Route("api/v{version:apiVersion}/my-app")]
     [ApiController]
     [ApiVersion("1")]
     public class PartyServiceApplicationController : Controller
