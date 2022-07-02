@@ -32,7 +32,7 @@ namespace kiosk_solution.Business.Services.impl
                     }
                 };
                 var result = await sender.SendAsync(message);
-                if(result == null)
+                if(result == null || !result.ReasonPhrase.Equals("OK"))
                 {
                     _logger.LogInformation("Firebase error.");
                     throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Firebase error.");
