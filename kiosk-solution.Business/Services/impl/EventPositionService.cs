@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -133,6 +134,47 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Invalid data.");
                 throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
             }
+        }
+
+        public async Task<EventPositionGetViewModel> GetById(Guid partyId, Guid templateId)
+        {
+            var template = await _templateService.GetById(templateId);
+            if (template == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
+            }
+
+            if (!template.PartyId.Equals(partyId))
+            {
+                _logger.LogInformation("You cannot use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You cannot use this feature.");
+            }
+
+            var listPosition = new List<EventPositionByRowViewModel>();
+            var components = new List<EventPositionDetailGetViewModel>();
+            int rowIndex = -1;
+            do
+            {
+                rowIndex++;
+                components = await _unitOfWork.EventPositionRepository
+                    .Get(p => p.TemplateId.Equals(templateId) && p.RowIndex == rowIndex)
+                    .ProjectTo<EventPositionDetailGetViewModel>(_mapper.ConfigurationProvider).AsQueryable()
+                    .OrderByDescending(p => p.ColumnIndex)
+                    .ToListAsync();
+                if (components == null)
+                    break;
+                listPosition.Add(new EventPositionByRowViewModel(rowIndex, components));
+            } while (true);
+
+            if (listPosition == null)
+            {
+                _logger.LogInformation("Can not found positions.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found positions.");
+            }
+
+            var result = new EventPositionGetViewModel(templateId, template.Name, listPosition);
+            return result;
         }
     }
 }

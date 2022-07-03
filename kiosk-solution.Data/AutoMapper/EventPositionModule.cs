@@ -25,6 +25,10 @@ namespace kiosk_solution.Data.AutoMapper
                 .ForMember(src => src.EventName, opt => opt.MapFrom(des => des.Event.Name))
                 .ForMember(src => src.TemplateName, opt => opt.MapFrom(des => des.Template.Name));
             mc.CreateMap<EventPositionViewModel, EventPosition>();
+            
+            mc.CreateMap<EventPosition, EventPositionDetailGetViewModel>()
+                .ForMember(src => src.EventName, opt => opt.MapFrom(des => des.Event.Name));
+            mc.CreateMap<EventPositionDetailGetViewModel, EventPosition>();
         }
     }
 }
