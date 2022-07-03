@@ -66,8 +66,8 @@ namespace kiosk_solution.Controllers
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _appCategoryPositionService.GetById(token.Id, templateId);
-            _logger.LogInformation($"Get template position {result.TemplateName} by party {token.Mail} successful");
-            return Ok(new SuccessResponse<AppCategoryPositionViewModel>((int)HttpStatusCode.OK, "Get success.", result));
+            _logger.LogInformation($"Get app category position {result.TemplateName} by party {token.Mail} successful");
+            return Ok(new SuccessResponse<AppCategoryPositionGetViewModel>((int)HttpStatusCode.OK, "Get success.", result));
         }
     }
 }

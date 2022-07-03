@@ -129,7 +129,7 @@ namespace kiosk_solution.Business.Services.impl
                         "Your account has no app in this category.");
                 }
             }
-            
+
             try
             {
                 var listDelete = await _unitOfWork.AppCategoryPositionRepository
@@ -165,26 +165,45 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<AppCategoryPositionViewModel> GetById(Guid partyId, Guid templateId)
+        public async Task<AppCategoryPositionGetViewModel> GetById(Guid partyId, Guid templateId)
         {
             var template = await _templateService.GetById(templateId);
+            if (template == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
+            }
+
             if (!template.PartyId.Equals(partyId))
             {
                 _logger.LogInformation("You cannot use this feature.");
                 throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You cannot use this feature.");
             }
 
-            var positions = await _unitOfWork.AppCategoryPositionRepository.Get(p => p.TemplateId.Equals(templateId))
-                .ProjectTo<CategoryPositionDetailViewModel>(_mapper.ConfigurationProvider).AsQueryable()
-                .OrderByDescending(p => p.RowIndex).ThenByDescending(p => p.ColumnIndex)
-                .ToListAsync();
-            if (positions == null)
+            var listPosition = new List<AppCategoryPositionByRowViewModel>();
+            var components = new List<AppCategoryPositionDetailViewModel>();
+            int rowIndex = -1;
+            do
+            {
+                rowIndex++;
+                components = await _unitOfWork.AppCategoryPositionRepository
+                    .Get(p => p.TemplateId.Equals(templateId) && p.RowIndex == rowIndex)
+                    .ProjectTo<AppCategoryPositionDetailViewModel>(_mapper.ConfigurationProvider).AsQueryable()
+                    .OrderByDescending(p => p.ColumnIndex)
+                    .ToListAsync();
+                if (components.Count == 0)
+                    break;
+                listPosition.Add(new AppCategoryPositionByRowViewModel(rowIndex, components));
+            } while (true);
+
+            if (listPosition == null)
             {
                 _logger.LogInformation("Can not found positions.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found positions.");
             }
-            var appCatePosition = new AppCategoryPositionViewModel(templateId, template.Name, positions);
-            return appCatePosition;
+
+            var result = new AppCategoryPositionGetViewModel(templateId, template.Name, listPosition);
+            return result;
         }
     }
 }

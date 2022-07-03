@@ -22,13 +22,17 @@ namespace kiosk_solution.Data.AutoMapper
 
             mc.CreateMap<AppCategoryPosition, CategoryPositionDetailCreateViewModel>();
             mc.CreateMap<CategoryPositionDetailCreateViewModel, AppCategoryPosition>();
-            
+
             mc.CreateMap<AppCategoryPosition, CategoryPositionDetailUpdateViewModel>();
             mc.CreateMap<CategoryPositionDetailUpdateViewModel, AppCategoryPosition>();
 
             mc.CreateMap<AppCategoryPosition, CategoryPositionDetailViewModel>()
                 .ForMember(src => src.AppCategoryName, opt => opt.MapFrom(des => des.AppCategory.Name));
             mc.CreateMap<AppCategoryPositionViewModel, AppCategoryPosition>();
+
+            mc.CreateMap<AppCategoryPosition, AppCategoryPositionDetailViewModel>()
+                .ForMember(src => src.AppCategoryName, opt => opt.MapFrom(des => des.AppCategory.Name));
+            mc.CreateMap<AppCategoryPositionDetailViewModel, AppCategoryPosition>();
         }
     }
 }
