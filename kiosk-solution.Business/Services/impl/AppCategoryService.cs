@@ -149,13 +149,13 @@ namespace kiosk_solution.Business.Services.impl
             cate.Name = model.Name;
             try
             {
-                _unitOfWork.AppCategoryRepository.Update(cate);
-                await _unitOfWork.SaveAsync();
-
-                var newLogo = await _fileService.UploadImageToFirebase(model.Logo,
+                if (!cate.Logo.Equals(model.Logo))
+                {
+                    var newLogo = await _fileService.UploadImageToFirebase(model.Logo,
                     CommonConstants.CATE_IMAGE, cate.Name, cate.Id, "Cate");
-
-                cate.Logo = newLogo;
+                    cate.Logo = newLogo;
+                }
+                
                 _unitOfWork.AppCategoryRepository.Update(cate);
                 await _unitOfWork.SaveAsync();
 

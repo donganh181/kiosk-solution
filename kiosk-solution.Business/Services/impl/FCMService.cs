@@ -1,4 +1,5 @@
 ﻿using FCM.Net;
+using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Responses;
 using Microsoft.Extensions.Logging;
 using System;
@@ -20,7 +21,7 @@ namespace kiosk_solution.Business.Services.impl
         }
         public async Task<bool> SendNotificationToUser(string deviceId)
         {
-            using (var sender = new Sender("AAAAz10Ppsw:APA91bEdkD0Byh3nc641p6TQizr4FcVpzbvAHa6vcSL0keSKFiF5FFmusHfQtUTdoqoFHybK5VQP9qlnH_-eU2C6_9QUNi9_SZOnPu7Diz-VLZNQ4KebxSybAkLmMpYtPm7NoHCdcxaD"))
+            using (var sender = new Sender(FirebaseConstants.SERVER_KEY))
             {
                 var message = new Message
                 {

@@ -74,14 +74,14 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found.");
             }
             cate.Name = model.Name;
-            if (!cate.Logo.Equals(model.Logo))
-            {
-                var newLogo = await _fileService.UploadImageToFirebase(model.Logo,
-                    CommonConstants.POI_CATE_IMAGE, cate.Name, cate.Id, "Poi Cate");
-                cate.Logo = newLogo;
-            }
             try
             {
+                if (!cate.Logo.Equals(model.Logo))
+                {
+                    var newLogo = await _fileService.UploadImageToFirebase(model.Logo,
+                        CommonConstants.POI_CATE_IMAGE, cate.Name, cate.Id, "Poi Cate");
+                    cate.Logo = newLogo;
+                }
                 _unitOfWork.PoicategoryRepository.Update(cate);
                 await _unitOfWork.SaveAsync();
 
