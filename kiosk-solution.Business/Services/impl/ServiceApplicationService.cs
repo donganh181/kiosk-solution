@@ -67,7 +67,9 @@ namespace kiosk_solution.Business.Services.impl
                     .Get()
                     .Include(a => a.Party)
                     .Include(a => a.AppCategory)
-                    .Include(a => a.PartyServiceApplications.Where(p => p.PartyId.Equals(partyId)))
+                    .Include(a => a.PartyServiceApplications.Where(x => x.PartyId.Value == partyId))
+                    .ToList()
+                    .AsQueryable()
                     .ProjectTo<ServiceApplicationSearchViewModel>(_mapper.ConfigurationProvider)
                     .DynamicFilter(model)
                     .AsQueryable().OrderByDescending(a => a.CreateDate);

@@ -18,7 +18,6 @@ namespace kiosk_solution.Data.ViewModels
         public string PartyEmail { get; set; }
         public Guid? AppCategoryId { get; set; }
         public string AppCategoryName { get; set; }
-        public Guid? ApplicationMarketId { get; set; }
         public string Status { get; set; }
     }
 }

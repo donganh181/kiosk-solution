@@ -16,5 +16,6 @@ namespace kiosk_solution.Business.Services
         Task<PartyViewModel> UpdateStatus(Guid id);
         Task<DynamicModelResponse<PartySearchViewModel>> GetAllWithPaging(PartySearchViewModel model, int size, int pageNum);
         Task<PartyViewModel> GetPartyById(Guid id);
+        Task<bool> Logout(Guid partyId);
     }
 }
