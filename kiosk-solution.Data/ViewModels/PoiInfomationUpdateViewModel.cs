@@ -15,5 +15,7 @@ namespace kiosk_solution.Data.ViewModels
         public string City { get; set; }
         public string Address { get; set; }
         public Guid? PoicategoryId { get; set; }
+        public Guid? ThumbnailId { get; set; }
+        public string Thumbnail { get; set; }
     }
 }

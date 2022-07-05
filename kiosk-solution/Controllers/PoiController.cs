@@ -99,23 +99,6 @@ namespace kiosk_solution.Controllers
         }
 
         /// <summary>
-        /// Update image to poi
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        [Authorize(Roles = "Admin, Location Owner")]
-        [HttpPatch("image")]
-        [MapToApiVersion("1")]
-        public async Task<IActionResult> UpdateImage([FromBody] PoiUpdateImageViewModel model)
-        {
-            var request = Request;
-            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _poiService.UpdateImageToPoi(token.Id, token.Role, model);
-            _logger.LogInformation($"Update image success by party {token.Mail}");
-            return Ok(new SuccessResponse<ImageViewModel>((int)HttpStatusCode.OK, "Update success.", result));
-        }
-
-        /// <summary>
         /// Delete image from poi by admin or its location owner
         /// </summary>
         /// <param name="imageId"></param>

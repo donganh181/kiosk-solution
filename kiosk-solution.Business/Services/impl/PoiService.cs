@@ -194,6 +194,12 @@ namespace kiosk_solution.Business.Services.impl
                 _unitOfWork.PoiRepository.Update(poi);
                 await _unitOfWork.SaveAsync();
                 var result = _mapper.Map<PoiViewModel>(poi);
+                if (model.ThumbnailId != null && !string.IsNullOrEmpty(model.Thumbnail))
+                {
+                    ImageUpdateViewModel updateModel =
+                        new ImageUpdateViewModel((Guid) model.ThumbnailId, poi.Name, model.Thumbnail, CommonConstants.THUMBNAIL);
+                    result.Thumbnail = await _imageService.Update(updateModel);
+                }
                 return result;
             }
             catch (Exception)
