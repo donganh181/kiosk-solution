@@ -189,7 +189,7 @@ namespace kiosk_solution.Business.Services.impl
                 components = await _unitOfWork.AppCategoryPositionRepository
                     .Get(p => p.TemplateId.Equals(templateId) && p.RowIndex == rowIndex)
                     .ProjectTo<AppCategoryPositionDetailViewModel>(_mapper.ConfigurationProvider).AsQueryable()
-                    .OrderByDescending(p => p.ColumnIndex)
+                    .OrderBy(p => p.ColumnIndex)
                     .ToListAsync();
                 if (components.Count == 0)
                     break;
