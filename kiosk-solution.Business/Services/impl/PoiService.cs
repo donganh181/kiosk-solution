@@ -175,18 +175,26 @@ namespace kiosk_solution.Business.Services.impl
             var geoCodeing = await _mapService.GetForwardGeocode(address);
             poi.Longtitude = geoCodeing.GeoMetries[0].Lng;
             poi.Latitude = geoCodeing.GeoMetries[0].Lat;
-            var checkPoi = await _unitOfWork.PoiRepository.Get(p =>
-                (p.Type.Equals(TypeConstants.SERVER_TYPE) && p.Latitude.Equals(poi.Latitude) &&
-                 p.Longtitude.Equals(poi.Longtitude)) ||
-                (p.CreatorId.Equals(partyId) && p.Latitude.Equals(poi.Latitude) &&
-                 p.Longtitude.Equals(poi.Longtitude))).FirstOrDefaultAsync();
-            if (checkPoi != null)
+            if (!poi.Address.Equals(model.Address) && !poi.City.Equals(model.City) &&
+                !poi.District.Equals(model.District) && !poi.Ward.Equals(model.Ward))
             {
-                _logger.LogInformation("Duplicated long lat");
-                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "A POI already exists at this location");
+                var checkPoi = await _unitOfWork.PoiRepository.Get(p =>
+                    (p.Type.Equals(TypeConstants.SERVER_TYPE) && p.Latitude.Equals(poi.Latitude) &&
+                     p.Longtitude.Equals(poi.Longtitude)) ||
+                    (p.CreatorId.Equals(partyId) && p.Latitude.Equals(poi.Latitude) &&
+                     p.Longtitude.Equals(poi.Longtitude))).FirstOrDefaultAsync();
+                if (checkPoi != null)
+                {
+                    _logger.LogInformation("Duplicated long lat");
+                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "A POI already exists at this location");
+                }
             }
             poi.OpenTime = TimeSpan.Parse(model.StringOpenTime);
             poi.CloseTime = TimeSpan.Parse(model.StringCloseTime);
+            poi.Address = address;
+            poi.City = model.City;
+            poi.District = model.District;
+            poi.Ward = model.Ward;
             poi.PoicategoryId = model.PoicategoryId;
             poi.DayOfWeek = model.DayOfWeek;
             try
@@ -194,11 +202,15 @@ namespace kiosk_solution.Business.Services.impl
                 _unitOfWork.PoiRepository.Update(poi);
                 await _unitOfWork.SaveAsync();
                 var result = _mapper.Map<PoiViewModel>(poi);
-                if (model.ThumbnailId != null && !string.IsNullOrEmpty(model.Thumbnail))
+                if (!string.IsNullOrEmpty(model.Thumbnail))
                 {
                     ImageUpdateViewModel updateModel =
                         new ImageUpdateViewModel((Guid) model.ThumbnailId, poi.Name, model.Thumbnail, CommonConstants.THUMBNAIL);
                     result.Thumbnail = await _imageService.Update(updateModel);
+                }
+                else
+                {
+                    result.Thumbnail = await _imageService.GetById((Guid) model.ThumbnailId);
                 }
                 return result;
             }
