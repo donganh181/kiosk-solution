@@ -59,7 +59,11 @@ namespace kiosk_solution.Business.Services.impl
                 {
                     var position = _mapper.Map<EventPosition>(pos);
                     position.TemplateId = model.TemplateId;
-                    
+                    if (position.EventId == null)
+                    {
+                        _logger.LogInformation($"Event id is required.");
+                        throw new ErrorResponse((int)HttpStatusCode.BadRequest, $"Event id is required.");
+                    }
                     await _unitOfWork.EventPositionRepository.InsertAsync(position);
                 }
                 await _unitOfWork.SaveAsync();
