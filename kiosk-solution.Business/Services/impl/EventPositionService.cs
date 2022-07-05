@@ -55,11 +55,11 @@ namespace kiosk_solution.Business.Services.impl
             }
             try
             {
-                foreach(var pos in model.ListPosition)
+                foreach (var pos in model.ListPosition)
                 {
                     var position = _mapper.Map<EventPosition>(pos);
                     position.TemplateId = model.TemplateId;
-
+                    
                     await _unitOfWork.EventPositionRepository.InsertAsync(position);
                 }
                 await _unitOfWork.SaveAsync();
@@ -160,7 +160,7 @@ namespace kiosk_solution.Business.Services.impl
                 components = await _unitOfWork.EventPositionRepository
                     .Get(p => p.TemplateId.Equals(templateId) && p.RowIndex == rowIndex)
                     .ProjectTo<EventPositionDetailGetViewModel>(_mapper.ConfigurationProvider).AsQueryable()
-                    .OrderByDescending(p => p.ColumnIndex)
+                    .OrderBy(p => p.ColumnIndex)
                     .ToListAsync();
                 if (components.Count == 0)
                     break;
