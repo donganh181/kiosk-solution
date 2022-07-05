@@ -72,7 +72,9 @@ namespace kiosk_solution.Business.Services.impl
                     .Get(a => a.Id.Equals(partyService.Id))
                     .Include(a => a.Party)
                     .Include(a => a.ServiceApplication)
-                    .ProjectTo<PartyServiceApplicationViewModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
+                    .ThenInclude(b => b.AppCategory)
+                    .ProjectTo<PartyServiceApplicationViewModel>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync();
                 return result;
             }
             catch (Exception)
@@ -88,6 +90,7 @@ namespace kiosk_solution.Business.Services.impl
                 .Get(a => a.PartyId.Equals(id))
                 .Include(a => a.Party)
                 .Include(a => a.ServiceApplication)
+                .ThenInclude(b => b.AppCategory)
                 .ProjectTo<PartyServiceApplicationSearchViewModel>(_mapper.ConfigurationProvider)
                 .DynamicFilter(model)
                 .AsQueryable().OrderByDescending(a => a.ServiceApplicationName);

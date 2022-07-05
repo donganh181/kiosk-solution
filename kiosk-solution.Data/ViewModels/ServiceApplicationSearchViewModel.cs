@@ -21,7 +21,7 @@ namespace kiosk_solution.Data.ViewModels
         [String] public string PartyEmail { get; set; }
         [BindNever] public Guid? AppCategoryId { get; set; }
         [String] public string AppCategoryName { get; set; }
-        [BindNever] public virtual ICollection<PartyServiceApplication> PartyServiceApplications { get; set; }
+        [BindNever] public PartyServiceApplicationViewModel PartyServiceApplication { get; set; }
         [String] public string Status { get; set; }
         [BindNever] public DateTime? CreateDate { get; set; }
     }

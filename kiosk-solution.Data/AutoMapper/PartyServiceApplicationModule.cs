@@ -16,7 +16,12 @@ namespace kiosk_solution.Data.AutoMapper
             mc.CreateMap<PartyServiceApplication, PartyServiceApplicationViewModel>()
                 .ForMember(src => src.PartyName, opt => opt.MapFrom(des => des.Party.FirstName))
                 .ForMember(src => src.PartyEmail, opt => opt.MapFrom(des => des.Party.Email))
-                .ForMember(src => src.ServiceApplicationName, opt => opt.MapFrom(des => des.ServiceApplication.Name));
+                .ForMember(src => src.ServiceApplicationName, opt => opt.MapFrom(des => des.ServiceApplication.Name))
+                .ForMember(src => src.ServiceApplicationDescription, opt => opt.MapFrom(des => des.ServiceApplication.Description))
+                .ForMember(src => src.ServiceApplicationLogo, opt => opt.MapFrom(des => des.ServiceApplication.Logo))
+                .ForMember(src => src.ServiceApplicationLink, opt => opt.MapFrom(des => des.ServiceApplication.Link))
+                .ForMember(src => src.AppCategoryId, opt => opt.MapFrom(des => des.ServiceApplication.AppCategory.Id))
+                .ForMember(src => src.AppcategoryName, opt => opt.MapFrom(des => des.ServiceApplication.AppCategory.Name));
             mc.CreateMap<PartyServiceApplicationViewModel, PartyServiceApplication>();
 
             mc.CreateMap<PartyServiceApplication, PartyServiceApplicationCreateViewModel>();
@@ -25,7 +30,12 @@ namespace kiosk_solution.Data.AutoMapper
             mc.CreateMap<PartyServiceApplication, PartyServiceApplicationSearchViewModel>()
                 .ForMember(src => src.PartyName, opt => opt.MapFrom(des => des.Party.FirstName))
                 .ForMember(src => src.PartyEmail, opt => opt.MapFrom(des => des.Party.Email))
-                .ForMember(src => src.ServiceApplicationName, opt => opt.MapFrom(des => des.ServiceApplication.Name));
+                .ForMember(src => src.ServiceApplicationName, opt => opt.MapFrom(des => des.ServiceApplication.Name))
+                .ForMember(src => src.ServiceApplicationDescription, opt => opt.MapFrom(des => des.ServiceApplication.Description))
+                .ForMember(src => src.ServiceApplicationLogo, opt => opt.MapFrom(des => des.ServiceApplication.Logo))
+                .ForMember(src => src.ServiceApplicationLink, opt => opt.MapFrom(des => des.ServiceApplication.Link))
+                .ForMember(src => src.AppCategoryId, opt => opt.MapFrom(des => des.ServiceApplication.AppCategory.Id))
+                .ForMember(src => src.AppcategoryName, opt => opt.MapFrom(des => des.ServiceApplication.AppCategory.Name));
             mc.CreateMap<PartyServiceApplicationSearchViewModel, PartyServiceApplication>();
         }
     }
