@@ -40,6 +40,15 @@ namespace kiosk_solution.Data.Context
         public virtual DbSet<ServiceOrder> ServiceOrders { get; set; }
         public virtual DbSet<Template> Templates { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=45.119.212.77, 9943;Database=Kiosk_Platform;User Id =sa;Password=Goboi123;Trusted_Connection=False;Persist Security Info=True");
+            }
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
@@ -48,7 +57,7 @@ namespace kiosk_solution.Data.Context
             {
                 entity.ToTable("AppCategory");
 
-                entity.HasIndex(e => e.Name, "UQ__AppCateg__737584F65DDDABEE")
+                entity.HasIndex(e => e.Name, "UQ__AppCateg__737584F6F1F65C89")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
@@ -223,10 +232,10 @@ namespace kiosk_solution.Data.Context
             {
                 entity.ToTable("Party");
 
-                entity.HasIndex(e => e.PhoneNumber, "UQ__Party__85FB4E387FE61104")
+                entity.HasIndex(e => e.PhoneNumber, "UQ__Party__85FB4E383C8D9404")
                     .IsUnique();
 
-                entity.HasIndex(e => e.Email, "UQ__Party__A9D10534BE97BDA1")
+                entity.HasIndex(e => e.Email, "UQ__Party__A9D105341F954720")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
@@ -297,6 +306,10 @@ namespace kiosk_solution.Data.Context
                 entity.ToTable("PartyServiceApplication");
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+
+                entity.Property(e => e.Status)
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
 
                 entity.HasOne(d => d.Party)
                     .WithMany(p => p.PartyServiceApplications)
@@ -400,7 +413,7 @@ namespace kiosk_solution.Data.Context
             {
                 entity.ToTable("ServiceApplication");
 
-                entity.HasIndex(e => e.Name, "UQ__ServiceA__737584F6E507CA19")
+                entity.HasIndex(e => e.Name, "UQ__ServiceA__737584F68CA82A97")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
