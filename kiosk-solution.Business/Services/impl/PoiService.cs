@@ -427,6 +427,11 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<List<PoiViewModel>> GetLocationNearby(Guid kioskId, double lng, double lat)
         {
             var kiosk = await _kioskService.GetById(kioskId);
+            if(kiosk == null)
+            {
+                _logger.LogInformation("Kiosk not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Kiosk not found.");
+            }
             var pois = _unitOfWork.PoiRepository
                 .GetPoiNearBy(Guid.Parse(kiosk.PartyId + ""), lng, lat)
                 .ProjectTo<PoiViewModel>(_mapper.ConfigurationProvider);
