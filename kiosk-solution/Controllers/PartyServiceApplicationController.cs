@@ -59,5 +59,18 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Get installed applications by party {token.Mail}");
             return Ok(new SuccessResponse<DynamicModelResponse<PartyServiceApplicationSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
+        
+        [Authorize(Roles = "Location Owner")]
+        [HttpPatch("status")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Get([FromBody] PartyServiceApplicationUpdateViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            Guid id = token.Id;
+            var result = await _partyServiceApplicationService.UpdateStatus(id, model);
+            _logger.LogInformation($"Update status application {model.serviceApplication} by party {token.Mail}");
+            return Ok(new SuccessResponse<PartyServiceApplicationViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
     }
 }

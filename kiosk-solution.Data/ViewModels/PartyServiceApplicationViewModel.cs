@@ -19,5 +19,6 @@ namespace kiosk_solution.Data.ViewModels
         public string ServiceApplicationLink { get; set; }
         public Guid? AppCategoryId { get; set; }
         public string AppcategoryName { get; set; }
+        public string Status { get; set; }
     }
 }

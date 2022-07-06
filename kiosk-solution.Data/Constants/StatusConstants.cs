@@ -29,5 +29,10 @@ namespace kiosk_solution.Data.Constants
         public static string COMING_SOON = "coming soon";
         public static string ON_GOING = "on going";
         public static string END = "end";
+        
+        //Service application
+        public static string INSTALLED = "installed";
+        public static string UNINSTALLED = "uninstalled";
+
     }
 }
