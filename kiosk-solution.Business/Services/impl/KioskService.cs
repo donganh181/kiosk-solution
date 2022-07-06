@@ -30,6 +30,36 @@ namespace kiosk_solution.Business.Services.impl
             _logger = logger;
         }
 
+        public async Task<KioskViewModel> AddDeviceId(KioskAddDeviceIdViewModel model)
+        {
+            var kiosk = await _unitOfWork.KioskRepository
+                .Get(k => k.Id.Equals(model.KioskId))
+                .FirstOrDefaultAsync();
+            if(kiosk == null)
+            {
+                _logger.LogInformation("Kiosk not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Kiosk not found.");
+            }
+            kiosk.DeviceId = model.DeviceId;
+            try
+            {
+                _unitOfWork.KioskRepository.Update(kiosk);
+                await _unitOfWork.SaveAsync();
+
+                var result = await _unitOfWork.KioskRepository
+                .Get(k => k.Id.Equals(model.KioskId))
+                .ProjectTo<KioskViewModel>(_mapper)
+                .FirstOrDefaultAsync();
+
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid Data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
+            }
+        }
+
         public async Task<KioskViewModel> CreateNewKiosk(CreateKioskViewModel model)
         {
             var user = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(model.PartyId)).FirstOrDefaultAsync();
