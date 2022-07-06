@@ -32,5 +32,7 @@ namespace kiosk_solution.Data.ViewModels
         public Guid? AppCategoryId { get; set; }
         [BindNever]
         public string AppcategoryName { get; set; }
+        [String]
+        public string Status { get; set; }
     }
 }
