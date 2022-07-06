@@ -25,6 +25,8 @@ namespace kiosk_solution.Data.Repositories.impl
         public IAppCategoryPositionRepository AppCategoryPositionRepository { get; set; }
         public IEventPositionRepository EventPositionRepository { get; set; }
         public IPoicategoryRepository PoicategoryRepository { get; set; }
+        public INotificationRepository NotificationRepository { get; set; }
+        public IPartyNotificationRepository PartyNotificationRepository { get; set; }
 
         public UnitOfWork(Kiosk_PlatformContext context, IRoleRepository roleRepository, IKioskRepository kioskRepository, 
             IPartyRepository partyRepository, IKioskLocationRepository kioskLocationRepository, IScheduleRepository scheduleRepository,
@@ -32,7 +34,8 @@ namespace kiosk_solution.Data.Repositories.impl
             IServiceApplicationPublishRequestRepository serviceApplicationPublishRequestRepository, IEventRepository eventRepository,
             IPartyServiceApplicationRepository partyServiceApplicationRepository, IPoiRepository poiRepository,
             IAppCategoryRepository appCategoryRepository, IImageRepository imageRepository, IAppCategoryPositionRepository appCategoryPositionRepository,
-            IEventPositionRepository eventPositionRepository, IPoicategoryRepository poicategoryRepository)
+            IEventPositionRepository eventPositionRepository, IPoicategoryRepository poicategoryRepository, INotificationRepository notificationRepository,
+            IPartyNotificationRepository partyNotificationRepository)
         {
             _context = context;
             RoleRepository = roleRepository;
@@ -52,6 +55,8 @@ namespace kiosk_solution.Data.Repositories.impl
             AppCategoryPositionRepository = appCategoryPositionRepository;
             EventPositionRepository = eventPositionRepository;
             PoicategoryRepository = poicategoryRepository;
+            NotificationRepository = notificationRepository;
+            PartyNotificationRepository = partyNotificationRepository;
         }
         public void Save()
         {

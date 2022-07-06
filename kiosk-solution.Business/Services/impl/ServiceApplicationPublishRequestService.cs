@@ -21,14 +21,17 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IMapper _mapper;
         private readonly ILogger<IServiceApplicationPublishRequestService> _logger;
         private readonly IServiceApplicationService _appService;
+        private readonly INotificationService _notiService;
 
         public ServiceApplicationPublishRequestService(IUnitOfWork unitOfWork, IMapper mapper,
-            ILogger<ServiceApplicationPublishRequestService> logger, IServiceApplicationService appService)
+            ILogger<ServiceApplicationPublishRequestService> logger, IServiceApplicationService appService,
+            INotificationService notiService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _appService = appService;
+            _notiService = notiService;
         }
 
         public async Task<ServiceApplicationPublishRequestViewModel> Create(Guid creatorId,
@@ -186,6 +189,9 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<ServiceApplicationPublishRequestViewModel> Update(Guid handlerId,
             UpdateServiceApplicationPublishRequestViewModel model)
         {
+
+            var noti = new NotificationCreateViewModel();
+
             var publishRequest = await _unitOfWork.ServiceApplicationPublishRequestRepository
                 .Get(p => p.Id.Equals(model.Id)).FirstOrDefaultAsync();
             if (publishRequest == null)
@@ -211,11 +217,29 @@ namespace kiosk_solution.Business.Services.impl
                 {
                     await _appService.SetStatus(Guid.Parse(publishRequest.ServiceApplicationId + ""),
                         StatusConstants.AVAILABLE);
+                    noti.SenderId = Guid.Parse(publishRequest.CreatorId+"");
+
+                    noti.Title = NotificationConstants.APPROVED_TITLE
+                        .Replace("APP", publishRequest.ServiceApplication.Name);
+
+                    noti.Content = NotificationConstants.APPROVED_CONTENT
+                        .Replace("APP", publishRequest.ServiceApplication.Name);
+
+                    var check = await _notiService.Create(noti);
                 }
                 else if (publishRequest.Status.Equals(StatusConstants.DENIED))
                 {
                     await _appService.SetStatus(Guid.Parse(publishRequest.ServiceApplicationId + ""),
                         StatusConstants.UNAVAILABLE);
+                    noti.SenderId = Guid.Parse(publishRequest.CreatorId+"");
+
+                    noti.Title = NotificationConstants.DENIED_TITLE
+                        .Replace("APP", publishRequest.ServiceApplication.Name);
+
+                    noti.Content = NotificationConstants.DENIED_CONTENT
+                        .Replace("APP", publishRequest.ServiceApplication.Name);
+
+                    var check = await _notiService.Create(noti);
                 }
                 else
                 {
