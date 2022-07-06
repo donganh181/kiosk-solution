@@ -14,7 +14,7 @@ namespace kiosk_solution.Data.Repositories.impl
         public IKioskLocationRepository KioskLocationRepository { get; set; }
         public IScheduleRepository ScheduleRepository { get; set; }
         public ITemplateRepository TemplateRepository { get; set; }
-        public IScheduleTemplateRepository ScheduleTemplateRepository { get; set; }
+        public IKioskScheduleTemplateRepository KioskScheduleTemplateRepository { get; set; }
         public IServiceApplicationRepository ServiceApplicationRepository { get; set; }
         public IServiceApplicationPublishRequestRepository ServiceApplicationPublishRequestRepository { get; set; }
         public IEventRepository EventRepository { get; set; }
@@ -30,7 +30,7 @@ namespace kiosk_solution.Data.Repositories.impl
 
         public UnitOfWork(Kiosk_PlatformContext context, IRoleRepository roleRepository, IKioskRepository kioskRepository, 
             IPartyRepository partyRepository, IKioskLocationRepository kioskLocationRepository, IScheduleRepository scheduleRepository,
-            ITemplateRepository templateRepository, IScheduleTemplateRepository scheduleTemplateRepository, IServiceApplicationRepository serviceApplicationRepository,
+            ITemplateRepository templateRepository, IKioskScheduleTemplateRepository kioskScheduleTemplateRepository, IServiceApplicationRepository serviceApplicationRepository,
             IServiceApplicationPublishRequestRepository serviceApplicationPublishRequestRepository, IEventRepository eventRepository,
             IPartyServiceApplicationRepository partyServiceApplicationRepository, IPoiRepository poiRepository,
             IAppCategoryRepository appCategoryRepository, IImageRepository imageRepository, IAppCategoryPositionRepository appCategoryPositionRepository,
@@ -44,7 +44,7 @@ namespace kiosk_solution.Data.Repositories.impl
             KioskLocationRepository = kioskLocationRepository;
             ScheduleRepository = scheduleRepository;
             TemplateRepository = templateRepository;
-            ScheduleTemplateRepository = scheduleTemplateRepository;
+            KioskScheduleTemplateRepository = kioskScheduleTemplateRepository;
             ServiceApplicationRepository = serviceApplicationRepository;
             ServiceApplicationPublishRequestRepository = serviceApplicationPublishRequestRepository;
             EventRepository = eventRepository;

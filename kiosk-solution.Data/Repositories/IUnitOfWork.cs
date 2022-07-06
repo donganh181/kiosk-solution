@@ -11,7 +11,7 @@ namespace kiosk_solution.Data.Repositories
         IScheduleRepository ScheduleRepository { get; }
         IKioskLocationRepository KioskLocationRepository { get; }
         ITemplateRepository TemplateRepository { get; }
-        IScheduleTemplateRepository ScheduleTemplateRepository { get; }
+        IKioskScheduleTemplateRepository KioskScheduleTemplateRepository { get; }
         IServiceApplicationRepository ServiceApplicationRepository { get; }
         IServiceApplicationPublishRequestRepository ServiceApplicationPublishRequestRepository { get; }
         IEventRepository EventRepository { get; }

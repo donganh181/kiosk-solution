@@ -11,25 +11,27 @@ using Microsoft.Extensions.Logging;
 
 namespace kiosk_solution.Business.Services.impl
 {
-    public class ScheduleTemplateService : IScheduleTemplateService
+    public class KioskScheduleTemplateService : IKioskScheduleTemplateService
     {
-        private readonly AutoMapper.IConfigurationProvider _mapper;
+        private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<IScheduleTemplateService> _logger;
+        private readonly ILogger<IKioskScheduleTemplateService> _logger;
         private readonly IScheduleService _scheduleService;
         private readonly ITemplateService _templateService;
 
-        public ScheduleTemplateService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IScheduleTemplateService> logger,
+        public KioskScheduleTemplateService(IUnitOfWork unitOfWork, IMapper mapper,
+            ILogger<IKioskScheduleTemplateService> logger,
             IScheduleService scheduleService, ITemplateService templateService)
         {
-            _mapper = mapper.ConfigurationProvider;
+            _mapper = mapper;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _scheduleService = scheduleService;
             _templateService = templateService;
         }
 
-        public async Task<ScheduleTemplateViewModel> AddTemplateToSchedule(Guid partyId, AddTemplateViewModel model)
+        public async Task<KioskScheduleTemplateViewModel> AddTemplateToSchedule(Guid partyId,
+            KioskScheduleTemplateCreateViewModel model)
         {
             bool isScheduleOwner = await _scheduleService.IsOwner(partyId, (Guid) model.ScheduleId);
             bool isTemplateOwner = await _templateService.IsOwner(partyId, (Guid) model.TemplateId);
@@ -45,20 +47,22 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Your account cannot use this feature.");
             }
 
-            var scheduleTemplate = await _unitOfWork.ScheduleTemplateRepository.Get(x =>
-                x.ScheduleId.Equals(model.ScheduleId) && x.TemplateId.Equals(model.TemplateId)).FirstOrDefaultAsync();
-            if (scheduleTemplate != null)
+            var kioskScheduleTemplate = await _unitOfWork.KioskScheduleTemplateRepository.Get(x =>
+                x.ScheduleId.Equals(model.ScheduleId) && x.TemplateId.Equals(model.TemplateId) &&
+                x.KioskId.Equals(model.kioskId)).FirstOrDefaultAsync();
+            if (kioskScheduleTemplate != null)
             {
-                _logger.LogInformation("Template is already on schedule.");
-                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Template is already on schedule.");
+                _logger.LogInformation("This template and schedule are already set for kiosk.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "This template and schedule are already set for kiosk.");
             }
+
             try
             {
-                var data = _mapper.CreateMapper().Map<ScheduleTemplate>(model);
-                await _unitOfWork.ScheduleTemplateRepository.InsertAsync(data);
+                var data = _mapper.Map<KioskScheduleTemplate>(model);
+                await _unitOfWork.KioskScheduleTemplateRepository.InsertAsync(data);
                 await _unitOfWork.SaveAsync();
 
-                var result = _mapper.CreateMapper().Map<ScheduleTemplateViewModel>(data);
+                var result = _mapper.Map<KioskScheduleTemplateViewModel>(data);
                 return result;
             }
             catch (DbUpdateException)

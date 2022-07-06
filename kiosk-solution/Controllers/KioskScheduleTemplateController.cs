@@ -12,15 +12,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace kiosk_solution.Controllers
 {
-    [Route("api/v{version:apiVersion}/scheduleTemplate")]
+    [Route("api/v{version:apiVersion}/kioskScheduleTemplates")]
     [ApiController]
     [ApiVersion("1")]
-    public class ScheduleTemplateController : Controller
+    public class KioskScheduleTemplateController : Controller
     {
-        private readonly IScheduleTemplateService _scheduleTemplateService;
-        private readonly ILogger<ScheduleTemplateController> _logger;
+        private readonly IKioskScheduleTemplateService _scheduleTemplateService;
+        private readonly ILogger<KioskScheduleTemplateController> _logger;
         private IConfiguration _configuration;
-        public ScheduleTemplateController(IScheduleTemplateService scheduleTemplateService, ILogger<ScheduleTemplateController> logger, IConfiguration configuration)
+        public KioskScheduleTemplateController(IKioskScheduleTemplateService scheduleTemplateService, ILogger<KioskScheduleTemplateController> logger, IConfiguration configuration)
         {
             _scheduleTemplateService = scheduleTemplateService;
             _configuration = configuration;
@@ -30,13 +30,13 @@ namespace kiosk_solution.Controllers
         [Authorize(Roles = "Location Owner")]
         [HttpPost]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> AddTemplateToSchedule([FromBody] AddTemplateViewModel model)
+        public async Task<IActionResult> AddTemplateScheduleToKiosk([FromBody] KioskScheduleTemplateCreateViewModel model)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _scheduleTemplateService.AddTemplateToSchedule(token.Id, model);
-            _logger.LogInformation($"Add template {result.TemplateId} to schedule {model.ScheduleId} by party {token.Id}.");
-            return Ok(new SuccessResponse<ScheduleTemplateViewModel>((int) HttpStatusCode.OK,"Add template to schedule successful.", result));
+            _logger.LogInformation($"Add template {result.TemplateId} and schedule {model.ScheduleId} to kiosk {model.kioskId} by party {token.Id}.");
+            return Ok(new SuccessResponse<KioskScheduleTemplateViewModel>((int) HttpStatusCode.OK,"Add template and schedule to kiosk successful.", result));
         }
     }
 }

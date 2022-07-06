@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace kiosk_solution.Data.ViewModels
 {
-    public class ScheduleTemplateViewModel
+    public class KioskScheduleTemplateViewModel
     {
         public Guid Id { get; set; }
         public Guid? ScheduleId { get; set; }
         public Guid? TemplateId { get; set; }
+        public Guid? KioskId { get; set; }
     }
 }
