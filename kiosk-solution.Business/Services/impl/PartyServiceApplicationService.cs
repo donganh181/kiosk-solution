@@ -102,6 +102,8 @@ namespace kiosk_solution.Business.Services.impl
             partyService.Status = StatusConstants.INSTALLED;
             partyService.PartyId = id;
 
+            partyService.Status = ServiceApplicationConstants.INSTALLED;
+
             try
             {
                 await _unitOfWork.PartyServiceApplicationRepository.InsertAsync(partyService);

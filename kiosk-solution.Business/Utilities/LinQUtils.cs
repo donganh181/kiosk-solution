@@ -33,7 +33,15 @@ namespace kiosk_solution.Business.Utilities
                 }
                 else if (item.CustomAttributes.Any(a => a.AttributeType == typeof(StringAttribute)) && item.Name.Equals("Status"))
                 {
-                    source = source.Where($"{item.Name}.ToLower().Equals(@0)", propertyVal.ToString().ToLower());
+                    if(source == null)
+                    {
+
+                    }
+                    else
+                    {
+                        source = source.Where($"{item.Name}.ToLower().Equals(@0)", propertyVal.ToString().ToLower());
+                    }
+                  
                 }
                 else if (item.CustomAttributes.Any(a => a.AttributeType == typeof(StringAttribute)))
                 {
