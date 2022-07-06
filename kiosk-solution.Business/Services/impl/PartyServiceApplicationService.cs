@@ -54,7 +54,10 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<PartyServiceApplicationViewModel> Create(Guid id, PartyServiceApplicationCreateViewModel model)
         {
-            var checkExist = await _unitOfWork.PartyServiceApplicationRepository.Get(c => c.PartyId.Equals(id) && c.ServiceApplicationId.Equals(model.ServiceApplicationId)).FirstOrDefaultAsync();
+            var checkExist = await _unitOfWork.PartyServiceApplicationRepository
+                .Get(c => c.PartyId
+                .Equals(id) && c.ServiceApplicationId.Equals(model.ServiceApplicationId))
+                .FirstOrDefaultAsync();
             if (checkExist != null)
             {
                 _logger.LogInformation("You have already taken this app.");
@@ -63,6 +66,8 @@ namespace kiosk_solution.Business.Services.impl
             var partyService = _mapper.Map<PartyServiceApplication>(model);
 
             partyService.PartyId = id;
+
+            partyService.Status = ServiceApplicationConstants.INSTALLED;
 
             try
             {
