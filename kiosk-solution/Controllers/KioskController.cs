@@ -47,6 +47,21 @@ namespace kiosk_solution.Controllers
         }
 
         /// <summary>
+        /// Add device id into kiosk
+        /// </summary>
+        /// <param name="kioskId"></param>
+        /// <param name="deviceId"></param>
+        /// <returns></returns>
+        [HttpPatch("deviceId")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> AddDeviceId([FromBody] KioskAddDeviceIdViewModel model)
+        {
+            var result = await _kioskService.AddDeviceId(model);
+            _logger.LogInformation($"Add DeviceId of kiosk [{result.Id}]");
+            return Ok(new SuccessResponse<KioskViewModel>((int)HttpStatusCode.OK, "Add success.", result));
+        }
+
+        /// <summary>
         /// Create new Kiosk
         /// </summary>
         /// <param name="id"></param>

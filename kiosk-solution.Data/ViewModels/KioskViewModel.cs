@@ -12,5 +12,6 @@ namespace kiosk_solution.Data.ViewModels
         public string Status { get; set; }
         public string Longtitude { get; set; }
         public string Latitude { get; set; }
+        public string DeviceId { get; set; }
     }
 }
