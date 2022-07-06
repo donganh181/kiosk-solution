@@ -43,12 +43,12 @@ pipeline {
             steps {
                 sshCommand remote: remote, command: "docker pull longpc/kiosk-solution"
                 sshCommand remote: remote, command: "cd /var/opt/projects/capstone && docker-compose up -d"
-                sshCommand remote: remote, command: "docker rmi $(docker images -q -f dangling=true)"
+                sshCommand remote: remote, command: "docker image prune -f"
             }
         }
         stage('Clean Images') {
             steps{
-                sh "docker rmi $(docker images -q -f dangling=true)"
+                sh "docker image prune -f"
             }
         }
     }
