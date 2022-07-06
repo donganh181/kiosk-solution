@@ -39,9 +39,9 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<PartyViewModel> Login(LoginViewModel model)
         {
-            var user = await _unitOfWork.PartyRepository.Get(u => u.Email.Equals(model.email)).Include(u => u.Role).Include(u => u.Creator).ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
+            var user = await _unitOfWork.PartyRepository.Get(u => u.Email.Equals(model.Email)).Include(u => u.Role).Include(u => u.Creator).ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
 
-            if (user == null || !BCryptNet.Verify(model.password, user.Password))
+            if (user == null || !BCryptNet.Verify(model.Password, user.Password))
             {
                 _logger.LogInformation("Not Found");
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
@@ -49,7 +49,7 @@ namespace kiosk_solution.Business.Services.impl
                 
             if (user.Status.Equals(StatusConstants.DEACTIVATE))
             {
-                _logger.LogInformation($"{model.email} has been banned.");
+                _logger.LogInformation($"{model.Email} has been banned.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "This user has been banned.");
             }
             string token = TokenUtil.GenerateJWTWebToken(user, _configuration);
@@ -249,6 +249,11 @@ namespace kiosk_solution.Business.Services.impl
                 party.PasswordIsChanged = true;
             }
             return party;
+        }
+
+        public Task<bool> Logout(Guid partyId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
