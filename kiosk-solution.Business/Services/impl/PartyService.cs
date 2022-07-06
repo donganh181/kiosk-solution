@@ -39,7 +39,9 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<PartyViewModel> Login(LoginViewModel model)
         {
-            var user = await _unitOfWork.PartyRepository.Get(u => u.Email.Equals(model.Email)).Include(u => u.Role).Include(u => u.Creator).ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
+            var user = await _unitOfWork.PartyRepository
+                .Get(u => u.Email.Equals(model.Email))
+                .FirstOrDefaultAsync();
 
             if (user == null || !BCryptNet.Verify(model.Password, user.Password))
             {
@@ -52,21 +54,39 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation($"{model.Email} has been banned.");
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "This user has been banned.");
             }
-            string token = TokenUtil.GenerateJWTWebToken(user, _configuration);
-            var result = _mapper.CreateMapper().Map<PartyViewModel>(user);
-
-            result.Token = token;
-
-            if (BCryptNet.Verify(DefaultConstants.DEFAULT_PASSWORD, result.Password))
+            try
             {
-                result.PasswordIsChanged = false;
-            }
-            else
-            {
-                result.PasswordIsChanged = true;
-            }
+                user.DeviceId = model.DeviceId;
+                _unitOfWork.PartyRepository.Update(user);
+                await _unitOfWork.SaveAsync();
+                
+                var result = await _unitOfWork.PartyRepository
+                .Get(u => u.Email.Equals(model.Email))
+                .Include(u => u.Role)
+                .Include(u => u.Creator)
+                .ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
 
-            return result;
+                string token = TokenUtil.GenerateJWTWebToken(result, _configuration);
+                
+                result.Token = token;
+
+                if (BCryptNet.Verify(DefaultConstants.DEFAULT_PASSWORD, result.Password))
+                {
+                    result.PasswordIsChanged = false;
+                }
+                else
+                {
+                    result.PasswordIsChanged = true;
+                }
+
+                return result;
+
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid Data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
+            }
         }
 
         public async Task<PartyViewModel> CreateAccount(Guid creatorId, CreateAccountViewModel model)
@@ -251,9 +271,31 @@ namespace kiosk_solution.Business.Services.impl
             return party;
         }
 
-        public Task<bool> Logout(Guid partyId)
+        public async Task<bool> Logout(Guid partyId)
         {
-            throw new NotImplementedException();
+            var user = await _unitOfWork.PartyRepository
+                .Get(u => u.Id.Equals(partyId))
+                .FirstOrDefaultAsync();
+
+            if(user == null)
+            {
+                _logger.LogInformation("Not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
+            }
+
+            user.DeviceId = string.Empty;
+
+            try
+            {
+                _unitOfWork.PartyRepository.Update(user);
+                await _unitOfWork.SaveAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid Data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
+            }
         }
     }
 }

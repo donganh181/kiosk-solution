@@ -72,6 +72,13 @@ namespace kiosk_solution.Business.DI
 
             services.AddScoped<IPoicategoryRepository, PoicategoryRepository>();
             services.AddScoped<IPoicategoryService, PoicategoryService>();
+
+            services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<INotificationService, NotificationService>();
+
+            services.AddScoped<IPartyNotificationRepository, PartyNotificationRepository>();
+            services.AddScoped<IPartyNotificationService, PartyNotificationService>();
+
         }
     }
 }
