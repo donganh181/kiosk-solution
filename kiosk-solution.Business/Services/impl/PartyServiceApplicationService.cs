@@ -23,7 +23,8 @@ namespace kiosk_solution.Business.Services.impl
         private readonly ILogger<IPartyServiceApplicationService> _logger;
         private readonly IUnitOfWork _unitOfWork;
 
-        public PartyServiceApplicationService(IMapper mapper, ILogger<IPartyServiceApplicationService> logger, IUnitOfWork unitOfWork)
+        public PartyServiceApplicationService(IMapper mapper, ILogger<IPartyServiceApplicationService> logger,
+            IUnitOfWork unitOfWork)
         {
             _mapper = mapper;
             _logger = logger;
@@ -39,7 +40,7 @@ namespace kiosk_solution.Business.Services.impl
                 .Include(a => a.ServiceApplication)
                 .ToListAsync();
 
-            if(listApp != null)
+            if (listApp != null)
             {
                 foreach (var app in listApp)
                 {
@@ -49,22 +50,59 @@ namespace kiosk_solution.Business.Services.impl
                     }
                 }
             }
-            return check;           
+
+            return check;
         }
 
-        public async Task<PartyServiceApplicationViewModel> Create(Guid id, PartyServiceApplicationCreateViewModel model)
+        public async Task<PartyServiceApplicationViewModel> UpdateStatus(Guid partyId, PartyServiceApplicationUpdateViewModel model)
         {
             var checkExist = await _unitOfWork.PartyServiceApplicationRepository
                 .Get(c => c.PartyId
                 .Equals(id) && c.ServiceApplicationId.Equals(model.ServiceApplicationId))
+            var partyApp = await _unitOfWork.PartyServiceApplicationRepository.Get(x =>
+                    x.PartyId.Equals(partyId) && x.ServiceApplicationId.Equals(model.serviceApplication))
+                .FirstOrDefaultAsync();
+            if (partyApp == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
+            }
+
+            partyApp.Status = partyApp.Status.Equals(StatusConstants.INSTALLED) ? StatusConstants.UNINSTALLED : StatusConstants.INSTALLED;
+            try
+            {
+                _unitOfWork.PartyServiceApplicationRepository.Update(partyApp);
+                await _unitOfWork.SaveAsync();
+                var result = await _unitOfWork.PartyServiceApplicationRepository
+                    .Get(a => a.Id.Equals(partyApp.Id))
+                    .Include(a => a.Party)
+                    .Include(a => a.ServiceApplication)
+                    .ThenInclude(b => b.AppCategory)
+                    .ProjectTo<PartyServiceApplicationViewModel>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync();
+                return result;
+            }
+            catch (Exception )
+            {
+                _logger.LogInformation("Fail to update.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Fail to update.");
+            }
+        }
+
+        public async Task<PartyServiceApplicationViewModel> Create(Guid id,
+            PartyServiceApplicationCreateViewModel model)
+        {
+            var checkExist = await _unitOfWork.PartyServiceApplicationRepository
+                .Get(c => c.PartyId.Equals(id) && c.ServiceApplicationId.Equals(model.ServiceApplicationId))
                 .FirstOrDefaultAsync();
             if (checkExist != null)
             {
                 _logger.LogInformation("You have already taken this app.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You have already taken this app.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You have already taken this app.");
             }
+            
             var partyService = _mapper.Map<PartyServiceApplication>(model);
-
+            partyService.Status = StatusConstants.INSTALLED;
             partyService.PartyId = id;
 
             partyService.Status = ServiceApplicationConstants.INSTALLED;
@@ -73,7 +111,7 @@ namespace kiosk_solution.Business.Services.impl
             {
                 await _unitOfWork.PartyServiceApplicationRepository.InsertAsync(partyService);
                 await _unitOfWork.SaveAsync();
-                var result =  await _unitOfWork.PartyServiceApplicationRepository
+                var result = await _unitOfWork.PartyServiceApplicationRepository
                     .Get(a => a.Id.Equals(partyService.Id))
                     .Include(a => a.Party)
                     .Include(a => a.ServiceApplication)
@@ -85,11 +123,12 @@ namespace kiosk_solution.Business.Services.impl
             catch (Exception)
             {
                 _logger.LogInformation("Invalid Data.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
             }
         }
 
-        public async Task<DynamicModelResponse<PartyServiceApplicationSearchViewModel>> GetAllWithPaging(Guid id, PartyServiceApplicationSearchViewModel model, int size, int pageNum)
+        public async Task<DynamicModelResponse<PartyServiceApplicationSearchViewModel>> GetAllWithPaging(Guid id,
+            PartyServiceApplicationSearchViewModel model, int size, int pageNum)
         {
             var apps = _unitOfWork.PartyServiceApplicationRepository
                 .Get(a => a.PartyId.Equals(id))
@@ -106,7 +145,7 @@ namespace kiosk_solution.Business.Services.impl
             if (listPaging.Data.ToList().Count < 1)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
 
             var result = new DynamicModelResponse<PartyServiceApplicationSearchViewModel>
