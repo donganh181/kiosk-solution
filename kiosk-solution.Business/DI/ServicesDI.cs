@@ -38,8 +38,8 @@ namespace kiosk_solution.Business.DI
             services.AddScoped<ITemplateRepository, TemplateRepsitory>();
             services.AddScoped<ITemplateService, TemplateService>();
 
-            services.AddScoped<IScheduleTemplateRepository, ScheduleTemplateRepository>();
-            services.AddScoped<IScheduleTemplateService, ScheduleTemplateService>();
+            services.AddScoped<IKioskScheduleTemplateRepository, KioskScheduleTemplateRepository>();
+            services.AddScoped<IKioskScheduleTemplateService, KioskScheduleTemplateService>();
 
             services.AddScoped<IServiceApplicationRepository, ServiceApplicationRepository>();
             services.AddScoped<IServiceApplicationService, ServiceApplicationService>();

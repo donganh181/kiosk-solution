@@ -2,7 +2,7 @@
 
 namespace kiosk_solution.Data.Repositories
 {
-    public interface IScheduleTemplateRepository : IBaseRepository<ScheduleTemplate>
+    public interface IKioskScheduleTemplateRepository : IBaseRepository<KioskScheduleTemplate>
     {
         
     }

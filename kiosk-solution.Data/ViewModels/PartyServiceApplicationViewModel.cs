@@ -10,7 +10,7 @@ namespace kiosk_solution.Data.ViewModels
     public class PartyServiceApplicationViewModel
     {
         [BindNever]
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
         [BindNever]
         public Guid? PartyId { get; set; }
         [BindNever]
