@@ -56,9 +56,6 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<PartyServiceApplicationViewModel> UpdateStatus(Guid partyId, PartyServiceApplicationUpdateViewModel model)
         {
-            var checkExist = await _unitOfWork.PartyServiceApplicationRepository
-                .Get(c => c.PartyId
-                .Equals(id) && c.ServiceApplicationId.Equals(model.ServiceApplicationId))
             var partyApp = await _unitOfWork.PartyServiceApplicationRepository.Get(x =>
                     x.PartyId.Equals(partyId) && x.ServiceApplicationId.Equals(model.serviceApplication))
                 .FirstOrDefaultAsync();
