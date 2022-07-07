@@ -96,20 +96,7 @@ namespace kiosk_solution.Business.Services.impl
             account.CreatorId = creatorId;
             account.Status = StatusConstants.ACTIVATE;
             account.CreateDate = DateTime.Now;
-            var party = await _unitOfWork.PartyRepository.Get(p => p.PhoneNumber.Equals(model.PhoneNumber))
-                .FirstOrDefaultAsync();
-            if (party != null)
-            {
-                _logger.LogInformation("Phone is duplicated.");
-                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Phone is duplicated.");
-            }
-            party = await _unitOfWork.PartyRepository.Get(p => p.Email.Equals(model.Email))
-                .FirstOrDefaultAsync();
-            if (party != null)
-            {
-                _logger.LogInformation("Eemail is duplicated.");
-                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Email is duplicated.");
-            }
+
             try
             {
                 await _unitOfWork.PartyRepository.InsertAsync(account);
@@ -122,10 +109,19 @@ namespace kiosk_solution.Business.Services.impl
                 var result = _mapper.CreateMapper().Map<PartyViewModel>(account);
                 return result;
             }
-            catch (SqlException e)
+            catch (Exception e)
             {
-                _logger.LogInformation("Invalid data.");
-                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid data.");
+                if(e.InnerException.Message.Contains("Cannot insert duplicate key"))
+                {
+                    _logger.LogInformation("Phone or Email is duplicated.");
+                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Phone or Email is duplicated.");
+                }
+                else
+                {
+                    _logger.LogInformation("Invalid data.");
+                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
+                }
+                
             }
         }
 
