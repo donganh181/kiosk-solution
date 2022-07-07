@@ -204,6 +204,11 @@ namespace kiosk_solution.Data.Context
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
 
+                entity.HasOne(d => d.Kiosk)
+                    .WithMany(p => p.KioskScheduleTemplates)
+                    .HasForeignKey(d => d.KioskId)
+                    .HasConstraintName("FK__KioskSche__Kiosk__08B54D69");
+
                 entity.HasOne(d => d.Schedule)
                     .WithMany(p => p.KioskScheduleTemplates)
                     .HasForeignKey(d => d.ScheduleId)

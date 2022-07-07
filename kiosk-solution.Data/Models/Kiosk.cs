@@ -9,6 +9,7 @@ namespace kiosk_solution.Data.Models
     {
         public Kiosk()
         {
+            KioskScheduleTemplates = new HashSet<KioskScheduleTemplate>();
             ServiceOrders = new HashSet<ServiceOrder>();
         }
 
@@ -24,6 +25,7 @@ namespace kiosk_solution.Data.Models
 
         public virtual KioskLocation KioskLocation { get; set; }
         public virtual Party Party { get; set; }
+        public virtual ICollection<KioskScheduleTemplate> KioskScheduleTemplates { get; set; }
         public virtual ICollection<ServiceOrder> ServiceOrders { get; set; }
     }
 }
