@@ -93,10 +93,10 @@ namespace kiosk_solution.Business.Services.impl
             return result;
         }
 
-        public async Task<PartyNotificationViewModel> GetById(Guid partyNotiId)
+        public async Task<PartyNotificationViewModel> GetById(Guid partyid, Guid partyNotiId)
         {
             var noti = await _unitOfWork.PartyNotificationRepository
-                .Get(n => n.Id.Equals(partyNotiId))
+                .Get(n => n.Id.Equals(partyNotiId) && n.PartyId.Equals(partyid))
                 .FirstOrDefaultAsync();
 
             if(noti == null)
@@ -113,7 +113,7 @@ namespace kiosk_solution.Business.Services.impl
                 await _unitOfWork.SaveAsync();
 
                 var result = await _unitOfWork.PartyNotificationRepository
-                    .Get(n => n.Id.Equals(partyNotiId))
+                    .Get(n => n.Id.Equals(partyNotiId) && n.PartyId.Equals(partyid))
                     .Include(n => n.Party)
                     .Include(n => n.Notification)
                     .ProjectTo<PartyNotificationViewModel>(_mapper.ConfigurationProvider)

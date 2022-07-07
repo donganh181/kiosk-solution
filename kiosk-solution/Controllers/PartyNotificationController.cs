@@ -51,6 +51,17 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<NotificationDynamicModelResponse<PartyNotificationViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
 
-
+        [Authorize(Roles = "Admin, Location Owner, Service Provider")]
+        [HttpPatch]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetById([FromBody] Guid partyNotiId)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            Guid partyId = token.Id;
+            var result = await _partyNotificationService.GetById(partyId, partyNotiId) ;
+            _logger.LogInformation($"Get notification by party {token.Mail}");
+            return Ok(new SuccessResponse<PartyNotificationViewModel>((int)HttpStatusCode.OK, "Search success.", result));
+        }
     }
 }
