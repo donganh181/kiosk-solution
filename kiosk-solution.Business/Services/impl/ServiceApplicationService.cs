@@ -234,5 +234,15 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid data.");
             }
         }
+
+        public async Task<bool> HasApplicationOnCategory(Guid appCategoryId)
+        {
+            var app = await _unitOfWork.ServiceApplicationRepository.Get(s => s.AppCategoryId.Equals(appCategoryId))
+                .FirstOrDefaultAsync();
+            if (app == null)
+                return false;
+            else
+                return true;
+        }
     }
 }

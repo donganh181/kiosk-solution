@@ -65,7 +65,18 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Updated category {result.Name} by party {token.Mail}");
             return Ok(new SuccessResponse<AppCategoryViewModel>((int) HttpStatusCode.OK, "Update success.", result));
         }
-
+        
+        [Authorize(Roles = "Admin")]
+        [HttpDelete]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Delete([FromBody] AppCategoryDeleteViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _appCategoryService.Delete(model);
+            _logger.LogInformation($"Delete category {result.Name} by party {token.Mail}");
+            return Ok(new SuccessResponse<AppCategoryViewModel>((int) HttpStatusCode.OK, "Delete success.", result));
+        }
 
         /// <summary>
         /// Get all categories

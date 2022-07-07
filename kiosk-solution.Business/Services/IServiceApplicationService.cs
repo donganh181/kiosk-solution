@@ -15,5 +15,6 @@ namespace kiosk_solution.Business.Services
         public Task<ServiceApplicationViewModel> Create(Guid partyId, CreateServiceApplicationViewModel model);
         public Task<ServiceApplicationViewModel> GetById(Guid id);
         public Task<bool> SetStatus(Guid id, string status);
+        public Task<bool> HasApplicationOnCategory(Guid appCategoryId);
     }
 }
