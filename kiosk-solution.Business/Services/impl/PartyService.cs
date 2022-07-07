@@ -96,6 +96,20 @@ namespace kiosk_solution.Business.Services.impl
             account.CreatorId = creatorId;
             account.Status = StatusConstants.ACTIVATE;
             account.CreateDate = DateTime.Now;
+            var party = await _unitOfWork.PartyRepository.Get(p => p.PhoneNumber.Equals(model.PhoneNumber))
+                .FirstOrDefaultAsync();
+            if (party != null)
+            {
+                _logger.LogInformation("Phone is duplicated.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Phone is duplicated.");
+            }
+            party = await _unitOfWork.PartyRepository.Get(p => p.Email.Equals(model.Email))
+                .FirstOrDefaultAsync();
+            if (party != null)
+            {
+                _logger.LogInformation("Eemail is duplicated.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Email is duplicated.");
+            }
             try
             {
                 await _unitOfWork.PartyRepository.InsertAsync(account);
@@ -110,16 +124,8 @@ namespace kiosk_solution.Business.Services.impl
             }
             catch (SqlException e)
             {
-                if (e.Number == 2601)
-                {
-                    _logger.LogInformation("Phone or email is duplicated.");
-                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Phone or email is duplicated.");
-                }
-                else
-                {
-                    _logger.LogInformation("Invalid Data.");
-                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
-                }
+                _logger.LogInformation("Invalid data.");
+                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid data.");
             }
         }
 
