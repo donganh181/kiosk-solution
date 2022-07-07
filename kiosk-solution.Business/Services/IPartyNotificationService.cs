@@ -11,7 +11,7 @@ namespace kiosk_solution.Business.Services
     public interface IPartyNotificationService
     {
         public Task<PartyNotificationViewModel> Create(PartyNotificationCreateViewModel model);
-        public Task<DynamicModelResponse<PartyNotificationViewModel>> Get(Guid partyId, int size, int pageNum);
+        public Task<NotificationDynamicModelResponse<PartyNotificationViewModel>> Get(Guid partyId, int size, int pageNum);
         public Task<PartyNotificationViewModel> GetById(Guid partyNotiId);
     }
 }
