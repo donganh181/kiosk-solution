@@ -56,7 +56,7 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<DynamicModelResponse<PartyNotificationViewModel>> Get(Guid partyId, int size, int pageNum)
+        public async Task<NotificationDynamicModelResponse<PartyNotificationViewModel>> Get(Guid partyId, int size, int pageNum)
         {
             var listPaging = _unitOfWork.PartyNotificationRepository
                 .Get(n => n.PartyId.Equals(partyId))
@@ -67,19 +67,26 @@ namespace kiosk_solution.Business.Services.impl
                 .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging,
                 CommonConstants.DefaultPaging);
 
+            var listUnseen = await _unitOfWork.PartyNotificationRepository
+                .Get(n => n.PartyId.Equals(partyId) && n.Status.Equals(NotificationConstants.UNSEEN))
+                .ToListAsync();
+
+            int unseenNoti = listUnseen.Count;
+
             if (listPaging.Data.ToList().Count < 1)
             {
                 _logger.LogInformation("Can not Found.");
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
             }
 
-            var result = new DynamicModelResponse<PartyNotificationViewModel>
+            var result = new NotificationDynamicModelResponse<PartyNotificationViewModel>
             {
-                Metadata = new PagingMetaData
+                Metadata = new NotificationPagingMetaData
                 {
                     Page = pageNum,
                     Size = size,
-                    Total = listPaging.Total
+                    Total = listPaging.Total,
+                    UnseenNoti = unseenNoti
                 },
                 Data = listPaging.Data.ToList()
             };
