@@ -24,6 +24,7 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<IAppCategoryService> _logger;
         private readonly IFileService _fileService;
+        private readonly IServiceApplicationService _serviceApplicationService;
         private readonly IPartyServiceApplicationService _partyServiceApplicationService;
 
         public AppCategoryService(IMapper mapper, IUnitOfWork unitOfWork, ILogger<IAppCategoryService> logger
@@ -72,6 +73,24 @@ namespace kiosk_solution.Business.Services.impl
                     _logger.LogInformation("Invalid Data.");
                     throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
                 }
+            }
+        }
+
+        public async Task<AppCategoryViewModel> Delete(AppCategoryDeleteViewModel model)
+        {
+            var checkExist = await _serviceApplicationService.HasApplicationOnCategory(model.Id);
+            if (checkExist)
+            {
+                _logger.LogInformation("Already app on this category, can not delete.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Already app on this category, can not delete.");
+            }
+            else
+            {
+                var appCate = await _unitOfWork.AppCategoryRepository.Get(a => a.Id.Equals(model.Id))
+                    .FirstOrDefaultAsync();
+                _unitOfWork.AppCategoryRepository.Delete(appCate);
+                var result = _mapper.Map<AppCategoryViewModel>(appCate);
+                return result;
             }
         }
 
