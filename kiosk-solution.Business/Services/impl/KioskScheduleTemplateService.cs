@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using kiosk_solution.Data.ViewModels;
@@ -53,9 +54,24 @@ namespace kiosk_solution.Business.Services.impl
             if (kioskScheduleTemplate != null)
             {
                 _logger.LogInformation("This template and schedule are already set for kiosk.");
-                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "This template and schedule are already set for kiosk.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest,
+                    "This template and schedule are already set for kiosk.");
             }
 
+            var schedule = await _scheduleService.GetById(model.ScheduleId);
+            var conflictData = await _unitOfWork.KioskScheduleTemplateRepository
+                .Get(k => k.KioskId.Equals(model.kioskId))
+                .Where(a => TimeSpan.Compare((TimeSpan) a.Schedule.TimeStart, (TimeSpan) schedule.TimeStart) == 0
+                            && (TimeSpan.Compare((TimeSpan) schedule.TimeStart, (TimeSpan) a.Schedule.TimeStart) == 1 &&
+                                TimeSpan.Compare((TimeSpan) schedule.TimeStart, (TimeSpan) a.Schedule.TimeEnd) == -1)
+                            && (TimeSpan.Compare((TimeSpan) schedule.TimeStart, (TimeSpan) a.Schedule.TimeStart) ==
+                                -1 && TimeSpan.Compare((TimeSpan) schedule.TimeEnd, (TimeSpan) a.Schedule.TimeStart) ==
+                                1)).FirstOrDefaultAsync();
+            if (conflictData != null)
+            {
+                _logger.LogInformation("This schedule is conflict with other schedule in this kiosk.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "This schedule is conflict with other schedule in this kiosk.");
+            }
             try
             {
                 var data = _mapper.Map<KioskScheduleTemplate>(model);

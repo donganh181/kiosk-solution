@@ -34,9 +34,21 @@ namespace kiosk_solution.Controllers
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _scheduleService.CreateSchedule(token.Id, model);
+            var result = await _scheduleService.Create(token.Id, model);
             _logger.LogInformation($"Create schedule {result.Name} by party {token.Mail}.");
             return Ok(new SuccessResponse<ScheduleViewModel>((int) HttpStatusCode.OK, "Create success.", result));
+        }
+        
+        [Authorize(Roles = "Location Owner")]
+        [HttpPut]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateSchedule([FromBody] ScheduleUpdateViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _scheduleService.Update(token.Id, model);
+            _logger.LogInformation($"Update schedule {result.Name} by party {token.Mail}.");
+            return Ok(new SuccessResponse<ScheduleViewModel>((int) HttpStatusCode.OK, "Update success.", result));
         }
         
         [Authorize(Roles = "Location Owner")]

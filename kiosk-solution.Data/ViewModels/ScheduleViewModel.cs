@@ -6,8 +6,6 @@ namespace kiosk_solution.Data.ViewModels
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public DateTime? DateStart { get; set; }
-        public DateTime? DateEnd { get; set; }
         public string TimeStart { get; set; }
         public string TimeEnd { get; set; }
         public string DayOfWeek { get; set; }
