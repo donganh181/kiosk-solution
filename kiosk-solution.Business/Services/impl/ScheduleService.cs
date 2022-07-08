@@ -18,20 +18,20 @@ namespace kiosk_solution.Business.Services.impl
 {
     public class ScheduleService : IScheduleService
     {
-        private readonly AutoMapper.IConfigurationProvider _mapper;
+        private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<IScheduleService> _logger;
 
         public ScheduleService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IScheduleService> logger)
         {
-            _mapper = mapper.ConfigurationProvider;
+            _mapper = mapper;
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
 
-        public async Task<ScheduleViewModel> CreateSchedule(Guid partyId, CreateScheduleViewModel model)
+        public async Task<ScheduleViewModel> Create(Guid partyId, CreateScheduleViewModel model)
         {
-            var schedule = _mapper.CreateMapper().Map<Schedule>(model);
+            var schedule = _mapper.Map<Schedule>(model);
             schedule.PartyId = partyId;
             schedule.Status = StatusConstants.OFF;
             schedule.TimeStart = TimeSpan.Parse(model.StringTimeStart);
@@ -40,7 +40,7 @@ namespace kiosk_solution.Business.Services.impl
             {
                 await _unitOfWork.ScheduleRepository.InsertAsync(schedule);
                 await _unitOfWork.SaveAsync();
-                var result = _mapper.CreateMapper().Map<ScheduleViewModel>(schedule);
+                var result = _mapper.Map<ScheduleViewModel>(schedule);
                 result.TimeStart = schedule.TimeStart.ToString();
                 result.TimeEnd = schedule.TimeEnd.ToString();
                 return result;
@@ -52,10 +52,42 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
+        public async Task<ScheduleViewModel> Update(Guid partyId, ScheduleUpdateViewModel model)
+        {
+            var schedule = await _unitOfWork.ScheduleRepository.Get(s => s.Id.Equals(model.Id)).FirstOrDefaultAsync();
+            if (schedule == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
+            }
+
+            if (!schedule.PartyId.Equals(partyId))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You can not use this feature.");
+            }
+            schedule.Name = model.Name;
+            schedule.TimeStart = TimeSpan.Parse(model.StringTimeStart);
+            schedule.TimeEnd = TimeSpan.Parse(model.StringTimeEnd);
+            schedule.DayOfWeek = model.DayOfWeek;
+            try
+            {
+                _unitOfWork.ScheduleRepository.Update(schedule);
+                await _unitOfWork.SaveAsync();
+                var result = _mapper.Map<ScheduleViewModel>(schedule);
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid data.");
+            }
+        }
+
         public async Task<DynamicModelResponse<ScheduleViewModel>> GetAllWithPaging(Guid id, int size, int pageNum)
         {
             var list = _unitOfWork.ScheduleRepository.Get(s => s.PartyId.Equals(id))
-                .ProjectTo<ScheduleViewModel>(_mapper).OrderByDescending(x => x.Name);
+                .ProjectTo<ScheduleViewModel>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Name);
             var listPaging =
                 list.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
             if (listPaging.Data.ToList().Count < 1)
@@ -88,6 +120,12 @@ namespace kiosk_solution.Business.Services.impl
 
             bool result = schedule.PartyId.Equals(partyId);
             return result;
+        }
+
+        public async Task<Schedule> GetById(Guid scheduleId)
+        {
+            var sch = await _unitOfWork.ScheduleRepository.Get(s => s.Id.Equals(scheduleId)).FirstOrDefaultAsync();
+            return sch;
         }
     }
 }

@@ -57,7 +57,7 @@ namespace kiosk_solution.Data.Context
             {
                 entity.ToTable("AppCategory");
 
-                entity.HasIndex(e => e.Name, "UQ__AppCateg__737584F6F1F65C89")
+                entity.HasIndex(e => e.Name, "UQ__AppCateg__737584F6BAC0DFFE")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
@@ -207,7 +207,7 @@ namespace kiosk_solution.Data.Context
                 entity.HasOne(d => d.Kiosk)
                     .WithMany(p => p.KioskScheduleTemplates)
                     .HasForeignKey(d => d.KioskId)
-                    .HasConstraintName("FK__KioskSche__Kiosk__08B54D69");
+                    .HasConstraintName("FK__KioskSche__Kiosk__6383C8BA");
 
                 entity.HasOne(d => d.Schedule)
                     .WithMany(p => p.KioskScheduleTemplates)
@@ -237,10 +237,10 @@ namespace kiosk_solution.Data.Context
             {
                 entity.ToTable("Party");
 
-                entity.HasIndex(e => e.PhoneNumber, "UQ__Party__85FB4E383C8D9404")
+                entity.HasIndex(e => e.PhoneNumber, "UQ__Party__85FB4E381DFCBB24")
                     .IsUnique();
 
-                entity.HasIndex(e => e.Email, "UQ__Party__A9D105341F954720")
+                entity.HasIndex(e => e.Email, "UQ__Party__A9D10534FC3551E9")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
@@ -298,12 +298,12 @@ namespace kiosk_solution.Data.Context
                 entity.HasOne(d => d.Notification)
                     .WithMany(p => p.PartyNotifications)
                     .HasForeignKey(d => d.NotificationId)
-                    .HasConstraintName("FK__PartyNoti__Notif__787EE5A0");
+                    .HasConstraintName("FK__PartyNoti__Notif__797309D9");
 
                 entity.HasOne(d => d.Party)
                     .WithMany(p => p.PartyNotifications)
                     .HasForeignKey(d => d.PartyId)
-                    .HasConstraintName("FK__PartyNoti__Party__778AC167");
+                    .HasConstraintName("FK__PartyNoti__Party__787EE5A0");
             });
 
             modelBuilder.Entity<PartyServiceApplication>(entity =>
@@ -394,10 +394,6 @@ namespace kiosk_solution.Data.Context
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
 
-                entity.Property(e => e.DateEnd).HasColumnType("datetime");
-
-                entity.Property(e => e.DateStart).HasColumnType("datetime");
-
                 entity.Property(e => e.DayOfWeek)
                     .HasMaxLength(255)
                     .IsUnicode(false);
@@ -418,7 +414,7 @@ namespace kiosk_solution.Data.Context
             {
                 entity.ToTable("ServiceApplication");
 
-                entity.HasIndex(e => e.Name, "UQ__ServiceA__737584F68CA82A97")
+                entity.HasIndex(e => e.Name, "UQ__ServiceA__737584F6163A3E21")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
@@ -455,12 +451,12 @@ namespace kiosk_solution.Data.Context
                 entity.HasOne(d => d.Party)
                     .WithMany(p => p.ServiceApplicationFeedBacks)
                     .HasForeignKey(d => d.PartyId)
-                    .HasConstraintName("FK__ServiceAp__Party__7D439ABD");
+                    .HasConstraintName("FK__ServiceAp__Party__7E37BEF6");
 
                 entity.HasOne(d => d.ServiceApplication)
                     .WithMany(p => p.ServiceApplicationFeedBacks)
                     .HasForeignKey(d => d.ServiceApplicationId)
-                    .HasConstraintName("FK__ServiceAp__Servi__7C4F7684");
+                    .HasConstraintName("FK__ServiceAp__Servi__7D439ABD");
             });
 
             modelBuilder.Entity<ServiceApplicationPublishRequest>(entity =>
@@ -478,17 +474,17 @@ namespace kiosk_solution.Data.Context
                 entity.HasOne(d => d.Creator)
                     .WithMany(p => p.ServiceApplicationPublishRequestCreators)
                     .HasForeignKey(d => d.CreatorId)
-                    .HasConstraintName("FK__ServiceAp__Creat__6FE99F9F");
+                    .HasConstraintName("FK__ServiceAp__Creat__70DDC3D8");
 
                 entity.HasOne(d => d.Handler)
                     .WithMany(p => p.ServiceApplicationPublishRequestHandlers)
                     .HasForeignKey(d => d.HandlerId)
-                    .HasConstraintName("FK__ServiceAp__Handl__70DDC3D8");
+                    .HasConstraintName("FK__ServiceAp__Handl__71D1E811");
 
                 entity.HasOne(d => d.ServiceApplication)
                     .WithMany(p => p.ServiceApplicationPublishRequests)
                     .HasForeignKey(d => d.ServiceApplicationId)
-                    .HasConstraintName("FK__ServiceAp__Servi__6EF57B66");
+                    .HasConstraintName("FK__ServiceAp__Servi__6FE99F9F");
             });
 
             modelBuilder.Entity<ServiceOrder>(entity =>
@@ -512,17 +508,17 @@ namespace kiosk_solution.Data.Context
                 entity.HasOne(d => d.Kiosk)
                     .WithMany(p => p.ServiceOrders)
                     .HasForeignKey(d => d.KioskId)
-                    .HasConstraintName("FK__ServiceOr__Kiosk__6B24EA82");
+                    .HasConstraintName("FK__ServiceOr__Kiosk__6C190EBB");
 
                 entity.HasOne(d => d.Party)
                     .WithMany(p => p.ServiceOrders)
                     .HasForeignKey(d => d.PartyId)
-                    .HasConstraintName("FK__ServiceOr__Party__6A30C649");
+                    .HasConstraintName("FK__ServiceOr__Party__6B24EA82");
 
                 entity.HasOne(d => d.ServiceApplication)
                     .WithMany(p => p.ServiceOrders)
                     .HasForeignKey(d => d.ServiceApplicationId)
-                    .HasConstraintName("FK__ServiceOr__Servi__693CA210");
+                    .HasConstraintName("FK__ServiceOr__Servi__6A30C649");
             });
 
             modelBuilder.Entity<Template>(entity =>
