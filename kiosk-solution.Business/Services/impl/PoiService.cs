@@ -300,32 +300,20 @@ namespace kiosk_solution.Business.Services.impl
         }
 
         public async Task<DynamicModelResponse<PoiSearchViewModel>> GetAllWithPaging(Guid partyId, string role,
-            PoiSearchViewModel model, int size, int pageNum, string dayOfWeek)
+            PoiSearchViewModel model, int size, int pageNum)
         {
             IQueryable<PoiSearchViewModel> pois = null;
             if (role.Equals(RoleConstants.ADMIN))
             {
-                if (dayOfWeek != null)
-                    pois = _unitOfWork.PoiRepository.Get(p =>
-                            p.DayOfWeek.Contains(dayOfWeek) && p.Type.Equals(TypeConstants.SERVER_TYPE))
-                        .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
-                        .DynamicFilter(model);
-                else
-                    pois = _unitOfWork.PoiRepository.Get(p => p.Type.Equals(TypeConstants.SERVER_TYPE))
-                        .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
-                        .DynamicFilter(model);
+                pois = _unitOfWork.PoiRepository.Get(p => p.Type.Equals(TypeConstants.SERVER_TYPE))
+                    .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
+                    .DynamicFilter(model);
             }
             else if (role.Equals(RoleConstants.LOCATION_OWNER))
             {
-                if (dayOfWeek != null)
-                    pois = _unitOfWork.PoiRepository
-                        .Get(p => p.CreatorId.Equals(partyId) && p.DayOfWeek.Contains(dayOfWeek))
-                        .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
-                        .DynamicFilter(model);
-                else
-                    pois = _unitOfWork.PoiRepository.Get(p => p.CreatorId.Equals(partyId))
-                        .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
-                        .DynamicFilter(model);
+                pois = _unitOfWork.PoiRepository.Get(p => p.CreatorId.Equals(partyId))
+                    .ProjectTo<PoiSearchViewModel>(_mapper.ConfigurationProvider)
+                    .DynamicFilter(model);
             }
 
             var listPoi = pois.ToList();
@@ -424,7 +412,7 @@ namespace kiosk_solution.Business.Services.impl
             return item;
         }
 
-        public async Task<List<PoiViewModel>> GetLocationNearby(Guid kioskId, double lng, double lat)
+        public async Task<DynamicModelResponse<PoiNearbySearchViewModel>> GetLocationNearby(Guid kioskId, PoiNearbySearchViewModel model, int size, int pageNum)
         {
             var kiosk = await _kioskService.GetById(kioskId);
             if(kiosk == null)
@@ -433,8 +421,9 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Kiosk not found.");
             }
             var pois = _unitOfWork.PoiRepository
-                .GetPoiNearBy(Guid.Parse(kiosk.PartyId + ""), lng, lat)
-                .ProjectTo<PoiViewModel>(_mapper.ConfigurationProvider);
+                .GetPoiNearBy(Guid.Parse(kiosk.PartyId + ""), model.Longtitude, model.Latitude)
+                .ProjectTo<PoiNearbySearchViewModel>(_mapper.ConfigurationProvider)
+                .DynamicFilter(model);
             var listPoi = pois.ToList();
             if (listPoi.Count() < 1)
             {
@@ -474,7 +463,28 @@ namespace kiosk_solution.Business.Services.impl
                 item.ListImage = _mapper.Map<List<PoiImageDetailViewModel>>(listSourceImage);
             }
 
-            return listPoi;
+            pois = listPoi.AsQueryable().OrderByDescending(p => p.Name);
+
+            var listPaging =
+                pois.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
+
+            if (listPaging.Data.ToList().Count < 1)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+
+            var result = new DynamicModelResponse<PoiNearbySearchViewModel>
+            {
+                Metadata = new PagingMetaData
+                {
+                    Page = pageNum,
+                    Size = size,
+                    Total = listPaging.Total
+                },
+                Data = listPaging.Data.ToList()
+            };
+            return result;
         }
 
         public async Task<ImageViewModel> UpdateImageToPoi(Guid partyId, string roleName, PoiUpdateImageViewModel model)
