@@ -1,11 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using kiosk_solution.Data.Attributes;
+﻿using kiosk_solution.Data.Attributes;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace kiosk_solution.Data.ViewModels
 {
-    public class PoiSearchViewModel
+    public class PoiNearbySearchViewModel
     {
         [BindNever]
         public Guid? Id { get; set; }
@@ -19,17 +22,17 @@ namespace kiosk_solution.Data.ViewModels
         public TimeSpan? OpenTime { get; set; }
         [BindNever]
         public TimeSpan? CloseTime { get; set; }
-        [String]
+        [BindNever]
         public string DayOfWeek { get; set; }
         [Specific]
         public double Longtitude { get; set; }
         [Specific]
         public double Latitude { get; set; }
-        [String]
+        [BindNever]
         public string Ward { get; set; }
-        [String]
+        [BindNever]
         public string District { get; set; }
-        [String]
+        [BindNever]
         public string City { get; set; }
         [String]
         public string Address { get; set; }
@@ -38,10 +41,16 @@ namespace kiosk_solution.Data.ViewModels
         [BindNever]
         public Guid? CreatorId { get; set; }
         [BindNever]
+        public string CreatorName { get; set; }
+        [BindNever]
+        public string CreatorEmail { get; set; }
+        [String]
         public string Status { get; set; }
         [Guid]
         public Guid? PoicategoryId { get; set; }
         [String]
+        public string PoicategoryName { get; set; }
+        [BindNever]
         public string Type { get; set; }
         [BindNever]
         public List<PoiImageDetailViewModel> ListImage { get; set; }
