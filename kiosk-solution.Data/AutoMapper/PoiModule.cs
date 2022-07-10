@@ -20,6 +20,12 @@ namespace kiosk_solution.Data.AutoMapper
             mc.CreateMap<Poi, PoiSearchViewModel>();
             mc.CreateMap<PoiSearchViewModel, Poi>();
 
+            mc.CreateMap<Poi, PoiNearbySearchViewModel>()
+                .ForMember(src => src.CreatorName, opt => opt.MapFrom(des => des.Creator.FirstName))
+                .ForMember(src => src.CreatorEmail, opt => opt.MapFrom(des => des.Creator.Email))
+                .ForMember(src => src.PoicategoryName, opt => opt.MapFrom(des => des.Poicategory.Name));
+            mc.CreateMap<PoiNearbySearchViewModel, Poi>();
+
             mc.CreateMap<Poi, PoiImageViewModel>();
             mc.CreateMap<PoiImageViewModel, Poi>();
 

@@ -19,7 +19,7 @@ namespace kiosk_solution.Data.ViewModels
         [BindNever] public Guid? PartyId { get; set; }
         [String] public string PartyName { get; set; }
         [String] public string PartyEmail { get; set; }
-        [BindNever] public Guid? AppCategoryId { get; set; }
+        [Guid] public Guid? AppCategoryId { get; set; }
         [String] public string AppCategoryName { get; set; }
         [BindNever] public PartyServiceApplicationViewModel PartyServiceApplication { get; set; }
         [String] public string Status { get; set; }

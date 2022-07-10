@@ -53,12 +53,12 @@ namespace kiosk_solution.Controllers
         [Authorize(Roles = "Admin, Location Owner")]
         [HttpGet]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> Get([FromQuery] PoiSearchViewModel model, string dayOfWeek, int size,
+        public async Task<IActionResult> Get([FromQuery] PoiSearchViewModel model, int size,
             int pageNum = CommonConstants.DefaultPage)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _poiService.GetAllWithPaging(token.Id, token.Role, model, size, pageNum, dayOfWeek);
+            var result = await _poiService.GetAllWithPaging(token.Id, token.Role, model, size, pageNum);
             _logger.LogInformation($"Get POIs");
             return Ok(new SuccessResponse<DynamicModelResponse<PoiSearchViewModel>>((int) HttpStatusCode.OK,
                 "Search success.", result));
@@ -117,12 +117,13 @@ namespace kiosk_solution.Controllers
 
         [HttpGet("nearby")]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> GetPoiNearby([FromQuery] Guid kioskId, double lng, double lat)
+        public async Task<IActionResult> GetPoiNearby([FromQuery]Guid kioskId, [FromQuery] PoiNearbySearchViewModel model, int size,
+            int pageNum = CommonConstants.DefaultPage)
         {
             
-            var result = await _poiService.GetLocationNearby(kioskId,lng,lat);
+            var result = await _poiService.GetLocationNearby(kioskId, model, size, pageNum);
             _logger.LogInformation($"Get POIs");
-            return Ok(new SuccessResponse<List<PoiViewModel>>((int)HttpStatusCode.OK,
+            return Ok(new SuccessResponse<DynamicModelResponse<PoiNearbySearchViewModel>>((int)HttpStatusCode.OK,
                 "Search success.", result));
         }
         
