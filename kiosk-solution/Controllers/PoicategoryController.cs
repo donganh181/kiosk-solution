@@ -21,13 +21,15 @@ namespace kiosk_solution.Controllers
         private readonly IPoicategoryService _poicategoryService;
         private readonly ILogger<PoicategoryController> _logger;
         private IConfiguration _configuration;
-        public PoicategoryController(IPoicategoryService poicategoryService, ILogger<PoicategoryController> logger, IConfiguration configuration)
+
+        public PoicategoryController(IPoicategoryService poicategoryService, ILogger<PoicategoryController> logger,
+            IConfiguration configuration)
         {
             _logger = logger;
             _poicategoryService = poicategoryService;
             _configuration = configuration;
         }
-        
+
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [MapToApiVersion("1")]
@@ -37,9 +39,9 @@ namespace kiosk_solution.Controllers
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _poicategoryService.Create(model);
             _logger.LogInformation($"Create category {result.Name} by party {token.Mail}");
-            return Ok(new SuccessResponse<PoicategoryViewModel>((int)HttpStatusCode.OK, "Create success.", result));
+            return Ok(new SuccessResponse<PoicategoryViewModel>((int) HttpStatusCode.OK, "Create success.", result));
         }
-        
+
         [Authorize(Roles = "Admin")]
         [HttpPut]
         [MapToApiVersion("1")]
@@ -49,7 +51,7 @@ namespace kiosk_solution.Controllers
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _poicategoryService.Update(model);
             _logger.LogInformation($"Update category {result.Name} by party {token.Mail}");
-            return Ok(new SuccessResponse<PoicategoryViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+            return Ok(new SuccessResponse<PoicategoryViewModel>((int) HttpStatusCode.OK, "Update success.", result));
         }
 
         [Authorize(Roles = "Admin")]
@@ -61,21 +63,18 @@ namespace kiosk_solution.Controllers
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _poicategoryService.Delete(poiCategoryId);
             _logger.LogInformation($"Delete category {result.Name} by party {token.Mail}");
-            return Ok(new SuccessResponse<PoicategoryViewModel>((int)HttpStatusCode.OK, "Delete success.", result));
+            return Ok(new SuccessResponse<PoicategoryViewModel>((int) HttpStatusCode.OK, "Delete success.", result));
         }
-        
+
         [HttpGet]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> Get([FromQuery] PoiCategorySearchViewModel model, int size, int page = CommonConstants.DefaultPage)
+        public async Task<IActionResult> Get([FromQuery] PoiCategorySearchViewModel model, int size,
+            int page = CommonConstants.DefaultPage)
         {
-            var request = Request;
-            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _poicategoryService.GetAllWithPaging(model, size, page);
-            if(token == null)
-                _logger.LogInformation($"Get all categories by guest");
-            else
-                _logger.LogInformation($"Get all categories by party {token.Mail}");
-            return Ok(new SuccessResponse<DynamicModelResponse<PoiCategorySearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+            _logger.LogInformation($"Get all categories by guest");
+            return Ok(new SuccessResponse<DynamicModelResponse<PoiCategorySearchViewModel>>((int) HttpStatusCode.OK,
+                "Search success.", result));
         }
     }
 }
