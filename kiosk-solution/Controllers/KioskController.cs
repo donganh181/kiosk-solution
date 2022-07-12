@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using kiosk_solution.Business.Services;
@@ -115,6 +116,14 @@ namespace kiosk_solution.Controllers
             var result = await _kioskService.GetAllWithPaging(role, id, model, size, page);
             _logger.LogInformation($"Get all Kiosks by party {token.Mail}");
             return Ok(new SuccessResponse<DynamicModelResponse<KioskSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+        }
+
+        [HttpGet("test")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Get()
+        {
+            var result = await _kioskService.GetListSpecificKiosk();
+            return Ok(new SuccessResponse<List<KioskDetailViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
     }
 }

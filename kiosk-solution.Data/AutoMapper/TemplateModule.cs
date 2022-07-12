@@ -21,6 +21,11 @@ namespace kiosk_solution.Data.AutoMapper
 
             mc.CreateMap<Template, TemplateSearchViewModel>();
             mc.CreateMap<TemplateSearchViewModel, Template>();
+
+            mc.CreateMap<Template, TemplateDetailViewModel>()
+                .ForMember(src => src.ListAppCatePosition, opt => opt.MapFrom(des => des.AppCategoryPositions.ToList()))
+                .ForMember(src => src.ListEventPosition, opt => opt.MapFrom(des => des.EventPositions.ToList()));
+            mc.CreateMap<TemplateDetailViewModel, Template>();
         }
     }
 }

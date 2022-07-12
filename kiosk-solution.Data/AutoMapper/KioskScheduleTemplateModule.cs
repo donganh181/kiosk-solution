@@ -15,6 +15,11 @@ namespace kiosk_solution.Data.AutoMapper
                 .ForMember(src => src.Template, opt => opt.MapFrom(des => des.Template))
                 .ForMember(src => src.Schedule, opt => opt.MapFrom(des => des.Schedule));
             mc.CreateMap<KioskScheduleTemplateViewModel, KioskScheduleTemplate>();
+
+            mc.CreateMap<KioskScheduleTemplate, KioskScheduleTemplateDetailViewModel>()
+                .ForMember(src => src.Template, opt => opt.MapFrom(des => des.Template))
+                .ForMember(src => src.Schedule, opt => opt.MapFrom(des => des.Schedule));
+            mc.CreateMap<KioskScheduleTemplateDetailViewModel, KioskScheduleTemplate>();
         }
     }
 }
