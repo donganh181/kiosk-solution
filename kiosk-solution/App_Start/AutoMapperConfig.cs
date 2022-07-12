@@ -19,7 +19,7 @@ namespace kiosk_solution.App_Start
                 mc.ConfigKioskModule();
                 mc.ConfigKioskLocationModule();
                 mc.ConfigScheduleModule();
-                mc.ConfigScheduleTemplateModule();
+                mc.ConfigKioskScheduleTemplateModule();
                 mc.ConfigServiceApplicationModule();
                 mc.ConfigServiceApplicationPublishRequestModule();
                 mc.ConfigTemplateModule();
