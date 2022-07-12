@@ -92,14 +92,13 @@ namespace kiosk_solution.Business.Services.impl
             var checkExist = await _unitOfWork.PartyServiceApplicationRepository
                 .Get(c => c.PartyId.Equals(id) && c.ServiceApplicationId.Equals(model.ServiceApplicationId))
                 .FirstOrDefaultAsync();
-            if (checkExist != null)
+            if (checkExist != null && checkExist.Status.Equals(ServiceApplicationConstants.INSTALLED))
             {
                 _logger.LogInformation("You have already taken this app.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You have already taken this app.");
             }
             
             var partyService = _mapper.Map<PartyServiceApplication>(model);
-            partyService.Status = StatusConstants.INSTALLED;
             partyService.PartyId = id;
 
             partyService.Status = ServiceApplicationConstants.INSTALLED;
