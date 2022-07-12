@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -147,6 +148,24 @@ namespace kiosk_solution.Business.Services.impl
                 .FirstOrDefaultAsync();
 
             return result;
+        }
+
+        public async Task<List<KioskDetailViewModel>> GetListSpecificKiosk()
+        {
+            var now = DateTime.Now;
+            var timeNow = now.TimeOfDay;
+
+            var listKiosk = await _unitOfWork.KioskRepository
+                .Get(k => k.Status.Equals(StatusConstants.ACTIVATE))
+                .Include(a => a.KioskScheduleTemplates.Where(d => d.Schedule.DayOfWeek.Contains(now.ToString("dddd"))
+                                                            && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeStart) == 0))
+                .ThenInclude(b => b.Schedule)
+                .Include(a => a.KioskScheduleTemplates)
+                .ThenInclude(b => b.Template)
+                .ProjectTo<KioskDetailViewModel>(_mapper)
+                .ToListAsync();
+
+            return listKiosk;
         }
 
         public async Task<KioskViewModel> UpdateInformation(Guid updaterId, UpdateKioskViewModel model)

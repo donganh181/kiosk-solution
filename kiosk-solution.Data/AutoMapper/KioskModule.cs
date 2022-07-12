@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.ViewModels;
+using System.Linq;
 
 namespace kiosk_solution.Data.AutoMapper
 {
@@ -16,6 +17,10 @@ namespace kiosk_solution.Data.AutoMapper
 
             mc.CreateMap<Kiosk, KioskSearchViewModel>();
             mc.CreateMap<KioskSearchViewModel, Kiosk>();
+
+            mc.CreateMap<Kiosk, KioskDetailViewModel>()
+                .ForMember(src => src.KioskScheduleTemplate, opt => opt.MapFrom(des => des.KioskScheduleTemplates.ToList()));
+            mc.CreateMap<KioskDetailViewModel, Kiosk>();
         }
     }
 }
