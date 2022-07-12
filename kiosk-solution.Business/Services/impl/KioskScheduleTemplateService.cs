@@ -65,7 +65,7 @@ namespace kiosk_solution.Business.Services.impl
                     "This template and schedule are already set for kiosk.");
             }
 
-            var schedule = await _scheduleService.GetById( model.ScheduleId);
+            var schedule = await _scheduleService.GetById(model.ScheduleId);
             var listDay = schedule.DayOfWeek.Split("-").ToList();
             var conflictData = await _unitOfWork.KioskScheduleTemplateRepository
                 .Get(k => k.KioskId.Equals(model.kioskId))
@@ -74,16 +74,22 @@ namespace kiosk_solution.Business.Services.impl
                                 TimeSpan.Compare((TimeSpan) schedule.TimeStart, (TimeSpan) a.Schedule.TimeEnd) == -1)
                             || (TimeSpan.Compare((TimeSpan) schedule.TimeStart, (TimeSpan) a.Schedule.TimeStart) ==
                                 -1 && TimeSpan.Compare((TimeSpan) schedule.TimeEnd, (TimeSpan) a.Schedule.TimeStart) ==
-                                1)
-                          // || listDay.Any(s => a.Schedule.DayOfWeek.Contains(s, StringComparison.CurrentCultureIgnoreCase))
-                ).FirstOrDefaultAsync();
-            if (conflictData != null)
+                                1)).Include(x => x.Template).Include(x => x.Schedule)
+                .ProjectTo<KioskScheduleTemplateViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+            if (conflictData.Count != 0)
             {
-                _logger.LogInformation("This schedule is conflict with other schedule in this kiosk.");
-                throw new ErrorResponse((int) HttpStatusCode.BadRequest,
-                    "This schedule is conflict with other schedule in this kiosk.");
+                foreach (var x in conflictData)
+                {
+                    if (listDay.Any(s => x.Schedule.DayOfWeek.Contains(s)))
+                    {
+                        _logger.LogInformation(
+                            "This schedule is conflict with other schedule in this kiosk.");
+                        throw new ErrorResponse((int) HttpStatusCode.BadRequest,
+                            "This schedule is conflict with other schedule in this kiosk.");
+                    }
+                }
             }
-
+            
             try
             {
                 var data = _mapper.Map<KioskScheduleTemplate>(model);
@@ -100,7 +106,8 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<DynamicModelResponse<KioskScheduleTemplateViewModel>> GetByKioskId(Guid kioskId, Guid partyId, int size,
+        public async Task<DynamicModelResponse<KioskScheduleTemplateViewModel>> GetByKioskId(Guid kioskId, Guid partyId,
+            int size,
             int pageNum)
         {
             var kiosk = await _kioskService.GetById(kioskId);
@@ -109,6 +116,7 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Can not found kiosk.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found kiosk.");
             }
+
             if (!partyId.Equals(kiosk.PartyId))
             {
                 _logger.LogInformation("You can not use this feature.");
@@ -124,6 +132,7 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Can not found");
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
             }
+
             var result = new DynamicModelResponse<KioskScheduleTemplateViewModel>
             {
                 Metadata = new PagingMetaData
