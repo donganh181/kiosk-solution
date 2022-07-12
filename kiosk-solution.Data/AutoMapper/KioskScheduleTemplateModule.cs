@@ -6,12 +6,14 @@ namespace kiosk_solution.Data.AutoMapper
 {
     public static class KioskScheduleTemplateModule
     {
-        public static void ConfigScheduleTemplateModule(this IMapperConfigurationExpression mc)
+        public static void ConfigKioskScheduleTemplateModule(this IMapperConfigurationExpression mc)
         {
             mc.CreateMap<KioskScheduleTemplate, KioskScheduleTemplateCreateViewModel>();
-            mc.CreateMap<KioskScheduleTemplateCreateViewModel, ScheduleTemplate>();
+            mc.CreateMap<KioskScheduleTemplateCreateViewModel, KioskScheduleTemplate>();
 
-            mc.CreateMap<KioskScheduleTemplate, KioskScheduleTemplateViewModel>();
+            mc.CreateMap<KioskScheduleTemplate, KioskScheduleTemplateViewModel>()
+                .ForMember(src => src.Template, opt => opt.MapFrom(des => des.Template))
+                .ForMember(src => src.Schedule, opt => opt.MapFrom(des => des.Schedule));
             mc.CreateMap<KioskScheduleTemplateViewModel, KioskScheduleTemplate>();
         }
     }
