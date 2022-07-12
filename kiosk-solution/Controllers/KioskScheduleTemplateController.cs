@@ -42,7 +42,7 @@ namespace kiosk_solution.Controllers
         }
         
         [Authorize(Roles = "Location Owner")]
-        [HttpGet]
+        [HttpGet("kioskId")]
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetByKioskId([FromQuery] Guid kioskId, int size, int page = CommonConstants.DefaultPage)
         {
