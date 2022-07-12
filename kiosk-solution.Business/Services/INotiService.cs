@@ -11,6 +11,6 @@ namespace kiosk_solution.Business.Services
     {
         public Task<bool> SendNotificationToUser(string deviceId);
         public Task<bool> SendNotification(NotificationCreateViewModel model, string deviceId);
-        //public Task<bool> SendNotificationToChangeTemplate();
+        public Task<bool> SendNotificationToChangeTemplate(TemplateDetailViewModel model, string deviceId);
     }
 }

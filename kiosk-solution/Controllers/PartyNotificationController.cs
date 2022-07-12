@@ -51,6 +51,11 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<NotificationDynamicModelResponse<PartyNotificationViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
 
+        /// <summary>
+        /// Get notification by id 
+        /// </summary>
+        /// <param name="partyNotiId"></param>
+        /// <returns></returns>
         [Authorize(Roles = "Admin, Location Owner, Service Provider")]
         [HttpPatch]
         [MapToApiVersion("1")]

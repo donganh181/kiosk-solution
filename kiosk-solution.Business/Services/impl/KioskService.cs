@@ -152,15 +152,19 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<List<KioskDetailViewModel>> GetListSpecificKiosk()
         {
-            var now = DateTime.Now;
-            var timeNow = now.TimeOfDay;
+            //var now = DateTime.Now;
+            //var timeNow = now.TimeOfDay;
+
+            var now = "Monday";
+            var timeNow = new TimeSpan(10, 00, 00);
 
             var listKiosk = await _unitOfWork.KioskRepository
                 .Get(k => k.Status.Equals(StatusConstants.ACTIVATE))
-                .Include(a => a.KioskScheduleTemplates.Where(d => d.Schedule.DayOfWeek.Contains(now.ToString("dddd"))
+                .Include(a => a.KioskScheduleTemplates.Where(d => d.Schedule.DayOfWeek.Contains(now)
                                                             && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeStart) == 0))
                 .ThenInclude(b => b.Schedule)
-                .Include(a => a.KioskScheduleTemplates)
+                .Include(a => a.KioskScheduleTemplates.Where(d => d.Schedule.DayOfWeek.Contains(now)
+                                                            && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeStart) == 0))
                 .ThenInclude(b => b.Template)
                 .ProjectTo<KioskDetailViewModel>(_mapper)
                 .ToListAsync();

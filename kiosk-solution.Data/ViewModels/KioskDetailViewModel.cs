@@ -8,11 +8,9 @@ namespace kiosk_solution.Data.ViewModels
 {
     public class KioskDetailViewModel
     {
-
-        //Kiosk zone
-        public Guid KioskId { get; set; }
+        public Guid Id { get; set; }
         public string DeviceId { get; set; }
-        public List<KioskScheduleTemplateViewModel> KioskScheduleTemplate { get; set; }
+        public KioskScheduleTemplateDetailViewModel? KioskScheduleTemplate { get; set; }
 
     }
 }

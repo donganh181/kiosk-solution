@@ -19,7 +19,7 @@ namespace kiosk_solution.Data.AutoMapper
             mc.CreateMap<KioskSearchViewModel, Kiosk>();
 
             mc.CreateMap<Kiosk, KioskDetailViewModel>()
-                .ForMember(src => src.KioskScheduleTemplate, opt => opt.MapFrom(des => des.KioskScheduleTemplates.ToList()));
+                .ForMember(src => src.KioskScheduleTemplate, opt => opt.MapFrom(des => des.KioskScheduleTemplates.FirstOrDefault()));
             mc.CreateMap<KioskDetailViewModel, Kiosk>();
         }
     }
