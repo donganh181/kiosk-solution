@@ -38,7 +38,7 @@ namespace kiosk_solution.Business.Services.impl
             _kioskService = kioskService;
         }
 
-        public async Task<KioskScheduleTemplateViewModel> AddTemplateToSchedule(Guid partyId,
+        public async Task<KioskScheduleTemplateViewModel> Create(Guid partyId,
             KioskScheduleTemplateCreateViewModel model)
         {
             bool isScheduleOwner = await _scheduleService.IsOwner(partyId, (Guid) model.ScheduleId);
@@ -96,7 +96,99 @@ namespace kiosk_solution.Business.Services.impl
                 await _unitOfWork.KioskScheduleTemplateRepository.InsertAsync(data);
                 await _unitOfWork.SaveAsync();
 
-                var result = _mapper.Map<KioskScheduleTemplateViewModel>(data);
+                var result = await _unitOfWork.KioskScheduleTemplateRepository.Get(x => x.Id.Equals(data.Id))
+                    .Include(x => x.Template).Include(x => x.Schedule)
+                    .ProjectTo<KioskScheduleTemplateViewModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
+                return result;
+            }
+            catch (DbUpdateException)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid data.");
+            }
+        }
+
+        public async Task<KioskScheduleTemplateViewModel> Delete(Guid partyId, KioskScheduleTemplateDeleteViewModel model)
+        {
+            var target = await _unitOfWork.KioskScheduleTemplateRepository.Get(k => k.Id.Equals(model.Id))
+                .FirstOrDefaultAsync();
+            if (target == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
+            }
+
+            try
+            {
+                _unitOfWork.KioskScheduleTemplateRepository.Delete(target);
+                await _unitOfWork.SaveAsync();
+                var result = _mapper.Map<KioskScheduleTemplateViewModel>(target);
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid data.");
+            }
+        }
+
+        public async Task<KioskScheduleTemplateViewModel> Update(Guid partyId, KioskScheduleTemplateUpdateViewModel model)
+        {
+            var target = await _unitOfWork.KioskScheduleTemplateRepository.Get(k => k.Id.Equals(model.Id))
+                .FirstOrDefaultAsync();
+            if (target == null)
+            {
+                _logger.LogInformation($"Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
+            }
+            bool isScheduleOwner = await _scheduleService.IsOwner(partyId, (Guid) model.ScheduleId);
+            bool isTemplateOwner = await _templateService.IsOwner(partyId, (Guid) model.TemplateId);
+            if (!isScheduleOwner)
+            {
+                _logger.LogInformation($"{partyId} account cannot use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+            }
+
+            if (!isTemplateOwner)
+            {
+                _logger.LogInformation($"{partyId} account cannot use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+            }
+            var schedule = await _scheduleService.GetById(model.ScheduleId);
+            var listDay = schedule.DayOfWeek.Split("-").ToList();
+            var conflictData = await _unitOfWork.KioskScheduleTemplateRepository
+                .Get(k => k.KioskId.Equals(target.KioskId) && !k.Id.Equals(model.Id))
+                .Where(a => TimeSpan.Compare((TimeSpan) a.Schedule.TimeStart, (TimeSpan) schedule.TimeStart) == 0
+                            || (TimeSpan.Compare((TimeSpan) schedule.TimeStart, (TimeSpan) a.Schedule.TimeStart) == 1 &&
+                                TimeSpan.Compare((TimeSpan) schedule.TimeStart, (TimeSpan) a.Schedule.TimeEnd) == -1)
+                            || (TimeSpan.Compare((TimeSpan) schedule.TimeStart, (TimeSpan) a.Schedule.TimeStart) ==
+                                -1 && TimeSpan.Compare((TimeSpan) schedule.TimeEnd, (TimeSpan) a.Schedule.TimeStart) ==
+                                1)).Include(x => x.Template).Include(x => x.Schedule)
+                .ProjectTo<KioskScheduleTemplateViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+            if (conflictData.Count != 0)
+            {
+                foreach (var x in conflictData)
+                {
+                    if (listDay.Any(s => x.Schedule.DayOfWeek.Contains(s)))
+                    {
+                        _logger.LogInformation(
+                            "This schedule is conflict with other schedule in this kiosk.");
+                        throw new ErrorResponse((int) HttpStatusCode.BadRequest,
+                            "This schedule is conflict with other schedule in this kiosk.");
+                    }
+                }
+            }
+            
+            try
+            {
+                target.ScheduleId = model.ScheduleId;
+                target.TemplateId = model.TemplateId;
+                _unitOfWork.KioskScheduleTemplateRepository.Update(target);
+                await _unitOfWork.SaveAsync();
+
+                var result = await _unitOfWork.KioskScheduleTemplateRepository.Get(x => x.Id.Equals(target.Id))
+                    .Include(x => x.Template).Include(x => x.Schedule)
+                    .ProjectTo<KioskScheduleTemplateViewModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
                 return result;
             }
             catch (DbUpdateException)

@@ -36,9 +36,33 @@ namespace kiosk_solution.Controllers
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _kioskScheduleTemplateService.AddTemplateToSchedule(token.Id, model);
+            var result = await _kioskScheduleTemplateService.Create(token.Id, model);
             _logger.LogInformation($"Add template {result.TemplateId} and schedule {model.ScheduleId} to kiosk {model.kioskId} by party {token.Id}.");
             return Ok(new SuccessResponse<KioskScheduleTemplateViewModel>((int) HttpStatusCode.OK,"Add template and schedule to kiosk successful.", result));
+        }
+        
+        [Authorize(Roles = "Location Owner")]
+        [HttpPut]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Update([FromBody] KioskScheduleTemplateUpdateViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _kioskScheduleTemplateService.Update(token.Id, model);
+            _logger.LogInformation($"Update kiosk-schedule-template {model.Id} by party {token.Id}.");
+            return Ok(new SuccessResponse<KioskScheduleTemplateViewModel>((int) HttpStatusCode.OK,"Update successful.", result));
+        }
+        
+        [Authorize(Roles = "Location Owner")]
+        [HttpDelete]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Delete([FromBody] KioskScheduleTemplateDeleteViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _kioskScheduleTemplateService.Delete(token.Id, model);
+            _logger.LogInformation($"Delete kiosk-schedule-template {model.Id} by party {token.Id}.");
+            return Ok(new SuccessResponse<KioskScheduleTemplateViewModel>((int) HttpStatusCode.OK,"Delete successful.", result));
         }
         
         [Authorize(Roles = "Location Owner")]

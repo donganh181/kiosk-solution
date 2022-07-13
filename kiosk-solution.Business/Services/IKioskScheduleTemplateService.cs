@@ -7,7 +7,9 @@ namespace kiosk_solution.Business.Services
 {
     public interface IKioskScheduleTemplateService
     {
-        Task<KioskScheduleTemplateViewModel> AddTemplateToSchedule(Guid partyId, KioskScheduleTemplateCreateViewModel model);
+        Task<KioskScheduleTemplateViewModel> Create(Guid partyId, KioskScheduleTemplateCreateViewModel model);
+        Task<KioskScheduleTemplateViewModel> Delete(Guid partyId, KioskScheduleTemplateDeleteViewModel model);
+        Task<KioskScheduleTemplateViewModel> Update(Guid partyId, KioskScheduleTemplateUpdateViewModel model);
         Task<DynamicModelResponse<KioskScheduleTemplateViewModel>> GetByKioskId(Guid kioskId, Guid partyId, int size, int pageNum);
     }
 }
