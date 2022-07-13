@@ -127,5 +127,18 @@ namespace kiosk_solution.Business.Services.impl
             var sch = await _unitOfWork.ScheduleRepository.Get(s => s.Id.Equals(scheduleId)).FirstOrDefaultAsync();
             return sch;
         }
+
+        public async Task<ScheduleViewModel> ClientGetById(Guid partyId, Guid scheduleId)
+        {
+            var schedule = await _unitOfWork.ScheduleRepository
+                .Get(s => s.Id.Equals(scheduleId) && s.PartyId.Equals(partyId)).FirstOrDefaultAsync();
+            if (schedule == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
+            }
+            var result = _mapper.Map<ScheduleViewModel>(schedule);
+            return result;
+        }
     }
 }

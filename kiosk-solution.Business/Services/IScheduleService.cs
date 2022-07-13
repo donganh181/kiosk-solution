@@ -14,5 +14,6 @@ namespace kiosk_solution.Business.Services
         Task<DynamicModelResponse<ScheduleViewModel>> GetAllWithPaging(Guid partyId, int size, int pageNum);
         Task<bool> IsOwner(Guid partyId, Guid scheduleId);
         Task<Schedule> GetById(Guid scheduleId);
+        Task<ScheduleViewModel> ClientGetById(Guid partyId, Guid scheduleId);
     }
 }

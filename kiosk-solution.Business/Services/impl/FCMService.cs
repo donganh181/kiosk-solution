@@ -52,6 +52,36 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
+        public async Task<bool> SendNotificationToChangeTemplate(TemplateDetailViewModel model, string deviceId)
+        {
+            string jsonConvert = JsonConvert.SerializeObject(model);
+
+            using (var sender = new Sender(FirebaseConstants.SERVER_KEY))
+            {
+                var message = new Message
+                {
+                    Data = new Dictionary<string, string>()
+                    {
+                        {"json", jsonConvert }
+                    },
+
+                    RegistrationIds = new List<string> { deviceId },
+                    Notification = new Notification
+                    {
+                        Title = "Change Template",
+                        Body = "Change Template base on Schedule"
+                    }
+                };
+                var result = await sender.SendAsync(message);
+                if (result == null || !result.ReasonPhrase.Equals("OK"))
+                {
+                    _logger.LogInformation("Firebase error.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Firebase error.");
+                }
+                return true;
+            }
+        }
+
         public async Task<bool> SendNotificationToUser(string deviceId)
         {
             using (var sender = new Sender(FirebaseConstants.SERVER_KEY))
