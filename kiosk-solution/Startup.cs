@@ -81,7 +81,7 @@ namespace kiosk_solution
                 q.ScheduleJob<CheckTemplateJob>(trigger => trigger
                     .WithIdentity("Combined Configuration Trigger")
                     .StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddSeconds(7)))
-                    .WithCronSchedule("0 * * ? * *")
+                    .WithCronSchedule("0 0 * ? * *")
                     .WithDescription("my awesome trigger configured for a job with single call")
                 );
             });
