@@ -153,6 +153,11 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Can not Found.");
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found.");
             }
+            if (template.Status.Equals(StatusConstants.DELETED))
+            {
+                _logger.LogInformation("Template Deleted.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Template Deleted.");
+            }
             var result = _mapper.Map<TemplateViewModel>(template);
             return result;
         }

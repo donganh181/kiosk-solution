@@ -49,12 +49,12 @@ namespace kiosk_solution.Business.Services.impl
                 await _unitOfWork.SaveAsync();
 
                 var partyNotiModel = new PartyNotificationCreateViewModel();
-                partyNotiModel.PartyId = model.SenderId;
+                partyNotiModel.PartyId = model.PartyId;
                 partyNotiModel.NotificationId = newNoti.Id;
 
                 var partyNoti = await _partyNotiService.Create(partyNotiModel);
 
-                var party = await _partyService.GetPartyById(Guid.Parse(model.SenderId + ""));
+                var party = await _partyService.GetPartyById(Guid.Parse(model.PartyId + ""));
 
                 var deviceId = party.DeviceId;
                 if (!string.IsNullOrEmpty(deviceId))
