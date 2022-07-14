@@ -8,7 +8,7 @@ namespace kiosk_solution.Data.ViewModels
 {
     public class NotificationCreateViewModel
     {
-        public Guid SenderId { get; set; }
+        public Guid PartyId { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
     }

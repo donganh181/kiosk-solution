@@ -23,12 +23,15 @@ namespace kiosk_solution.Business.Services.impl
         private readonly AutoMapper.IConfigurationProvider _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<IKioskService> _logger;
+        private readonly INotiService _fcmService;
 
-        public KioskService(IMapper mapper, IUnitOfWork unitOfWork, ILogger<IKioskService> logger)
+        public KioskService(IMapper mapper, IUnitOfWork unitOfWork, ILogger<IKioskService> logger
+            , INotiService fcmService)
         {
             _mapper = mapper.ConfigurationProvider;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _fcmService = fcmService;
         }
 
         public async Task<KioskViewModel> AddDeviceId(KioskAddDeviceIdViewModel model)
@@ -152,24 +155,85 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<List<KioskDetailViewModel>> GetListSpecificKiosk()
         {
-            //var now = DateTime.Now;
-            //var timeNow = now.TimeOfDay;
+            var now = DateTime.Now;
+            var timeNow = now.TimeOfDay;
 
-            var now = "Monday";
-            var timeNow = new TimeSpan(10, 00, 00);
-
-            var listKiosk = await _unitOfWork.KioskRepository
+            var listKiosk = _unitOfWork.KioskRepository
                 .Get(k => k.Status.Equals(StatusConstants.ACTIVATE))
-                .Include(a => a.KioskScheduleTemplates.Where(d => d.Schedule.DayOfWeek.Contains(now)
-                                                            && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeStart) == 0))
+                .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
+                                                            && d.Schedule.DayOfWeek.Contains(now.ToString("dddd"))
+                                                            && d.Schedule.Status.Equals(StatusConstants.ON) //bỏ status
+                                                            && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeStart) >= 0
+                                                            && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeEnd) < 0
+                                                            ))
                 .ThenInclude(b => b.Schedule)
-                .Include(a => a.KioskScheduleTemplates.Where(d => d.Schedule.DayOfWeek.Contains(now)
-                                                            && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeStart) == 0))
+                .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
+                                                            && d.Schedule.DayOfWeek.Contains(now.ToString("dddd"))
+                                                            && d.Schedule.Status.Equals(StatusConstants.ON)
+                                                            && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeStart) >= 0
+                                                            && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeEnd) < 0
+                                                            ))
                 .ThenInclude(b => b.Template)
+                .ThenInclude(c => c.AppCategoryPositions)
+                .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
+                                                            && d.Schedule.DayOfWeek.Contains(now.ToString("dddd"))
+                                                            && d.Schedule.Status.Equals(StatusConstants.ON)
+                                                            && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeStart) >= 0
+                                                            && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeEnd) < 0
+                                                            ))
+                .ThenInclude(b => b.Template)
+                .ThenInclude(c => c.EventPositions)
+                .ToList()
+                .AsQueryable()
                 .ProjectTo<KioskDetailViewModel>(_mapper)
-                .ToListAsync();
+                .ToList();
 
             return listKiosk;
+        }
+
+        //test noti to change template
+        public async Task<KioskDetailViewModel> GetSpecificKiosk(Guid id)
+        {
+            var now = DateTime.Now;
+            var timeNow = now.TimeOfDay;
+            var daynow = now.ToString("dddd");
+
+            var kiosk = await _unitOfWork.KioskRepository
+                .Get(k => k.Status.Equals(StatusConstants.ACTIVATE)&& k.Id.Equals(id))
+                .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
+                                                            && d.Schedule.DayOfWeek.Contains(daynow)
+                                                            && d.Schedule.Status.Equals(StatusConstants.ON)
+                                                            && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeStart) >= 0
+                                                            && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeEnd) < 0
+                                                            ))
+                .ThenInclude(b => b.Schedule)
+                .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
+                                                            && d.Schedule.DayOfWeek.Contains(daynow)
+                                                            && d.Schedule.Status.Equals(StatusConstants.ON)
+                                                            && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeStart) >= 0
+                                                            && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeEnd) < 0
+                                                            ))
+                .ThenInclude(b => b.Template)
+                .ProjectTo<KioskDetailViewModel>(_mapper)
+                .FirstOrDefaultAsync();
+
+            if(kiosk.KioskScheduleTemplate == null)
+            {
+                var check = await _fcmService.SendNotificationToUser(kiosk.DeviceId);
+                if (check)
+                {
+                    _logger.LogInformation($"Send Notification to change default template of kiosk {kiosk.Id}");
+                }
+            }
+            else
+            {
+                var checkSendNoti = await _fcmService.SendNotificationToChangeTemplate(kiosk.KioskScheduleTemplate.Template, kiosk.DeviceId);
+                if (checkSendNoti)
+                {
+                    _logger.LogInformation($"Send Notification to change template of kiosk {kiosk.Id}");
+                }
+            }
+            return kiosk;
         }
 
         public async Task<KioskViewModel> UpdateInformation(Guid updaterId, UpdateKioskViewModel model)

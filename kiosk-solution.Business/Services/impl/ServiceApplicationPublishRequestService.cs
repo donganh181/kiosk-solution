@@ -217,7 +217,7 @@ namespace kiosk_solution.Business.Services.impl
                 {
                     await _appService.SetStatus(Guid.Parse(publishRequest.ServiceApplicationId + ""),
                         StatusConstants.AVAILABLE);
-                    noti.SenderId = Guid.Parse(publishRequest.CreatorId+"");
+                    noti.PartyId = Guid.Parse(publishRequest.CreatorId+"");
 
                     noti.Title = NotificationConstants.APPROVED_TITLE
                         .Replace("APP", publishRequest.ServiceApplication.Name);
@@ -231,7 +231,7 @@ namespace kiosk_solution.Business.Services.impl
                 {
                     await _appService.SetStatus(Guid.Parse(publishRequest.ServiceApplicationId + ""),
                         StatusConstants.UNAVAILABLE);
-                    noti.SenderId = Guid.Parse(publishRequest.CreatorId+"");
+                    noti.PartyId = Guid.Parse(publishRequest.CreatorId+"");
 
                     noti.Title = NotificationConstants.DENIED_TITLE
                         .Replace("APP", publishRequest.ServiceApplication.Name);

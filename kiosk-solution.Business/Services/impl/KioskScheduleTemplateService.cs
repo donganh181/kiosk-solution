@@ -101,7 +101,7 @@ namespace kiosk_solution.Business.Services.impl
                     .ProjectTo<KioskScheduleTemplateViewModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
                 return result;
             }
-            catch (DbUpdateException)
+            catch (Exception)
             {
                 _logger.LogInformation("Invalid data.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid data.");

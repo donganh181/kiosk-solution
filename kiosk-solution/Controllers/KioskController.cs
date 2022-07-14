@@ -118,12 +118,29 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<DynamicModelResponse<KioskSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
 
+        /// <summary>
+        /// test get all specific kiosk base on scheduling time
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("test")]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetSpecificListKiosk()
         {
             var result = await _kioskService.GetListSpecificKiosk();
             return Ok(new SuccessResponse<List<KioskDetailViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+        }
+
+        /// <summary>
+        /// test send noti to specific kiosk
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("testSendNoti")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetByIdThenSendNoti([FromQuery]Guid id)
+        {
+            var result = await _kioskService.GetSpecificKiosk(id);
+            return Ok(new SuccessResponse<KioskDetailViewModel>((int)HttpStatusCode.OK, "Search success.", result));
         }
     }
 }

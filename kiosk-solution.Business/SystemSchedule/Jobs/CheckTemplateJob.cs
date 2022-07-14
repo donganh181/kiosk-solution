@@ -29,10 +29,12 @@ namespace kiosk_solution.Business.SystemSchedule.Jobs
                 if(item.KioskScheduleTemplate == null)
                 {
                     //send default
+                    await _fcmService.SendNotificationToUser(item.DeviceId);
                     _logger.LogInformation($"Send notification to change default template to Kiosk {item.Id}");
                 }
                 else
                 {
+                    //send specific
                     await _fcmService.SendNotificationToChangeTemplate(item.KioskScheduleTemplate.Template, item.DeviceId);
                     _logger.LogInformation($"Send notification to change specific template to Kiosk {item.Id}");
                 }
