@@ -21,7 +21,10 @@ namespace kiosk_solution.Data.AutoMapper
             mc.CreateMap<EventPosition, EventPositionDetailCreateViewModel>();
             mc.CreateMap<EventPositionDetailCreateViewModel, EventPosition>();
 
-            mc.CreateMap<EventPosition, EventPositionSpecificViewModel>();
+            mc.CreateMap<EventPosition, EventPositionSpecificViewModel>()
+                .ForMember(src => src.EventType, opt => opt.MapFrom(des => des.Event.Type))
+                .ForMember(src => src.Description, opt => opt.MapFrom(des => des.Event.Description))
+                .ForMember(src => src.Address, opt => opt.MapFrom(des => des.Event.Address));
             mc.CreateMap<EventPositionSpecificViewModel, EventPosition>();
 
             mc.CreateMap<EventPosition, EventPositionDetailViewModel>()
