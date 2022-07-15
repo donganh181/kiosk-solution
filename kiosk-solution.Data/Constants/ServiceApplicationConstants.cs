@@ -9,5 +9,6 @@ namespace kiosk_solution.Data.Constants
     public class ServiceApplicationConstants
     {
         public static string INSTALLED = "installed";
+        public static string UNINSTALLED = "uninstalled";
     }
 }

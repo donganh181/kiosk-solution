@@ -91,8 +91,8 @@ namespace kiosk_solution.Business.Services.impl
                     RegistrationIds = new List<string> { deviceId },
                     Notification = new Notification
                     {
-                        Title = "Test!",
-                        Body = "Check it now"
+                        Title = "Change default template!",
+                        Body = "Default template"
                     }
                 };
                 var result = await sender.SendAsync(message);
