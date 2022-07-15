@@ -25,10 +25,13 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IScheduleService _scheduleService;
         private readonly ITemplateService _templateService;
         private readonly IKioskService _kioskService;
+        private readonly INotiService _fcmService;
+        private readonly IEventService _eventService;
 
         public KioskScheduleTemplateService(IUnitOfWork unitOfWork, IMapper mapper,
             ILogger<IKioskScheduleTemplateService> logger,
-            IScheduleService scheduleService, ITemplateService templateService, IKioskService kioskService)
+            IScheduleService scheduleService, ITemplateService templateService, IKioskService kioskService,
+            INotiService fcmService, IEventService eventService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -36,11 +39,17 @@ namespace kiosk_solution.Business.Services.impl
             _scheduleService = scheduleService;
             _templateService = templateService;
             _kioskService = kioskService;
+            _fcmService = fcmService;
+            _eventService = eventService;
         }
 
         public async Task<KioskScheduleTemplateViewModel> Create(Guid partyId,
             KioskScheduleTemplateCreateViewModel model)
         {
+            var now = DateTime.Now;
+            var timeNow = now.TimeOfDay;
+            var thisDay = now.ToString("dddd");
+
             bool isScheduleOwner = await _scheduleService.IsOwner(partyId, (Guid) model.ScheduleId);
             bool isTemplateOwner = await _templateService.IsOwner(partyId, (Guid) model.TemplateId);
             if (!isScheduleOwner)
@@ -96,6 +105,37 @@ namespace kiosk_solution.Business.Services.impl
                 await _unitOfWork.KioskScheduleTemplateRepository.InsertAsync(data);
                 await _unitOfWork.SaveAsync();
 
+                if(schedule.DayOfWeek.Contains(thisDay) 
+                    && TimeSpan.Compare(timeNow, (TimeSpan)schedule.TimeStart) >= 0
+                    && TimeSpan.Compare(timeNow, (TimeSpan)schedule.TimeEnd) < 0)
+                {
+                    var tmp = await _unitOfWork.KioskScheduleTemplateRepository
+                    .Get(x => x.Id.Equals(data.Id))
+                    .Include(a => a.Kiosk)
+                    .Include(a => a.Schedule)
+                    .Include(a => a.Template)
+                    .ThenInclude(b => b.AppCategoryPositions)
+                    .ThenInclude(c => c.AppCategory)
+                    .Include(a => a.Template)
+                    .ThenInclude(b => b.EventPositions)
+                    .ThenInclude(c => c.Event)
+                    .ProjectTo<KioskScheduleTemplateChangeViewModel>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync();
+
+                    foreach(var eventPos in tmp.Template.ListEventPosition)
+                    {
+                        var myEvent = await _eventService.GetById(eventPos.EventId);
+                        eventPos.EventThumbnail = myEvent.Thumbnail;
+                    }
+
+                    var checkSendNoti = await _fcmService.SendNotificationToChangeTemplate(tmp.Template, tmp.DeviceId);
+                    if (!checkSendNoti)
+                    {
+                        _logger.LogInformation("Firebase Error.");
+                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Firebase Error.");
+                    }
+
+                }
                 var result = await _unitOfWork.KioskScheduleTemplateRepository.Get(x => x.Id.Equals(data.Id))
                     .Include(x => x.Template).Include(x => x.Schedule)
                     .ProjectTo<KioskScheduleTemplateViewModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
