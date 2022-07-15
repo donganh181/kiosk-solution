@@ -24,14 +24,16 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<IKioskService> _logger;
         private readonly INotiService _fcmService;
+        private readonly IEventService _eventService;
 
         public KioskService(IMapper mapper, IUnitOfWork unitOfWork, ILogger<IKioskService> logger
-            , INotiService fcmService)
+            , INotiService fcmService, IEventService eventService)
         {
             _mapper = mapper.ConfigurationProvider;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _fcmService = fcmService;
+            _eventService = eventService;
         }
 
         public async Task<KioskViewModel> AddDeviceId(KioskAddDeviceIdViewModel model)
@@ -158,35 +160,51 @@ namespace kiosk_solution.Business.Services.impl
             var now = DateTime.Now;
             var timeNow = now.TimeOfDay;
 
+            var thisDay = now.ToString("dddd");
+
             var listKiosk = _unitOfWork.KioskRepository
                 .Get(k => k.Status.Equals(StatusConstants.ACTIVATE))
                 .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
-                                                            && d.Schedule.DayOfWeek.Contains(now.ToString("dddd"))
+                                                            && d.Schedule.DayOfWeek.Contains(thisDay)
                                                             && d.Schedule.Status.Equals(StatusConstants.ON) //bỏ status
                                                             && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeStart) >= 0
                                                             && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeEnd) < 0
                                                             ))
                 .ThenInclude(b => b.Schedule)
                 .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
-                                                            && d.Schedule.DayOfWeek.Contains(now.ToString("dddd"))
+                                                            && d.Schedule.DayOfWeek.Contains(thisDay)
                                                             && d.Schedule.Status.Equals(StatusConstants.ON)
                                                             && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeStart) >= 0
                                                             && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeEnd) < 0
                                                             ))
                 .ThenInclude(b => b.Template)
                 .ThenInclude(c => c.AppCategoryPositions)
+                .ThenInclude(d => d.AppCategory)
                 .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
-                                                            && d.Schedule.DayOfWeek.Contains(now.ToString("dddd"))
+                                                            && d.Schedule.DayOfWeek.Contains(thisDay)
                                                             && d.Schedule.Status.Equals(StatusConstants.ON)
                                                             && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeStart) >= 0
                                                             && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeEnd) < 0
                                                             ))
                 .ThenInclude(b => b.Template)
                 .ThenInclude(c => c.EventPositions)
+                .ThenInclude(d => d.Event)
                 .ToList()
                 .AsQueryable()
                 .ProjectTo<KioskDetailViewModel>(_mapper)
                 .ToList();
+
+            foreach(var item in listKiosk)
+            {
+                if(item.KioskScheduleTemplate != null)
+                {
+                    foreach(var eventPos in item.KioskScheduleTemplate.Template.ListEventPosition)
+                    {
+                        var myEvent = await _eventService.GetById(eventPos.EventId);
+                        eventPos.EventThumbnail = myEvent.Thumbnail;
+                    }
+                }
+            }
 
             return listKiosk;
         }
