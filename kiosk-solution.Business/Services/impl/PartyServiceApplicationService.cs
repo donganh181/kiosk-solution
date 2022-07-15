@@ -97,29 +97,53 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("You have already taken this app.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You have already taken this app.");
             }
-            
-            var partyService = _mapper.Map<PartyServiceApplication>(model);
-            partyService.PartyId = id;
-
-            partyService.Status = ServiceApplicationConstants.INSTALLED;
-
-            try
+            else if(checkExist != null && checkExist.Status.Equals(ServiceApplicationConstants.UNINSTALLED))
             {
-                await _unitOfWork.PartyServiceApplicationRepository.InsertAsync(partyService);
-                await _unitOfWork.SaveAsync();
-                var result = await _unitOfWork.PartyServiceApplicationRepository
-                    .Get(a => a.Id.Equals(partyService.Id))
-                    .Include(a => a.Party)
-                    .Include(a => a.ServiceApplication)
-                    .ThenInclude(b => b.AppCategory)
-                    .ProjectTo<PartyServiceApplicationViewModel>(_mapper.ConfigurationProvider)
-                    .FirstOrDefaultAsync();
-                return result;
+                checkExist.Status = ServiceApplicationConstants.INSTALLED;
+                try
+                {
+                    _unitOfWork.PartyServiceApplicationRepository.Update(checkExist);
+                    await _unitOfWork.SaveAsync();
+                    var result = await _unitOfWork.PartyServiceApplicationRepository
+                        .Get(a => a.Id.Equals(checkExist.Id))
+                        .Include(a => a.Party)
+                        .Include(a => a.ServiceApplication)
+                        .ThenInclude(b => b.AppCategory)
+                        .ProjectTo<PartyServiceApplicationViewModel>(_mapper.ConfigurationProvider)
+                        .FirstOrDefaultAsync();
+                    return result;
+                }
+                catch (Exception)
+                {
+                    _logger.LogInformation("Fail to update.");
+                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Fail to update.");
+                }
             }
-            catch (Exception)
+            else
             {
-                _logger.LogInformation("Invalid Data.");
-                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
+                var partyService = _mapper.Map<PartyServiceApplication>(model);
+                partyService.PartyId = id;
+
+                partyService.Status = ServiceApplicationConstants.INSTALLED;
+
+                try
+                {
+                    await _unitOfWork.PartyServiceApplicationRepository.InsertAsync(partyService);
+                    await _unitOfWork.SaveAsync();
+                    var result = await _unitOfWork.PartyServiceApplicationRepository
+                        .Get(a => a.Id.Equals(partyService.Id))
+                        .Include(a => a.Party)
+                        .Include(a => a.ServiceApplication)
+                        .ThenInclude(b => b.AppCategory)
+                        .ProjectTo<PartyServiceApplicationViewModel>(_mapper.ConfigurationProvider)
+                        .FirstOrDefaultAsync();
+                    return result;
+                }
+                catch (Exception)
+                {
+                    _logger.LogInformation("Invalid Data.");
+                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
+                }
             }
         }
 
