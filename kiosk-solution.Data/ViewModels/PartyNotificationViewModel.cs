@@ -14,7 +14,7 @@ namespace kiosk_solution.Data.ViewModels
         public Guid? NotificationId { get; set; }
         public string NotiTitle { get; set; }
         public string NotiContent { get; set; }
-        public string NotiCreateDate { get; set; }
+        public DateTime NotiCreateDate { get; set; }
         public string Status { get; set; }
     }
 }
