@@ -27,6 +27,7 @@ namespace kiosk_solution.Data.Repositories.impl
         public IPoicategoryRepository PoicategoryRepository { get; set; }
         public INotificationRepository NotificationRepository { get; set; }
         public IPartyNotificationRepository PartyNotificationRepository { get; set; }
+        public IServiceApplicationFeedBackRepository ServiceApplicationFeedBackRepository { get; set; }
 
         public UnitOfWork(Kiosk_PlatformContext context, IRoleRepository roleRepository, IKioskRepository kioskRepository, 
             IPartyRepository partyRepository, IKioskLocationRepository kioskLocationRepository, IScheduleRepository scheduleRepository,
@@ -35,7 +36,7 @@ namespace kiosk_solution.Data.Repositories.impl
             IPartyServiceApplicationRepository partyServiceApplicationRepository, IPoiRepository poiRepository,
             IAppCategoryRepository appCategoryRepository, IImageRepository imageRepository, IAppCategoryPositionRepository appCategoryPositionRepository,
             IEventPositionRepository eventPositionRepository, IPoicategoryRepository poicategoryRepository, INotificationRepository notificationRepository,
-            IPartyNotificationRepository partyNotificationRepository)
+            IPartyNotificationRepository partyNotificationRepository, IServiceApplicationFeedBackRepository serviceApplicationFeedBackRepository)
         {
             _context = context;
             RoleRepository = roleRepository;
@@ -57,6 +58,7 @@ namespace kiosk_solution.Data.Repositories.impl
             PoicategoryRepository = poicategoryRepository;
             NotificationRepository = notificationRepository;
             PartyNotificationRepository = partyNotificationRepository;
+            ServiceApplicationFeedBackRepository = serviceApplicationFeedBackRepository;
         }
         public void Save()
         {
