@@ -79,6 +79,8 @@ namespace kiosk_solution.Business.DI
             services.AddScoped<IPartyNotificationRepository, PartyNotificationRepository>();
             services.AddScoped<IPartyNotificationService, PartyNotificationService>();
 
+            services.AddScoped<IServiceApplicationFeedBackRepository, ServiceApplicationFeedBackRepository>();
+            services.AddScoped<IServiceApplicationFeedBackService, ServiceApplicationFeedBackService>();
         }
     }
 }
