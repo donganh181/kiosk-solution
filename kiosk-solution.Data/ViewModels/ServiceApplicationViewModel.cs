@@ -19,5 +19,8 @@ namespace kiosk_solution.Data.ViewModels
         public Guid? AppCategoryId { get; set; }
         public string AppCategoryName { get; set; }
         public string Status { get; set; }
+        public double? AverageRating { get; set; }
+        public int? NumberOfRating { get; set; }
+        public List<ServiceApplicationFeedBackViewModel> ListFeedback { get; set; }
     }
 }

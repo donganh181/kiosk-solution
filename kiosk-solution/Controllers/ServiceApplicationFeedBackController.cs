@@ -80,7 +80,7 @@ namespace kiosk_solution.Controllers
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _serviceApplicationFeedBackService.GetListFeedbackByAppId(appId, size, page);
+            var result = await _serviceApplicationFeedBackService.GetListFeedbackByAppIdWithPaging(appId, size, page);
             _logger.LogInformation($"Get all feedbacks by party {token.Mail}");
             return Ok(new SuccessResponse<DynamicModelResponse<ServiceApplicationFeedBackViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
