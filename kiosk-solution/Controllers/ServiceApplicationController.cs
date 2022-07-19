@@ -95,5 +95,17 @@ namespace kiosk_solution.Controllers
             var result = await _serviceApplicationService.GetById(id);
             return Ok(new SuccessResponse<ServiceApplicationViewModel>((int)HttpStatusCode.OK, "Search success.", result));
         }
+        
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("status")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateStatus([FromBody] ServiceApplicationUpdateStatusViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _serviceApplicationService.UpdateStatus(model);
+            _logger.LogInformation($"Stop application {result.Name} by party {token.Mail}");
+            return Ok(new SuccessResponse<ServiceApplicationViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
     }
 }

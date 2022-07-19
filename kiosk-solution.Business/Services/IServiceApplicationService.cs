@@ -16,5 +16,7 @@ namespace kiosk_solution.Business.Services
         public Task<ServiceApplicationViewModel> GetById(Guid id);
         public Task<bool> SetStatus(Guid id, string status);
         public Task<bool> HasApplicationOnCategory(Guid appCategoryId);
+
+        public Task<ServiceApplicationViewModel> UpdateStatus(ServiceApplicationUpdateStatusViewModel model);
     }
 }
