@@ -76,6 +76,37 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
+        public async Task<Dictionary<int, double?>> GetAverageRatingOfApp(Guid appId)
+        {
+            Dictionary<int, double?> result = new Dictionary<int, double?>();
+            result.Add(0, 0);
+            
+            var listFeedback = await _unitOfWork.ServiceApplicationFeedBackRepository
+                .Get(c => c.ServiceApplicationId.Equals(appId))
+                .ToListAsync();
+
+            if (listFeedback.Count == 0) return result;
+
+            result.Clear();
+
+            double rating = 0;
+            int total = 0;
+            foreach (var feedback in listFeedback)
+            {
+                if (feedback != null)
+                {
+                    if (feedback.Rating == null || feedback.Rating > 0)
+                    {
+                        total++;
+                        rating += (float)feedback.Rating;
+                    }
+                }
+            }
+
+            result.Add(total, rating / total);
+            return result;
+        }
+
         public async Task<ServiceApplicationFeedBackViewModel> GetFeedbackById(Guid id)
         {
             var feedback = await _unitOfWork.ServiceApplicationFeedBackRepository
@@ -91,10 +122,23 @@ namespace kiosk_solution.Business.Services.impl
             return feedback;
         }
 
-        public async Task<DynamicModelResponse<ServiceApplicationFeedBackViewModel>> GetListFeedbackByAppId(Guid appId, int size, int pageNum)
+        public async Task<List<ServiceApplicationFeedBackViewModel>> GetListFeedbackByAppId(Guid appId)
+        {
+            var listFeedback = await _unitOfWork.ServiceApplicationFeedBackRepository
+                .Get(f => f.ServiceApplicationId.Equals(appId))
+                .Include(x => x.Party)
+                .Include(x => x.ServiceApplication)
+                .ProjectTo<ServiceApplicationFeedBackViewModel>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+            return listFeedback;
+        }
+
+        public async Task<DynamicModelResponse<ServiceApplicationFeedBackViewModel>> GetListFeedbackByAppIdWithPaging(Guid appId, int size, int pageNum)
         {
             var listPaging = _unitOfWork.ServiceApplicationFeedBackRepository
                 .Get(c => c.ServiceApplicationId.Equals(appId))
+                .Include(x => x.Party)
+                .Include(x => x.ServiceApplication)
                 .ProjectTo<ServiceApplicationFeedBackViewModel>(_mapper.ConfigurationProvider)
                 .OrderByDescending(r => r.CreateDate)
                 .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging,
@@ -157,5 +201,6 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
             }
         }
+
     }
 }

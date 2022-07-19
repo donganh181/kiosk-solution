@@ -26,21 +26,25 @@ namespace kiosk_solution.Business.Services.impl
         private readonly ILogger<IServiceApplicationService> _logger;
         private readonly IFileService _fileService;
         private readonly INotificationService _notificationService;
+        private readonly IServiceApplicationFeedBackService _serviceApplicationFeedBackService;
 
         public ServiceApplicationService(IUnitOfWork unitOfWork, IMapper mapper,
-            ILogger<ServiceApplicationService> logger, IFileService fileService, INotificationService notificationService)
+            ILogger<ServiceApplicationService> logger, IFileService fileService, INotificationService notificationService,
+            IServiceApplicationFeedBackService serviceApplicationFeedBackService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _fileService = fileService;
             _notificationService = notificationService;
+            _serviceApplicationFeedBackService = serviceApplicationFeedBackService;
         }
 
         public async Task<DynamicModelResponse<ServiceApplicationSearchViewModel>> GetAllWithPaging(string role,
             Guid? partyId, ServiceApplicationSearchViewModel model, int size, int pageNum)
         {
-            object apps = null;
+            
+            IQueryable<ServiceApplicationSearchViewModel> apps = null;
             if (string.IsNullOrEmpty(role) || role.Equals(RoleConstants.ADMIN))
             {
                 apps = _unitOfWork.ServiceApplicationRepository
@@ -87,10 +91,28 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
 
-            var listApp = (IQueryable<ServiceApplicationSearchViewModel>) apps;
+            var listApp = apps.ToList();
+            
+
+            foreach(var app in listApp)
+            {
+                var rating = await _serviceApplicationFeedBackService.GetAverageRatingOfApp(Guid.Parse(app.Id + ""));
+                if(rating.FirstOrDefault().Value != 0)
+                {
+                    app.NumberOfRating = rating.FirstOrDefault().Key;
+                    app.AverageRating = rating.FirstOrDefault().Value;
+                }
+                else
+                {
+                    app.NumberOfRating = 0;
+                    app.AverageRating = 0;
+                }
+
+                app.ListFeedback = await _serviceApplicationFeedBackService.GetListFeedbackByAppId(Guid.Parse(app.Id + ""));
+            }
 
             var listPaging =
-                listApp.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
+                listApp.AsQueryable().PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
 
             if (listPaging.Data.ToList().Count < 1)
             {
@@ -205,12 +227,27 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<ServiceApplicationViewModel> GetById(Guid id)
         {
-            return await _unitOfWork.ServiceApplicationRepository
+            var app = await _unitOfWork.ServiceApplicationRepository
                 .Get(a => a.Id.Equals(id))
                 .Include(a => a.Party)
                 .Include(a => a.AppCategory)
                 .ProjectTo<ServiceApplicationViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
+
+            var rating = await _serviceApplicationFeedBackService.GetAverageRatingOfApp(Guid.Parse(app.Id + ""));
+            if (rating.FirstOrDefault().Value != 0)
+            {
+                app.NumberOfRating = rating.FirstOrDefault().Key;
+                app.AverageRating = rating.FirstOrDefault().Value;
+            }
+            else
+            {
+                app.NumberOfRating = 0;
+                app.AverageRating = 0;
+            }
+
+            app.ListFeedback = await _serviceApplicationFeedBackService.GetListFeedbackByAppId(Guid.Parse(app.Id + ""));
+            return app;
         }
 
         public async Task<bool> SetStatus(Guid id, string status)
