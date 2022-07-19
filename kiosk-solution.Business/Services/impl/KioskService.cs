@@ -245,6 +245,12 @@ namespace kiosk_solution.Business.Services.impl
             }
             else
             {
+                foreach(var eventPos in kiosk.KioskScheduleTemplate.Template.ListEventPosition)
+                {
+                    var myEvent = await _eventService.GetById(eventPos.EventId);
+                    eventPos.EventThumbnail = myEvent.Thumbnail;
+                }
+
                 var checkSendNoti = await _fcmService.SendNotificationToChangeTemplate(kiosk.KioskScheduleTemplate.Template, kiosk.DeviceId);
                 if (checkSendNoti)
                 {
