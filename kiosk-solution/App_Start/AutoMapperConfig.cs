@@ -33,6 +33,7 @@ namespace kiosk_solution.App_Start
                 mc.ConfigPoicategoryModule();
                 mc.ConfigNotificationModule();
                 mc.ConfigPartyNotificationModule();
+                mc.ConfigServiceApplicationFeedBackModule();
             });
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);

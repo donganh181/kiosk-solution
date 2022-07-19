@@ -180,5 +180,18 @@ namespace kiosk_solution.Business.Services.impl
             };
             return result;
         }
+
+        public async Task<bool> CheckAppExistByPartyIdAndServiceApplicationId(Guid partyId, Guid serviceApplicationId)
+        {
+            var app = await _unitOfWork.PartyServiceApplicationRepository
+                .Get(a => a.PartyId.Equals(partyId) && a.ServiceApplicationId.Equals(serviceApplicationId))
+                .FirstOrDefaultAsync();
+
+            if(app == null)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }
