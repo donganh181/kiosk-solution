@@ -25,14 +25,16 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IMapper _mapper;
         private readonly ILogger<IServiceApplicationService> _logger;
         private readonly IFileService _fileService;
+        private readonly INotificationService _notificationService;
 
         public ServiceApplicationService(IUnitOfWork unitOfWork, IMapper mapper,
-            ILogger<ServiceApplicationService> logger, IFileService fileService)
+            ILogger<ServiceApplicationService> logger, IFileService fileService, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _fileService = fileService;
+            _notificationService = notificationService;
         }
 
         public async Task<DynamicModelResponse<ServiceApplicationSearchViewModel>> GetAllWithPaging(string role,
@@ -243,6 +245,45 @@ namespace kiosk_solution.Business.Services.impl
                 return false;
             else
                 return true;
+        }
+
+        public async Task<ServiceApplicationViewModel> UpdateStatus(ServiceApplicationUpdateStatusViewModel model)
+        {
+            var app = await _unitOfWork.ServiceApplicationRepository.Get(a => a.Id.Equals(model.serviceApplicationId))
+                .FirstOrDefaultAsync();
+            if (app == null)
+            {
+                _logger.LogInformation("App not found.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "App not found.");
+            }
+
+            if (!app.Status.Equals(StatusConstants.AVAILABLE))
+            {
+                _logger.LogInformation("This status app can not update.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "This status app can not update.");
+            }
+
+            app.Status = StatusConstants.UNAVAILABLE;
+            try
+            {
+                _unitOfWork.ServiceApplicationRepository.Update(app);
+                await _unitOfWork.SaveAsync();
+                var notiModel = new NotificationCreateViewModel()
+                {
+                    PartyId = (Guid) app.PartyId,
+                    Title = "Your application has been stopped",
+                    Content = $"Your application {app.Name} has been stopped by admin."
+                };
+                await _notificationService.Create(notiModel);
+                var result = _mapper.Map<ServiceApplicationViewModel>(app);
+                return result;
+
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid data.");
+            }
         }
     }
 }
