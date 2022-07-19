@@ -24,5 +24,8 @@ namespace kiosk_solution.Data.ViewModels
         [BindNever] public PartyServiceApplicationViewModel PartyServiceApplication { get; set; }
         [String] public string Status { get; set; }
         [BindNever] public DateTime? CreateDate { get; set; }
+        [BindNever] public double? AverageRating { get; set; }
+        [BindNever] public int? NumberOfRating { get; set; }
+        [BindNever] public List<ServiceApplicationFeedBackViewModel> ListFeedback { get; set; }
     }
 }

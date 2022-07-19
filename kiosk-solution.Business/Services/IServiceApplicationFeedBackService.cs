@@ -12,7 +12,9 @@ namespace kiosk_solution.Business.Services
     {
         public Task<ServiceApplicationFeedBackViewModel> Create(Guid partyId, ServiceApplicationFeedBackCreateViewModel model);
         public Task<ServiceApplicationFeedBackViewModel> Update(Guid partyId, ServiceApplicationFeedBackUpdateViewModel model);
-        public Task<DynamicModelResponse<ServiceApplicationFeedBackViewModel>> GetListFeedbackByAppId(Guid appId, int size, int pageNum);
+        public Task<DynamicModelResponse<ServiceApplicationFeedBackViewModel>> GetListFeedbackByAppIdWithPaging(Guid appId, int size, int pageNum);
         public Task<ServiceApplicationFeedBackViewModel> GetFeedbackById(Guid id);
+        public Task<List<ServiceApplicationFeedBackViewModel>> GetListFeedbackByAppId(Guid appId);
+        public Task<Dictionary<int , double?>> GetAverageRatingOfApp(Guid appId);
     }
 }
