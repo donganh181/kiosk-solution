@@ -19,6 +19,13 @@ namespace kiosk_solution.Data.AutoMapper
                 .ForMember(src => src.AppCategoryName, opt => opt.MapFrom(des => des.AppCategory.Name));
             mc.CreateMap<ServiceApplicationViewModel, ServiceApplication>();
 
+            mc.CreateMap<ServiceApplication, ServiceApplicationSpecificViewModel>()
+                .ForMember(src => src.PartyName, opt => opt.MapFrom(des => des.Party.FirstName))
+                .ForMember(src => src.PartyEmail, opt => opt.MapFrom(des => des.Party.Email))
+                .ForMember(src => src.AppCategoryName, opt => opt.MapFrom(des => des.AppCategory.Name))
+                .ForMember(src => src.MyFeedback, opt => opt.MapFrom(des => des.ServiceApplicationFeedBacks.FirstOrDefault()));
+            mc.CreateMap<ServiceApplicationSpecificViewModel, ServiceApplication>();
+
             mc.CreateMap<ServiceApplication, ServiceApplicationSearchViewModel>()
                 .ForMember(src => src.PartyName, opt => opt.MapFrom(des => des.Party.FirstName))
                 .ForMember(src => src.PartyEmail, opt => opt.MapFrom(des => des.Party.Email))

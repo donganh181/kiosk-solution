@@ -37,7 +37,7 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<ServiceApplicationPublishRequestViewModel> Create(Guid creatorId,
             ServiceApplicationPublishRequestCreateViewModel model)
         {
-            var app = await _appService.GetById(Guid.Parse(model.ServiceApplicationId + ""));
+            var app = await _appService.GetById(null, Guid.Parse(model.ServiceApplicationId + ""));
             if (app == null)
             {
                 _logger.LogInformation("Can not found.");
