@@ -9,5 +9,6 @@ namespace kiosk_solution.Data.Repositories
 {
     public interface IEventRepository : IBaseRepository<Event>
     {
+        public IQueryable<Event> GetEventNearBy(Guid partyId, double longitude, double latitude);
     }
 }

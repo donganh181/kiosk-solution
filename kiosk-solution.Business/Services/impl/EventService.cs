@@ -25,7 +25,9 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IImageService _imageService;
         private readonly IMapService _mapService;
 
-        public EventService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IEventService> logger, IImageService imageService, IMapService mapService)
+        public EventService(IUnitOfWork unitOfWork, IMapper mapper,
+            ILogger<IEventService> logger, IImageService imageService,
+            IMapService mapService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -646,6 +648,72 @@ namespace kiosk_solution.Business.Services.impl
             checkEvent.ListImage = _mapper.Map<List<EventImageDetailViewModel>>(listSourceImage);
             return checkEvent;
         }
-    
+
+        public async Task<DynamicModelResponse<EventNearbySearchViewModel>> GetEventNearby(Guid partyId, EventNearbySearchViewModel model, int size, int pageNum)
+        {
+            var events = _unitOfWork.EventRepository
+                .GetEventNearBy(partyId, model.Longtitude, model.Latitude)
+                .ProjectTo<EventNearbySearchViewModel>(_mapper.ConfigurationProvider)
+                .DynamicFilter(model);
+            var listEvent = events.ToList();
+            if (listEvent.Count < 1)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+            foreach(var item in listEvent)
+            {
+                var listImage = await _imageService
+                    .GetByKeyIdAndKeyType(Guid.Parse(item.Id + ""), CommonConstants.EVENT_IMAGE);
+                if (listImage == null)
+                {
+                    _logger.LogInformation($"{item.Name} has lost image.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                }
+
+                var listSourceImage = new List<ImageViewModel>();
+                foreach (var img in listImage)
+                {
+                    if (img.Link == null)
+                    {
+                        _logger.LogInformation($"{item.Name} has lost image.");
+                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                    }
+
+                    if (img.Link.Contains(CommonConstants.THUMBNAIL))
+                    {
+                        item.Thumbnail = img;
+                    }
+                    else if (img.Link.Contains(CommonConstants.SOURCE_IMAGE))
+                    {
+                        listSourceImage.Add(img);
+                    }
+                }
+
+                item.ListImage = _mapper.Map<List<EventImageDetailViewModel>>(listSourceImage);
+            }
+            events = listEvent.AsQueryable().OrderByDescending(e => e.Name);
+
+            var listPaging =
+                 events.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
+
+            if (listPaging.Data.ToList().Count < 1)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+
+            var result = new DynamicModelResponse<EventNearbySearchViewModel>
+            {
+                Metadata = new PagingMetaData
+                {
+                    Page = pageNum,
+                    Size = size,
+                    Total = listPaging.Total
+                },
+                Data = listPaging.Data.ToList()
+            };
+            return result;
+        }
     }
 }

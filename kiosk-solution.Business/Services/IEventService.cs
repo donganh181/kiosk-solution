@@ -10,15 +10,15 @@ namespace kiosk_solution.Business.Services
 {
     public interface IEventService
     {
-        public Task<EventViewModel> Create(Guid creatorId, string role, EventCreateViewModel model);
-        public Task<DynamicModelResponse<EventSearchViewModel>> GetAllWithPaging(Guid? partyId, string roleName, EventSearchViewModel model, int size, int pageNum);
-        public Task<EventViewModel> Update(Guid partyId, EventUpdateViewModel model, string roleName);
-        public Task<EventImageViewModel> AddImageToEvent(Guid partyId, string roleName, EventAddImageViewModel model);
-        public Task<ImageViewModel> UpdateImageToEvent(Guid partyId, string roleName, EventUpdateImageViewModel model);
-        public Task<EventViewModel> DeleteImageFromEvent(Guid partyId, string roleName, Guid imageId);
-        public Task<EventViewModel> Delete(Guid partyId, string roleName, Guid eventId);
-        public Task<EventViewModel> GetById(Guid id);
-        public Task<EventViewModel> ReplaceImage(Guid partyId, string roleName, ImageReplaceViewModel model);
-    
+        Task<EventViewModel> Create(Guid creatorId, string role, EventCreateViewModel model);
+        Task<DynamicModelResponse<EventSearchViewModel>> GetAllWithPaging(Guid? partyId, string roleName, EventSearchViewModel model, int size, int pageNum);
+        Task<EventViewModel> Update(Guid partyId, EventUpdateViewModel model, string roleName);
+        Task<EventImageViewModel> AddImageToEvent(Guid partyId, string roleName, EventAddImageViewModel model);
+        Task<ImageViewModel> UpdateImageToEvent(Guid partyId, string roleName, EventUpdateImageViewModel model);
+        Task<EventViewModel> DeleteImageFromEvent(Guid partyId, string roleName, Guid imageId);
+        Task<EventViewModel> Delete(Guid partyId, string roleName, Guid eventId);
+        Task<EventViewModel> GetById(Guid id);
+        Task<EventViewModel> ReplaceImage(Guid partyId, string roleName, ImageReplaceViewModel model);
+        public Task<DynamicModelResponse<EventNearbySearchViewModel>> GetEventNearby(Guid partyId, EventNearbySearchViewModel model, int size, int pageNum);
     }
 }
