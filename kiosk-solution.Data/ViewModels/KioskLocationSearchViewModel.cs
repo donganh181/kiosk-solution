@@ -12,13 +12,21 @@ namespace kiosk_solution.Data.ViewModels
     {
         [BindNever]
         public Guid? Id { get; set; }
-        [String]
-        public string District { get; set; }
-        [String]
-        public string Province { get; set; }
         [BindNever]
         public DateTime? CreateDate { get; set; }
-        [String]
+        [BindNever]
         public string Status { get; set; }
+        [String]
+        public string Name { get; set; }
+        [BindNever]
+        public string Description { get; set; }
+        [BindNever]
+        public Guid? OwnerId { get; set; }
+        [BindNever]
+        public string OwnerEmail { get; set; }
+        [BindNever]
+        public string HotLine { get; set; }
+        [BindNever]
+        public List<ImageViewModel> ListImage { get; set; }
     }
 }

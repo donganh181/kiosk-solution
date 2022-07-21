@@ -33,30 +33,30 @@ namespace kiosk_solution.Controllers
         }
 
         /// <summary>
-        /// Create new Kiosk Location by admin
+        /// Create new Kiosk Location by location owner
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Location Owner")]
         [HttpPost]
         [MapToApiVersion("1")]
         public async Task<IActionResult> CreateNewKioskLocation([FromBody] CreateKioskLocationViewModel model)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _kioskLocationService.CreateNew(model);
+            var result = await _kioskLocationService.CreateNew(token.Id, model);
             _logger.LogInformation($"Create new Kiosk Location by party {token.Mail}");
             return Ok(new SuccessResponse<KioskLocationViewModel>((int)HttpStatusCode.OK, "Create success.", result));
         }
 
         /// <summary>
-        /// Search Location by admin
+        /// Search Location by location owner
         /// </summary>
         /// <param name="model"></param>
         /// <param name="size"></param>
         /// <param name="page"></param>
         /// <returns></returns>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Location Owner")]
         [HttpGet]
         [MapToApiVersion("1")]
         public async Task<IActionResult> Get([FromQuery] KioskLocationSearchViewModel model, int size, int page = CommonConstants.DefaultPage)
@@ -64,43 +64,57 @@ namespace kiosk_solution.Controllers
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             Guid id = token.Id;
-            var result = await _kioskLocationService.GetAllWithPaging(model, size, page);
+            var result = await _kioskLocationService.GetAllWithPaging(token.Id, model, size, page);
             _logger.LogInformation($"Get all Kiosk Locations by party {token.Mail}");
             return Ok(new SuccessResponse<DynamicModelResponse<KioskLocationSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
 
         /// <summary>
-        /// Update kiosk location by admin
+        /// Update kiosk location by location owner
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Location Owner")]
         [HttpPut]
         [MapToApiVersion("1")]
         public async Task<IActionResult> UpdateInformation([FromBody] UpdateKioskLocationViewModel model)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _kioskLocationService.UpdateInformation(model);
+            var result = await _kioskLocationService.UpdateInformation(token.Id, model);
             _logger.LogInformation($"Update kiosk location by party {token.Mail}");
             return Ok(new SuccessResponse<KioskLocationViewModel>((int)HttpStatusCode.OK, "Update success.", result));
         }
 
         /// <summary>
-        /// Update status of kiosk location by admin
+        /// Replace image by its location owner
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="model"></param>
         /// <returns></returns>
-        [Authorize(Roles = "Admin")]
-        [HttpPatch]
+        [Authorize(Roles = "Location Owner")]
+        [HttpPut("replace")]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> UpdateStatus([FromQuery] Guid id)
+        public async Task<IActionResult> ReplaceImage([FromBody] ImageReplaceViewModel model)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _kioskLocationService.UpdateStatus(id);
-            _logger.LogInformation($"Update status of kiosk location {result.Id} by party {token.Mail}");
+            var result = await _kioskLocationService.ReplaceImage(token.Id, model);
+            _logger.LogInformation($"Update event images success by party {token.Mail}");
             return Ok(new SuccessResponse<KioskLocationViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+
+        /// <summary>
+        /// Get location by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("id")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Get([FromQuery] Guid id)
+        {
+            var result = await _kioskLocationService.GetById(id);
+            _logger.LogInformation($"Get information of location {result.Name} by guest");
+            return Ok(new SuccessResponse<KioskLocationViewModel>((int)HttpStatusCode.OK, "Search success.", result));
         }
     }
 }

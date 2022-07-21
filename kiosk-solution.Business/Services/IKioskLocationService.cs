@@ -10,9 +10,10 @@ namespace kiosk_solution.Business.Services
 {
     public interface IKioskLocationService
     {
-        Task<KioskLocationViewModel> CreateNew(CreateKioskLocationViewModel model);
-        Task<KioskLocationViewModel> UpdateInformation(UpdateKioskLocationViewModel model);
-        Task<KioskLocationViewModel> UpdateStatus(Guid id);
-        Task<DynamicModelResponse<KioskLocationSearchViewModel>> GetAllWithPaging(KioskLocationSearchViewModel model, int size, int pageNum);
+        Task<KioskLocationViewModel> CreateNew(Guid partyId, CreateKioskLocationViewModel model);
+        Task<KioskLocationViewModel> UpdateInformation(Guid partyId, UpdateKioskLocationViewModel model);
+        Task<DynamicModelResponse<KioskLocationSearchViewModel>> GetAllWithPaging(Guid partyId, KioskLocationSearchViewModel model, int size, int pageNum);
+        Task<KioskLocationViewModel> ReplaceImage(Guid partyId, ImageReplaceViewModel model);
+        Task<KioskLocationViewModel> GetById(Guid id);
     }
 }
