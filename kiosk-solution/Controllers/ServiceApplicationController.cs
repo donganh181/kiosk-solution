@@ -92,8 +92,21 @@ namespace kiosk_solution.Controllers
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetAppById(Guid id)
         {
-            var result = await _serviceApplicationService.GetById(id);
-            return Ok(new SuccessResponse<ServiceApplicationViewModel>((int)HttpStatusCode.OK, "Search success.", result));
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            if (token == null)
+            {
+                var result = await _serviceApplicationService.GetById(null, id);
+                _logger.LogInformation($"Get application {result.Name} by guest");
+                return Ok(new SuccessResponse<ServiceApplicationSpecificViewModel>((int)HttpStatusCode.OK, "Search success.", result));
+            }
+            else
+            {
+                var result = await _serviceApplicationService.GetById(token.Id, id);
+                _logger.LogInformation($"Get application {result.Name} by {token.Mail}");
+                return Ok(new SuccessResponse<ServiceApplicationSpecificViewModel>((int)HttpStatusCode.OK, "Search success.", result));
+            }
+                
         }
         
         [Authorize(Roles = "Admin")]

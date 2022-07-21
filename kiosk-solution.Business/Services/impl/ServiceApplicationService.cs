@@ -225,15 +225,35 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<ServiceApplicationViewModel> GetById(Guid id)
+        public async Task<ServiceApplicationSpecificViewModel> GetById(Guid? partyId, Guid id)
         {
-            var app = await _unitOfWork.ServiceApplicationRepository
+            ServiceApplicationSpecificViewModel app = null;
+            if (partyId == null)
+            {
+                app = _unitOfWork.ServiceApplicationRepository
                 .Get(a => a.Id.Equals(id))
                 .Include(a => a.Party)
                 .Include(a => a.AppCategory)
-                .ProjectTo<ServiceApplicationViewModel>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync();
-
+                .ToList()
+                .AsQueryable()
+                .ProjectTo<ServiceApplicationSpecificViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefault();
+            }
+            else
+            {
+                app = _unitOfWork.ServiceApplicationRepository
+                .Get(a => a.Id.Equals(id))
+                .Include(a => a.Party)
+                .Include(a => a.AppCategory)
+                .Include(a => a.ServiceApplicationFeedBacks.Where(x => x.PartyId.Value == partyId && x.ServiceApplicationId.Value == id))
+                .ThenInclude(b => b.Party)
+                .Include(a => a.ServiceApplicationFeedBacks.Where(x => x.PartyId.Value == partyId && x.ServiceApplicationId.Value == id))
+                .ThenInclude(b => b.ServiceApplication)
+                .ToList()
+                .AsQueryable()
+                .ProjectTo<ServiceApplicationSpecificViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefault();
+            }
             var rating = await _serviceApplicationFeedBackService.GetAverageRatingOfApp(Guid.Parse(app.Id + ""));
             if (rating.FirstOrDefault().Value != 0)
             {

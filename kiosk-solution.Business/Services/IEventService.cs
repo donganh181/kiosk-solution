@@ -19,5 +19,6 @@ namespace kiosk_solution.Business.Services
         public Task<EventViewModel> Delete(Guid partyId, string roleName, Guid eventId);
         public Task<EventViewModel> GetById(Guid id);
         public Task<EventViewModel> ReplaceImage(Guid partyId, string roleName, ImageReplaceViewModel model);
+    
     }
 }
