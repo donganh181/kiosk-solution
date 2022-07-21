@@ -180,13 +180,20 @@ namespace kiosk_solution.Data.Context
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
-                entity.Property(e => e.District).HasMaxLength(100);
+                entity.Property(e => e.HotLine)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
 
-                entity.Property(e => e.Province).HasMaxLength(100);
+                entity.Property(e => e.Name).HasMaxLength(255);
 
                 entity.Property(e => e.Status)
                     .HasMaxLength(20)
                     .IsUnicode(false);
+
+                entity.HasOne(d => d.Owner)
+                    .WithMany(p => p.KioskLocations)
+                    .HasForeignKey(d => d.OwnerId)
+                    .HasConstraintName("FK__KioskLoca__Owner__18EBB532");
             });
 
             modelBuilder.Entity<KioskScheduleTemplate>(entity =>

@@ -20,29 +20,62 @@ namespace kiosk_solution.Business.Services.impl
     public class KioskLocationService : IKioskLocationService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IConfigurationProvider _mapper;
+        private readonly IMapper _mapper;
         private readonly ILogger<IKioskLocationService> _logger;
+        private readonly IImageService _imageService;
 
-        public KioskLocationService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IKioskLocationService> logger)
+        public KioskLocationService(IUnitOfWork unitOfWork, IMapper mapper,
+            ILogger<IKioskLocationService> logger, IImageService imageService)
         {
             _unitOfWork = unitOfWork;
-            _mapper = mapper.ConfigurationProvider;
+            _mapper = mapper;
             _logger = logger;
+            _imageService = imageService;
         }
 
-        public async Task<KioskLocationViewModel> CreateNew(CreateKioskLocationViewModel model)
+        public async Task<KioskLocationViewModel> CreateNew(Guid partyId, CreateKioskLocationViewModel model)
         {
-            var kioskLocation = _mapper.CreateMapper().Map<KioskLocation>(model);
-            kioskLocation.CreateDate = DateTime.Now;
-            kioskLocation.Status = StatusConstants.ACTIVATE;
-            
+            List<ImageViewModel> listLocationImage = new List<ImageViewModel>();
+
+            var check = await _unitOfWork.KioskLocationRepository
+                .Get(l => l.OwnerId.Equals(partyId) && l.Name.Equals(model.Name))
+                .FirstOrDefaultAsync();
+
+            if (check != null)
+            {
+                _logger.LogInformation("You has already created this location.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You has already created this location.");
+            }
+
+            var location = _mapper.Map<KioskLocation>(model);
+            location.OwnerId = partyId;
+            location.CreateDate = DateTime.Now;
             try
             {
-                await _unitOfWork.KioskLocationRepository.InsertAsync(kioskLocation);
+                await _unitOfWork.KioskLocationRepository.InsertAsync(location);
                 await _unitOfWork.SaveAsync();
 
-                var result = _mapper.CreateMapper().Map<KioskLocationViewModel>(kioskLocation);
+                var result = await _unitOfWork.KioskLocationRepository
+                    .Get(l => l.Id.Equals(location.Id))
+                    .Include(a => a.Owner)
+                    .ProjectTo<KioskLocationViewModel>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync();
+
+                if (model.ListImage == null)
+                {
+                    return result;
+                }
+
+                foreach (var img in model.ListImage)
+                {
+                    ImageCreateViewModel imageModel = new ImageCreateViewModel(result.Name, img,
+                        result.Id, CommonConstants.LOCATION_IMAGE, CommonConstants.SOURCE_IMAGE);
+                    var image = await _imageService.Create(imageModel);
+                    listLocationImage.Add(image);
+                }
+                result.ListImage = listLocationImage;
                 return result;
+                 
             }
             catch (Exception)
             {
@@ -51,16 +84,41 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<DynamicModelResponse<KioskLocationSearchViewModel>> GetAllWithPaging(KioskLocationSearchViewModel model, int size, int pageNum)
+        public async Task<DynamicModelResponse<KioskLocationSearchViewModel>> GetAllWithPaging(Guid partyId, KioskLocationSearchViewModel model, int size, int pageNum)
         {
-            var kioskLocations = _unitOfWork.KioskLocationRepository.Get().ProjectTo<KioskLocationSearchViewModel>(_mapper)
+            var listLocation = _unitOfWork.KioskLocationRepository
+                .Get(l => l.OwnerId.Equals(partyId))
+                .Include(a => a.Owner)
+                .ProjectTo<KioskLocationSearchViewModel>(_mapper.ConfigurationProvider)
+                .ToList();
+
+            foreach(var item in listLocation)
+            {
+                var listImage = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(item.Id + ""), CommonConstants.LOCATION_IMAGE);
+                if(listImage == null)
+                {
+                    _logger.LogInformation($"{item.Name} has lost image.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                }
+                var listSourceImage = new List<ImageViewModel>();
+                foreach (var img in listImage)
+                {
+                    if (img.Link == null)
+                    {
+                        _logger.LogInformation($"{item.Name} has lost image.");
+                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                    }
+                    listSourceImage.Add(img);
+                }
+                item.ListImage = listSourceImage;
+            }
+            var locations = listLocation.AsQueryable().OrderByDescending(l => l.Name);
+
+            var listPaging = locations
                 .DynamicFilter(model)
-                .AsQueryable().OrderByDescending(l => l.District);
-
-            var listPaging = kioskLocations
-                .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
-
-            if(listPaging.Data.ToList().Count < 1)
+                .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging,
+                CommonConstants.DefaultPaging);
+            if (listPaging.Data.ToList().Count < 1)
             {
                 _logger.LogInformation("Can not Found.");
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
@@ -79,71 +137,156 @@ namespace kiosk_solution.Business.Services.impl
             return result;
         }
 
-        public async Task<KioskLocationViewModel> UpdateInformation(UpdateKioskLocationViewModel model)
+        public async Task<KioskLocationViewModel> GetById(Guid id)
         {
-            var kioskLocation = await _unitOfWork.KioskLocationRepository.Get(k => k.Id.Equals(model.Id)).FirstOrDefaultAsync();
-
-            if(kioskLocation == null)
+            var location = await _unitOfWork.KioskLocationRepository
+                .Get(l => l.Id.Equals(id))
+                .Include(a => a.Owner)
+                .ProjectTo<KioskLocationViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+            if (location == null)
             {
-                _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
             }
-
-            kioskLocation.District = model.District;
-            kioskLocation.Province = model.Province;
-            try
+            var listImage = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(location.Id + ""), CommonConstants.LOCATION_IMAGE);
+            if (listImage == null)
             {
-                _unitOfWork.KioskLocationRepository.Update(kioskLocation);
-                await _unitOfWork.SaveAsync();
-
-                var result = _mapper.CreateMapper().Map<KioskLocationViewModel>(kioskLocation);
-                return result;
+                _logger.LogInformation($"{location.Name} has lost image.");
+                throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
             }
-            catch (Exception)
+            var listSourceImage = new List<ImageViewModel>();
+            foreach (var img in listImage)
             {
-                _logger.LogInformation("Invalid Data.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
+                if (img.Link == null)
+                {
+                    _logger.LogInformation($"{location.Name} has lost image.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                }
+                listSourceImage.Add(img);
             }
+            location.ListImage = listSourceImage;
+
+            return location;
         }
 
-        public async Task<KioskLocationViewModel> UpdateStatus(Guid id)
+        public async Task<KioskLocationViewModel> ReplaceImage(Guid partyId, ImageReplaceViewModel model)
         {
-            var kioskLocation = await _unitOfWork.KioskLocationRepository.Get(k => k.Id.Equals(id)).Include(k => k.Kiosks).FirstOrDefaultAsync();
-
-            if (kioskLocation == null)
+            var checkLocation = await _unitOfWork.KioskLocationRepository
+                .Get(l => l.Id.Equals(model.Id) && l.OwnerId.Equals(partyId))
+                .Include(a => a.Owner)
+                .ProjectTo<KioskLocationViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+            if(checkLocation == null)
             {
-                _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
             }
-
-            if (kioskLocation.Status.Equals(StatusConstants.ACTIVATE))
+            if(model.RemoveFields != null)
             {
-                if (kioskLocation.Kiosks.ToList().Count == 0) {
-                    kioskLocation.Status = StatusConstants.DEACTIVATE;
-                }
-                else
+                foreach (var imageId in model.RemoveFields)
                 {
-                    _logger.LogInformation("Found kiosk work at this location.");
-                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Found kiosk work at this location.");
+                    var img = await _imageService.GetById(imageId);
+                    if (!img.KeyType.Equals(CommonConstants.LOCATION_IMAGE))
+                    {
+                        _logger.LogInformation("You can not delete other type image.");
+                        throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not delete other type image.");
+                    }
+                    var myLocation = await _unitOfWork.KioskLocationRepository
+                        .Get(l => l.Id.Equals(img.KeyId))
+                        .ProjectTo<KioskLocationViewModel>(_mapper.ConfigurationProvider)
+                        .FirstOrDefaultAsync();
+                    if (myLocation == null)
+                    {
+                        _logger.LogInformation("Can not found.");
+                        throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+                    }
+                    if (!myLocation.OwnerId.Equals(partyId))
+                    {
+                        _logger.LogInformation("You can not delete image of other user.");
+                        throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not delete image of other user.");
+                    }
+                    bool delete = await _imageService.Delete(imageId);
+                    if (!delete)
+                    {
+                        _logger.LogInformation("Server Error.");
+                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
+                    }
                 }
-                    
             }
-            else if (kioskLocation.Status.Equals(StatusConstants.DEACTIVATE))
+            if(model.AddFields != null)
             {
-                kioskLocation.Status = StatusConstants.ACTIVATE;
+                foreach (var image in model.AddFields)
+                {
+                    ImageCreateViewModel imageModel = new ImageCreateViewModel(checkLocation.Name, image,
+                        checkLocation.Id, CommonConstants.LOCATION_IMAGE, CommonConstants.SOURCE_IMAGE);
+                    var newImage = await _imageService.Create(imageModel);
+                }
             }
-            else
+            var listImage = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(checkLocation.Id + ""), CommonConstants.LOCATION_IMAGE);
+            if (listImage == null)
             {
-                _logger.LogInformation("Status format is not valid.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Status format is not valid.");
+                _logger.LogInformation($"{checkLocation.Name} has lost image.");
+                throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
             }
+            var listSourceImage = new List<ImageViewModel>();
+            foreach (var img in listImage)
+            {
+                if (img.Link == null)
+                {
+                    _logger.LogInformation($"{checkLocation.Name} has lost image.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                }
+                listSourceImage.Add(img);
+            }
+            checkLocation.ListImage = listSourceImage;
+            return checkLocation;
+        }
+
+        public async Task<KioskLocationViewModel> UpdateInformation(Guid partyId, UpdateKioskLocationViewModel model)
+        {
+            List<ImageViewModel> listLocationImage = new List<ImageViewModel>();
+
+            var location = await _unitOfWork.KioskLocationRepository
+                .Get(l => l.Id.Equals(model.Id))
+                .FirstOrDefaultAsync();
+
+            if (location == null)
+            {
+                _logger.LogInformation("Cannot found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Cannot found.");
+            }
+
+            location.Name = model.Name;
+            location.Description = model.Description;
+            location.HotLine = model.HotLine;
 
             try
             {
-                _unitOfWork.KioskLocationRepository.Update(kioskLocation);
+                _unitOfWork.KioskLocationRepository.Update(location);
                 await _unitOfWork.SaveAsync();
-
-                var result = _mapper.CreateMapper().Map<KioskLocationViewModel>(kioskLocation);
+                var result = await _unitOfWork.KioskLocationRepository
+                    .Get(l => l.Id.Equals(location.Id))
+                    .Include(a => a.Owner)
+                    .ProjectTo<KioskLocationViewModel>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync();
+                var listImage = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(result.Id + ""), CommonConstants.LOCATION_IMAGE);
+                if(listImage == null)
+                {
+                    _logger.LogInformation($"{result.Name} has lost image.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                }
+                var listSourceImage = new List<ImageViewModel>();
+                foreach(var img in listImage)
+                {
+                    if (img.Link == null)
+                    {
+                        _logger.LogInformation($"{result.Name} has lost image.");
+                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                    }
+                    listSourceImage.Add(img);
+                }
+                result.ListImage = listSourceImage;
                 return result;
             }
             catch (Exception)
