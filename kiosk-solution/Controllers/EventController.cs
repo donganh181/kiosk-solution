@@ -189,5 +189,25 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Update event images success by party {token.Mail}");
             return Ok(new SuccessResponse<EventViewModel>((int)HttpStatusCode.OK, "Update success.", result));
         }
+
+        /// <summary>
+        /// Get event nearby
+        /// </summary>
+        /// <param name="partyId"></param>
+        /// <param name="model"></param>
+        /// <param name="size"></param>
+        /// <param name="pageNum"></param>
+        /// <returns></returns>
+        [HttpGet("nearby")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetEvent([FromQuery] Guid partyId, [FromQuery] EventNearbySearchViewModel model, int size,
+            int pageNum = CommonConstants.DefaultPage)
+        {
+
+            var result = await _eventService.GetEventNearby(partyId, model, size, pageNum);
+            _logger.LogInformation($"Get events");
+            return Ok(new SuccessResponse<DynamicModelResponse<EventNearbySearchViewModel>>((int)HttpStatusCode.OK,
+                "Search success.", result));
+        }
     }
 }

@@ -425,7 +425,7 @@ namespace kiosk_solution.Business.Services.impl
                 .ProjectTo<PoiNearbySearchViewModel>(_mapper.ConfigurationProvider)
                 .DynamicFilter(model);
             var listPoi = pois.ToList();
-            if (listPoi.Count() < 1)
+            if (listPoi.Count < 1)
             {
                 _logger.LogInformation("Can not found.");
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
