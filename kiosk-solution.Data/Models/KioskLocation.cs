@@ -13,11 +13,14 @@ namespace kiosk_solution.Data.Models
         }
 
         public Guid Id { get; set; }
-        public string District { get; set; }
-        public string Province { get; set; }
         public DateTime? CreateDate { get; set; }
         public string Status { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public Guid? OwnerId { get; set; }
+        public string HotLine { get; set; }
 
+        public virtual Party Owner { get; set; }
         public virtual ICollection<Kiosk> Kiosks { get; set; }
     }
 }

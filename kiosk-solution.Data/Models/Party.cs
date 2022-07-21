@@ -11,6 +11,7 @@ namespace kiosk_solution.Data.Models
         {
             Events = new HashSet<Event>();
             InverseCreator = new HashSet<Party>();
+            KioskLocations = new HashSet<KioskLocation>();
             Kiosks = new HashSet<Kiosk>();
             PartyNotifications = new HashSet<PartyNotification>();
             PartyServiceApplications = new HashSet<PartyServiceApplication>();
@@ -42,6 +43,7 @@ namespace kiosk_solution.Data.Models
         public virtual Role Role { get; set; }
         public virtual ICollection<Event> Events { get; set; }
         public virtual ICollection<Party> InverseCreator { get; set; }
+        public virtual ICollection<KioskLocation> KioskLocations { get; set; }
         public virtual ICollection<Kiosk> Kiosks { get; set; }
         public virtual ICollection<PartyNotification> PartyNotifications { get; set; }
         public virtual ICollection<PartyServiceApplication> PartyServiceApplications { get; set; }

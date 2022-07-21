@@ -567,55 +567,59 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Can not found.");
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
             }
-
-            foreach (var imageId in model.RemoveFields)
+            if(model.RemoveFields != null)
             {
-                var img = await _imageService.GetById(imageId);
-                if (!img.KeyType.Equals(CommonConstants.EVENT_IMAGE))
+                foreach (var imageId in model.RemoveFields)
                 {
-                    _logger.LogInformation("You can not delete poi image.");
-                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not delete poi image.");
-                }
-                var myEvent = await _unitOfWork.EventRepository
-                .Get(p => p.Id.Equals(img.KeyId))
-                .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync();
-                if (myEvent == null)
-                {
-                    _logger.LogInformation("Can not found.");
-                    throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
-                }
+                    var img = await _imageService.GetById(imageId);
+                    if (!img.KeyType.Equals(CommonConstants.EVENT_IMAGE))
+                    {
+                        _logger.LogInformation("You can not delete other type image.");
+                        throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not delete other type image.");
+                    }
+                    var myEvent = await _unitOfWork.EventRepository
+                    .Get(p => p.Id.Equals(img.KeyId))
+                    .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync();
+                    if (myEvent == null)
+                    {
+                        _logger.LogInformation("Can not found.");
+                        throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+                    }
 
-                if (myEvent.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
-                {
-                    _logger.LogInformation("You can not use this feature.");
-                    throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
-                }
+                    if (myEvent.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
+                    {
+                        _logger.LogInformation("You can not use this feature.");
+                        throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+                    }
 
-                if (myEvent.Type.Equals(TypeConstants.LOCAL_TYPE) && !myEvent.CreatorId.Equals(partyId))
-                {
-                    _logger.LogInformation("You can not use this feature.");
-                    throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
-                }
-                if (img.Link.Contains(CommonConstants.THUMBNAIL))
-                {
-                    _logger.LogInformation("You can not delete thumbnail. You can only change thumbnail.");
-                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not delete thumbnail. You can only change thumbnail.");
-                }
-                bool delete = await _imageService.Delete(imageId);
-                if (!delete)
-                {
-                    _logger.LogInformation("Server Error.");
-                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
+                    if (myEvent.Type.Equals(TypeConstants.LOCAL_TYPE) && !myEvent.CreatorId.Equals(partyId))
+                    {
+                        _logger.LogInformation("You can not use this feature.");
+                        throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+                    }
+                    if (img.Link.Contains(CommonConstants.THUMBNAIL))
+                    {
+                        _logger.LogInformation("You can not delete thumbnail. You can only change thumbnail.");
+                        throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not delete thumbnail. You can only change thumbnail.");
+                    }
+                    bool delete = await _imageService.Delete(imageId);
+                    if (!delete)
+                    {
+                        _logger.LogInformation("Server Error.");
+                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
+                    }
                 }
             }
-            foreach (var image in model.AddFields)
+            if(model.AddFields != null)
             {
-                ImageCreateViewModel imageModel = new ImageCreateViewModel(checkEvent.Name, image,
-                    checkEvent.Id, CommonConstants.EVENT_IMAGE, CommonConstants.SOURCE_IMAGE);
-                var newImage = await _imageService.Create(imageModel);
+                foreach (var image in model.AddFields)
+                {
+                    ImageCreateViewModel imageModel = new ImageCreateViewModel(checkEvent.Name, image,
+                        checkEvent.Id, CommonConstants.EVENT_IMAGE, CommonConstants.SOURCE_IMAGE);
+                    var newImage = await _imageService.Create(imageModel);
+                }
             }
-
             var listImage = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(checkEvent.Id + ""), CommonConstants.EVENT_IMAGE);
             if (listImage == null)
             {

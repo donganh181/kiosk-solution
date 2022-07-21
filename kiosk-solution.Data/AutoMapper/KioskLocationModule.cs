@@ -13,13 +13,15 @@ namespace kiosk_solution.Data.AutoMapper
     {
         public static void ConfigKioskLocationModule(this IMapperConfigurationExpression mc)
         {
-            mc.CreateMap<KioskLocation, KioskLocationViewModel>();
+            mc.CreateMap<KioskLocation, KioskLocationViewModel>()
+                     .ForMember(src => src.OwnerEmail, opt => opt.MapFrom(des => des.Owner.Email));
             mc.CreateMap<KioskLocationViewModel, KioskLocation>();
 
             mc.CreateMap<KioskLocation, CreateKioskLocationViewModel>();
             mc.CreateMap<CreateKioskLocationViewModel, KioskLocation>();
 
-            mc.CreateMap<KioskLocation, KioskLocationSearchViewModel>();
+            mc.CreateMap<KioskLocation, KioskLocationSearchViewModel>()
+                .ForMember(src => src.OwnerEmail, opt => opt.MapFrom(des => des.Owner.Email));
             mc.CreateMap<KioskLocationSearchViewModel, KioskLocation>();
         }
     }
