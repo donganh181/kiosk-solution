@@ -17,6 +17,9 @@ namespace kiosk_solution.Data.AutoMapper
                 .ForMember(src => src.CreatorMail , opt => opt.MapFrom(des => des.Creator.Email));;
             mc.CreateMap<PartyViewModel, Party>();
 
+            mc.CreateMap<Party, PartyByKioskIdViewModel>();
+            mc.CreateMap<PartyByKioskIdViewModel, Party>();
+
             mc.CreateMap<Party, CreateAccountViewModel>();
             mc.CreateMap<CreateAccountViewModel, Party>();
 

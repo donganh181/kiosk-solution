@@ -131,5 +131,14 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Get all parties by party {token.Mail}");
             return Ok(new SuccessResponse<PartyViewModel>((int)HttpStatusCode.OK, "Search success.", result));
         }
+
+        [HttpGet("kioskId")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetPartyIdByKioskId(Guid kioskId)
+        {
+            var result = await _partyService.GetPartyByKioskId(kioskId);
+            _logger.LogInformation($"Get party by kioskId success");
+            return Ok(new SuccessResponse<PartyByKioskIdViewModel>((int)HttpStatusCode.OK, "Search success.", result));
+        }
     }
 }

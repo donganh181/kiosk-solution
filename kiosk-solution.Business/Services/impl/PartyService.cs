@@ -299,5 +299,32 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
             }
         }
+
+        public async Task<PartyByKioskIdViewModel> GetPartyByKioskId(Guid id)
+        {
+            var party = await _unitOfWork.PartyRepository
+                .Get(p => p.Role.Name.Equals(RoleConstants.LOCATION_OWNER))
+                .Include(a => a.Kiosks)
+                .ToListAsync();
+
+            if (party.Count < 1)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+            foreach(var item in party)
+            {
+                foreach(var kiosk in item.Kiosks)
+                {
+                    if (kiosk.Id.Equals(id))
+                    {
+                        var result = _mapper.CreateMapper().Map<PartyByKioskIdViewModel>(item);
+                        return result;
+                    }
+                }
+            }
+            _logger.LogInformation("Can not Found.");
+            throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+        }
     }
 }
