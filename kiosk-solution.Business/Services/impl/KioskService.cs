@@ -155,6 +155,35 @@ namespace kiosk_solution.Business.Services.impl
             return result;
         }
 
+        public async Task<DynamicModelResponse<KioskNearbyViewModel>> GetKioskNearby(KioskNearbyViewModel model, int size, int pageNum)
+        {
+            var kiosks = _unitOfWork.KioskRepository
+                .GetKioskNearBy(model.Longtitude, model.Latitude)
+                .ProjectTo<KioskNearbyViewModel>(_mapper)
+                .DynamicFilter(model);
+
+            var listPaging =
+                 kiosks.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
+
+            if (listPaging.Data.ToList().Count < 1)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+
+            var result = new DynamicModelResponse<KioskNearbyViewModel>
+            {
+                Metadata = new PagingMetaData
+                {
+                    Page = pageNum,
+                    Size = size,
+                    Total = listPaging.Total
+                },
+                Data = listPaging.Data.ToList()
+            };
+            return result;
+        }
+
         public async Task<List<KioskDetailViewModel>> GetListSpecificKiosk()
         {
             var now = DateTime.Now;

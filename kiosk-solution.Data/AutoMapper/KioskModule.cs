@@ -12,6 +12,9 @@ namespace kiosk_solution.Data.AutoMapper
             mc.CreateMap<Kiosk, KioskViewModel>();
             mc.CreateMap<KioskViewModel, Kiosk>();
 
+            mc.CreateMap<Kiosk, KioskNearbyViewModel>();
+            mc.CreateMap<KioskNearbyViewModel, Kiosk>();
+
             mc.CreateMap<Kiosk, CreateKioskViewModel>();
             mc.CreateMap<CreateKioskViewModel, Kiosk>();
 
