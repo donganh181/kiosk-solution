@@ -54,7 +54,7 @@ namespace kiosk_solution.Business.Services.impl
 
                 var partyNoti = await _partyNotiService.Create(partyNotiModel);
 
-                var party = await _partyService.GetPartyById(Guid.Parse(model.PartyId + ""));
+                var party = await _partyService.GetPartyById(Guid.Parse(model.PartyId + ""), RoleConstants.SYSTEM, null);
 
                 var deviceId = party.DeviceId;
                 if (!string.IsNullOrEmpty(deviceId))
