@@ -200,7 +200,7 @@ namespace kiosk_solution.Controllers
         /// <returns></returns>
         [HttpGet("nearby")]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> GetEvent([FromQuery] Guid partyId, [FromQuery] EventNearbySearchViewModel model, int size,
+        public async Task<IActionResult> GetEventNearby([FromQuery] Guid partyId, [FromQuery] EventNearbySearchViewModel model, int size,
             int pageNum = CommonConstants.DefaultPage)
         {
 

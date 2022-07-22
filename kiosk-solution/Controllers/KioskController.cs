@@ -142,5 +142,17 @@ namespace kiosk_solution.Controllers
             var result = await _kioskService.GetSpecificKiosk(id);
             return Ok(new SuccessResponse<KioskDetailViewModel>((int)HttpStatusCode.OK, "Search success.", result));
         }
+
+        [HttpGet("nearby")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetKioskNearby([FromQuery] KioskNearbyViewModel model, int size,
+            int pageNum = CommonConstants.DefaultPage)
+        {
+
+            var result = await _kioskService.GetKioskNearby(model, size, pageNum);
+            _logger.LogInformation($"Get kiosks");
+            return Ok(new SuccessResponse<DynamicModelResponse<KioskNearbyViewModel>>((int)HttpStatusCode.OK,
+                "Search success.", result));
+        }
     }
 }
