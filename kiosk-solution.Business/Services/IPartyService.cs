@@ -15,7 +15,7 @@ namespace kiosk_solution.Business.Services
         Task<PartyViewModel> UpdatePassword(Guid id, UpdatePasswordViewModel model);
         Task<PartyViewModel> UpdateStatus(Guid id);
         Task<DynamicModelResponse<PartySearchViewModel>> GetAllWithPaging(PartySearchViewModel model, int size, int pageNum);
-        Task<PartyViewModel> GetPartyById(Guid id);
+        Task<PartyViewModel> GetPartyById(Guid id, string roleName, Guid? checkId);
         Task<bool> Logout(Guid partyId);
         Task<PartyByKioskIdViewModel> GetPartyByKioskId(Guid id);
     }

@@ -11,5 +11,6 @@ namespace kiosk_solution.Data.Constants
         public static string ADMIN = "Admin";
         public static string LOCATION_OWNER = "Location Owner";
         public static string SERVICE_PROVIDER = "Service Provider";
+        public static string SYSTEM = "System";
     }
 }

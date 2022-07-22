@@ -253,11 +253,36 @@ namespace kiosk_solution.Business.Services.impl
             return result;
         }
 
-        public async Task<PartyViewModel> GetPartyById(Guid id)
+        public async Task<PartyViewModel> GetPartyById(Guid id, string roleName, Guid? checkId)
         {
-            var party = await _unitOfWork.PartyRepository.Get(p => p.Id.Equals(id)).Include(p => p.Role).Include(p => p.Creator).ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
-
-            if(party == null)
+            PartyViewModel party = null;
+            if (roleName.Equals(RoleConstants.ADMIN) || roleName.Equals(RoleConstants.SYSTEM))
+            {
+                party = await _unitOfWork.PartyRepository
+               .Get(p => p.Id.Equals(id))
+               .Include(p => p.Role)
+               .Include(p => p.Creator)
+               .ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
+            }
+            else if (roleName.Equals(RoleConstants.LOCATION_OWNER))
+            {
+                if (!id.Equals(checkId))
+                {
+                    _logger.LogInformation("You can not get another user info.");
+                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not get another user info.");
+                }
+                party = await _unitOfWork.PartyRepository
+               .Get(p => p.Id.Equals(id))
+               .Include(p => p.Role)
+               .Include(p => p.Creator)
+               .ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
+            }
+            else
+            {
+                _logger.LogInformation("Cannot access.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Cannot access.");
+            }
+            if (party == null)
             {
                 _logger.LogInformation("Can not Found.");
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");

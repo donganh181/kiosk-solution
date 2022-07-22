@@ -120,14 +120,14 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<DynamicModelResponse<PartySearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Location Owner")]
         [HttpGet("{id}")]
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetPartyById(Guid id)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _partyService.GetPartyById(id);
+            var result = await _partyService.GetPartyById(id, token.Role, token.Id);
             _logger.LogInformation($"Get all parties by party {token.Mail}");
             return Ok(new SuccessResponse<PartyViewModel>((int)HttpStatusCode.OK, "Search success.", result));
         }
