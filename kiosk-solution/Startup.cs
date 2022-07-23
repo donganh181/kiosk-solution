@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using kiosk_solution.Business.SystemSchedule.Jobs;
+using kiosk_solution.Hubs;
 using Quartz;
 
 namespace kiosk_solution
@@ -43,6 +44,7 @@ namespace kiosk_solution
             services.AddSwaggerGenNewtonsoftSupport();
             services.ConfigureSwagger();
             services.AddCors();
+            services.AddSignalR();
 
             JWTBearerConfig.ConfigAuthentication(services, _configuration);
 
@@ -101,13 +103,19 @@ namespace kiosk_solution
                 app.UseDeveloperExceptionPage();
             }
 
+            
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseCors(builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); });
+            app.UseCors(builder =>
+            {
+                builder.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+            });
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
             app.ConfigureSwagger(provider);
+            // end point signalR
+            app.UseEndpoints(routes => { routes.MapHub<SystemEventHub>("/signalr"); });
         }
     }
 }
