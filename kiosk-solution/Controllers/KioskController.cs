@@ -127,7 +127,14 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<DynamicModelResponse<KioskSearchViewModel>>((int) HttpStatusCode.OK,
                 "Search success.", result));
         }
-
+        [HttpGet("{kioskId}")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetById(Guid kioskId)
+        {
+            var result = await _kioskService.GetById(kioskId);
+            return Ok(new SuccessResponse<KioskViewModel>((int) HttpStatusCode.OK,
+                "Search success.", result));
+        }
         /// <summary>
         /// test get all specific kiosk base on scheduling time
         /// </summary>
