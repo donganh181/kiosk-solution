@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using kiosk_solution.Business.Hubs;
 using kiosk_solution.Business.Services;
 using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
-using kiosk_solution.Hubs;
 using kiosk_solution.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
