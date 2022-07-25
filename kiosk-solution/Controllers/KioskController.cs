@@ -155,12 +155,12 @@ namespace kiosk_solution.Controllers
         /// <returns></returns>
         [HttpGet("testSendNoti")]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> GetByIdThenSendNoti([FromQuery] string kioskId)
+        public async Task<IActionResult> GetByIdThenSendNoti([FromQuery] Guid kioskId)
         {
-            //var result = await _kioskService.GetSpecificKiosk(id);
-            await _eventHub.Clients.Group(kioskId)
-                .SendAsync(SystemEventHub.KIOSK_CONNECTION_CHANNEL, SystemEventHub.SYSTEM_BOT, "value");
-            return Ok();
+            var result = await _kioskService.GetSpecificKiosk(kioskId);
+            /*await _eventHub.Clients.Group(kioskId)
+                .SendAsync(SystemEventHub.KIOSK_CONNECTION_CHANNEL, SystemEventHub.SYSTEM_BOT, "value");*/
+            return Ok(new SuccessResponse<KioskDetailViewModel>((int)HttpStatusCode.OK, "Search success.", result));
         }
 
         [HttpGet("nearby")]

@@ -11,10 +11,12 @@ using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
 using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
+using kiosk_solution.Hubs;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-
+using Newtonsoft.Json;
 
 namespace kiosk_solution.Business.Services.impl
 {
@@ -25,15 +27,17 @@ namespace kiosk_solution.Business.Services.impl
         private readonly ILogger<IKioskService> _logger;
         private readonly INotiService _fcmService;
         private readonly IEventService _eventService;
+        private readonly IHubContext<SystemEventHub> _eventHub;
 
         public KioskService(IMapper mapper, IUnitOfWork unitOfWork, ILogger<IKioskService> logger
-            , INotiService fcmService, IEventService eventService)
+            , INotiService fcmService, IEventService eventService, IHubContext<SystemEventHub> eventHub)
         {
             _mapper = mapper.ConfigurationProvider;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _fcmService = fcmService;
             _eventService = eventService;
+            _eventHub = eventHub;
         }
 
         public async Task<KioskViewModel> AddDeviceId(KioskAddDeviceIdViewModel model)
@@ -238,7 +242,6 @@ namespace kiosk_solution.Business.Services.impl
             return listKiosk;
         }
 
-        //test noti to change template
         public async Task<KioskDetailViewModel> GetSpecificKiosk(Guid id)
         {
             var now = DateTime.Now;
@@ -279,12 +282,11 @@ namespace kiosk_solution.Business.Services.impl
                     var myEvent = await _eventService.GetById(eventPos.EventId);
                     eventPos.EventThumbnail = myEvent.Thumbnail;
                 }
+                string jsonConvert = JsonConvert.SerializeObject(kiosk.KioskScheduleTemplate.Template);
+                await _eventHub.Clients.Group(kiosk.Id.ToString())
+                   .SendAsync(SystemEventHub.KIOSK_CONNECTION_CHANNEL,
+                   SystemEventHub.SYSTEM_BOT, jsonConvert);
 
-                var checkSendNoti = await _fcmService.SendNotificationToChangeTemplate(kiosk.KioskScheduleTemplate.Template, kiosk.DeviceId);
-                if (checkSendNoti)
-                {
-                    _logger.LogInformation($"Send Notification to change template of kiosk {kiosk.Id}");
-                }
             }
             return kiosk;
         }

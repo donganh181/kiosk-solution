@@ -14,6 +14,8 @@ using kiosk_solution.Data.Responses;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.SignalR;
+using kiosk_solution.Hubs;
 
 namespace kiosk_solution.Business.Services.impl
 {
@@ -27,11 +29,12 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IKioskService _kioskService;
         private readonly INotiService _fcmService;
         private readonly IEventService _eventService;
+        private readonly IHubContext<SystemEventHub> _eventHub;
 
         public KioskScheduleTemplateService(IUnitOfWork unitOfWork, IMapper mapper,
             ILogger<IKioskScheduleTemplateService> logger,
             IScheduleService scheduleService, ITemplateService templateService, IKioskService kioskService,
-            INotiService fcmService, IEventService eventService)
+            INotiService fcmService, IEventService eventService, IHubContext<SystemEventHub> eventHub)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -41,6 +44,7 @@ namespace kiosk_solution.Business.Services.impl
             _kioskService = kioskService;
             _fcmService = fcmService;
             _eventService = eventService;
+            _eventHub = eventHub;
         }
 
         public async Task<KioskScheduleTemplateViewModel> Create(Guid partyId,
@@ -128,13 +132,9 @@ namespace kiosk_solution.Business.Services.impl
                         eventPos.EventThumbnail = myEvent.Thumbnail;
                     }
 
-                    var checkSendNoti = await _fcmService.SendNotificationToChangeTemplate(tmp.Template, tmp.DeviceId);
-                    if (!checkSendNoti)
-                    {
-                        _logger.LogInformation("Firebase Error.");
-                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Firebase Error.");
-                    }
-
+                    await _eventHub.Clients.Group(tmp.KioskId.ToString())
+                        .SendAsync(SystemEventHub.KIOSK_CONNECTION_CHANNEL,
+                        SystemEventHub.SYSTEM_BOT, tmp.Template);
                 }
                 var result = await _unitOfWork.KioskScheduleTemplateRepository.Get(x => x.Id.Equals(data.Id))
                     .Include(x => x.Template).Include(x => x.Schedule)
