@@ -189,7 +189,8 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<List<KioskDetailViewModel>> GetListSpecificKiosk()
         {
-            var now = DateTime.Now.ToLocalTime();
+            var now = TimeZoneInfo.ConvertTime(DateTime.Now,
+                 TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
             var timeNow = now.TimeOfDay;
 
             var thisDay = now.ToString("dddd");
@@ -198,7 +199,7 @@ namespace kiosk_solution.Business.Services.impl
                 .Get(k => k.Status.Equals(StatusConstants.ACTIVATE))
                 .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
                                                             && d.Schedule.DayOfWeek.Contains(thisDay)
-                                                            && d.Schedule.Status.Equals(StatusConstants.ON) //bỏ status
+                                                            && d.Schedule.Status.Equals(StatusConstants.ON)
                                                             && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeStart) >= 0
                                                             && TimeSpan.Compare(timeNow, (TimeSpan)d.Schedule.TimeEnd) < 0
                                                             ))
@@ -243,7 +244,8 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<KioskDetailViewModel> GetSpecificKiosk(Guid id)
         {
-            var now = DateTime.Now.ToLocalTime();
+            var now = TimeZoneInfo.ConvertTime(DateTime.Now,
+                 TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
             var timeNow = now.TimeOfDay;
             var daynow = now.ToString("dddd");
 
