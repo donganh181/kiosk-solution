@@ -190,7 +190,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<List<KioskDetailViewModel>> GetListSpecificKiosk()
         {
-            var now = DateTime.Now;
+            var now = DateTime.Now.ToLocalTime();
             var timeNow = now.TimeOfDay;
 
             var thisDay = now.ToString("dddd");
@@ -244,7 +244,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<KioskDetailViewModel> GetSpecificKiosk(Guid id)
         {
-            var now = DateTime.Now;
+            var now = DateTime.Now.ToLocalTime();
             var timeNow = now.TimeOfDay;
             var daynow = now.ToString("dddd");
 
