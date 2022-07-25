@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Net;
 using System.Threading.Tasks;
 using kiosk_solution.Data.ViewModels;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using kiosk_solution.Business.Hubs;
 using kiosk_solution.Business.Utilities;
 using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
 using kiosk_solution.Data.Responses;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.SignalR;
-using kiosk_solution.Hubs;
 
 namespace kiosk_solution.Business.Services.impl
 {

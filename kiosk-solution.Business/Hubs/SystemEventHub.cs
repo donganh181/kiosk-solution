@@ -3,7 +3,7 @@ using kiosk_solution.Data.ViewModels;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 
-namespace kiosk_solution.Hubs
+namespace kiosk_solution.Business.Hubs
 {
     public class SystemEventHub : Hub
     {
