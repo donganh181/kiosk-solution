@@ -15,7 +15,7 @@ namespace kiosk_solution.Business.Services
         Task<KioskViewModel> GetById(Guid kioskId);
         Task<KioskViewModel> AddDeviceId(KioskAddDeviceIdViewModel model);
         Task<List<KioskDetailViewModel>> GetListSpecificKiosk();
-        Task<KioskDetailViewModel> GetSpecificKiosk(Guid id);
+        Task<dynamic> GetSpecificKiosk(Guid id);
         Task<DynamicModelResponse<KioskNearbyViewModel>> GetKioskNearby(KioskNearbyViewModel model, int size, int pageNum);
     }
 }
