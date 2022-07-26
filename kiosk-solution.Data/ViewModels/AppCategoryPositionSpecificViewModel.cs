@@ -12,7 +12,7 @@ namespace kiosk_solution.Data.ViewModels
         public Guid AppCategoryId { get; set; }
         public string AppCategoryName { get; set; }
         public string AppCategoryLogo { get; set; }
-        public int? RowIndex { get; set; }
-        public int? ColumnIndex { get; set; }
+        public int RowIndex { get; set; }
+        public int ColumnIndex { get; set; }
     }
 }
