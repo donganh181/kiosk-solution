@@ -18,11 +18,11 @@ namespace kiosk_solution.Data.ViewModels
         [BindNever] public DateTime? TimeEnd { get; set; }
         [Specific] public double Longtitude { get; set; }
         [Specific] public double Latitude { get; set; }
-        [String] public string Street { get; set; }
+        [BindNever] public string Street { get; set; }
         [String] public string Ward { get; set; }
         [String] public string District { get; set; }
         [String] public string City { get; set; }
-        [BindNever] public string Address { get; set; }
+        [String] public string Address { get; set; }
         [BindNever] public Guid? CreatorId { get; set; }
         [String] public string CreatorName { get; set; }
         [String] public string CreatorEmail { get; set; }
