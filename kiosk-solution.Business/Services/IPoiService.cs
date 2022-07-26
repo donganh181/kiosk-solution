@@ -17,5 +17,6 @@ namespace kiosk_solution.Business.Services
         public Task<PoiViewModel> DeleteImageFromPoi(Guid partyId, string roleName, Guid imageId);
         public Task<DynamicModelResponse<PoiNearbySearchViewModel>> GetLocationNearby(Guid kioskId, PoiNearbySearchViewModel model, int size, int pageNum);
         public Task<PoiViewModel> ReplaceImage(Guid partyId, string roleName, ImageReplaceViewModel model);
+        public Task<bool> IsExistPoiInCategory(Guid poiCategoryId);
     }
 }

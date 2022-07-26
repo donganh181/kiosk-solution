@@ -625,5 +625,17 @@ namespace kiosk_solution.Business.Services.impl
             checkPoi.ListImage = _mapper.Map<List<PoiImageDetailViewModel>>(listSourceImage);
             return checkPoi;
         }
+
+        public async Task<bool> IsExistPoiInCategory(Guid poiCategoryId)
+        {
+            var existPoi = await _unitOfWork.PoiRepository.Get(p => p.PoicategoryId.Equals(poiCategoryId))
+                .FirstOrDefaultAsync();
+            if (existPoi == null)
+                return false;
+            else
+            {
+                return true;
+            }
+        }
     }
 }
