@@ -14,8 +14,8 @@ namespace kiosk_solution.Data.ViewModels
         public string EventType { get; set; }
         public string Description { get; set; }
         public string Address { get; set; }
-        public int? RowIndex { get; set; }
-        public int? ColumnIndex { get; set; }
+        public int RowIndex { get; set; }
+        public int ColumnIndex { get; set; }
         public string Status { get; set; }
     }
 }

@@ -160,7 +160,7 @@ namespace kiosk_solution.Controllers
             var result = await _kioskService.GetSpecificKiosk(kioskId);
             // await _eventHub.Clients.Group(kioskId.ToString())
             //     .SendAsync(SystemEventHub.KIOSK_CONNECTION_CHANNEL, SystemEventHub.SYSTEM_BOT, "value");
-            return Ok(new SuccessResponse<KioskDetailViewModel>((int)HttpStatusCode.OK, "Search success.", result));
+            return Ok(new SuccessResponse<dynamic>((int)HttpStatusCode.OK, "Search success.", result));
         }
 
         [HttpGet("nearby")]
