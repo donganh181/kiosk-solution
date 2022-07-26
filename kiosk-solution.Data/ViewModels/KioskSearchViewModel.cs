@@ -21,6 +21,8 @@ namespace kiosk_solution.Data.ViewModels
         [BindNever]
         public Guid? KioskLocationId { get; set; }
         [String]
+        public string KioskLocationName { get; set; }
+        [String]
         public string Status { get; set; }
         [String]
         public string Longtitude { get; set; }
