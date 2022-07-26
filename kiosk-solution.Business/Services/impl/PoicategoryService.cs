@@ -22,14 +22,18 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<IPoicategoryService> _logger;
         private readonly IFileService _fileService;
+        private readonly IPoiService _poiService;
 
-        public PoicategoryService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IPoicategoryService> logger, IFileService fileService)
+        public PoicategoryService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IPoicategoryService> logger,
+            IFileService fileService, IPoiService poiService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _fileService = fileService;
+            _poiService = poiService;
         }
+
         public async Task<PoicategoryViewModel> Create(PoiCategoryCreateViewModel model)
         {
             var cate = _mapper.Map<Poicategory>(model);
@@ -43,7 +47,7 @@ namespace kiosk_solution.Business.Services.impl
                     .FirstOrDefaultAsync();
                 var logo = await _fileService.UploadImageToFirebase(model.Logo,
                     CommonConstants.POI_CATE_IMAGE, cate.Name, cate.Id, "Poi Cate");
-               
+
                 newCate.Logo = logo;
                 _unitOfWork.PoicategoryRepository.Update(newCate);
                 await _unitOfWork.SaveAsync();
@@ -68,11 +72,12 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<PoicategoryViewModel> Update(PoiCategoryUpdateViewModel model)
         {
             var cate = await _unitOfWork.PoicategoryRepository.Get(c => c.Id.Equals(model.Id)).FirstOrDefaultAsync();
-            if(cate == null)
+            if (cate == null)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found.");
             }
+
             cate.Name = model.Name;
             try
             {
@@ -82,6 +87,7 @@ namespace kiosk_solution.Business.Services.impl
                         CommonConstants.POI_CATE_IMAGE, cate.Name, cate.Id, "Poi Cate");
                     cate.Logo = newLogo;
                 }
+
                 _unitOfWork.PoicategoryRepository.Update(cate);
                 await _unitOfWork.SaveAsync();
 
@@ -105,13 +111,20 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<PoicategoryViewModel> Delete(Guid poiCategoryId)
         {
-            var cate = await _unitOfWork.PoicategoryRepository.Get(c => c.Id.Equals(poiCategoryId)).FirstOrDefaultAsync();
-            if(cate == null)
+            var cate = await _unitOfWork.PoicategoryRepository.Get(c => c.Id.Equals(poiCategoryId))
+                .FirstOrDefaultAsync();
+            if (cate == null)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found.");
             }
 
+            var existPoi = await _poiService.IsExistPoiInCategory(poiCategoryId);
+            if (existPoi)
+            {
+                _logger.LogInformation("Already poi on this category, can not delete.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Already poi on this category, can not delete.");
+            }
             try
             {
                 _unitOfWork.PoicategoryRepository.Delete(cate);
@@ -126,7 +139,8 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<DynamicModelResponse<PoiCategorySearchViewModel>> GetAllWithPaging(PoiCategorySearchViewModel model, int size, int pageNum)
+        public async Task<DynamicModelResponse<PoiCategorySearchViewModel>> GetAllWithPaging(
+            PoiCategorySearchViewModel model, int size, int pageNum)
         {
             var cates = _unitOfWork.PoicategoryRepository
                 .Get()
@@ -136,11 +150,11 @@ namespace kiosk_solution.Business.Services.impl
 
             var listPaging = cates.PagingIQueryable(pageNum, size,
                 CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
-            
+
             if (listPaging.Data.ToList().Count < 1)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
 
             var result = new DynamicModelResponse<PoiCategorySearchViewModel>
