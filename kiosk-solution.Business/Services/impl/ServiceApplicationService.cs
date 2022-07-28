@@ -306,7 +306,9 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<ServiceApplicationViewModel> UpdateStatus(ServiceApplicationUpdateStatusViewModel model)
         {
-            var app = await _unitOfWork.ServiceApplicationRepository.Get(a => a.Id.Equals(model.serviceApplicationId))
+            var app = await _unitOfWork.ServiceApplicationRepository
+                .Get(a => a.Id.Equals(model.serviceApplicationId))
+                .Include(x => x.Party)
                 .FirstOrDefaultAsync();
             if (app == null)
             {
@@ -332,6 +334,11 @@ namespace kiosk_solution.Business.Services.impl
                     Content = $"Your application {app.Name} has been stopped by admin."
                 };
                 await _notificationService.Create(notiModel);
+
+                var subject = EmailConstants.STOP_APP_SUBJECT;
+                var content = EmailUtil.GetStopAppContent(app.Name);
+                await EmailUtil.SendEmail(app.Party.Email, subject, content);
+
                 var result = _mapper.Map<ServiceApplicationViewModel>(app);
                 return result;
 
