@@ -109,5 +109,15 @@ namespace kiosk_solution.Controllers
                     "Search success.", result));
             }
         }
+
+        [HttpGet("id")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetById([FromQuery] Guid id)
+        {
+            var result = await _appCategoryService.GetById(id);
+            _logger.LogInformation($"Get category {result.Name} by guest");
+            return Ok(new SuccessResponse<AppCategoryViewModel>((int)HttpStatusCode.OK,
+                    "Search success.", result));
+        }
     }
 }
