@@ -109,5 +109,11 @@ namespace kiosk_solution.Data.ViewModels
                 result = EmailConstants.UPATE_STATUS_TO_DEACTIVE_CONTENT_BASE.Replace("EMAIL", email);
             return result;
         }
+
+        public static string GetStopAppContent(string appName)
+        {
+            var content = EmailConstants.STOP_APP_CONTENT.Replace("APP", appName);
+            return content;
+        }
     }
 }
