@@ -110,9 +110,9 @@ namespace kiosk_solution.Controllers
             }
         }
 
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> GetById([FromQuery] Guid id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _appCategoryService.GetById(id);
             _logger.LogInformation($"Get category {result.Name} by guest");
