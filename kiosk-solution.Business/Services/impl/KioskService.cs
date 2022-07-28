@@ -255,8 +255,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<dynamic> GetSpecificKiosk(Guid id)
         {
-            var now = TimeZoneInfo.ConvertTime(DateTime.Now,
-                 TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+            var now = DateTime.Now;
             var timeNow = now.TimeOfDay;
             var daynow = now.ToString("dddd");
 
