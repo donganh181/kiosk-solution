@@ -115,5 +115,17 @@ namespace kiosk_solution.Data.ViewModels
             var content = EmailConstants.STOP_APP_CONTENT.Replace("APP", appName);
             return content;
         }
+
+        public static string GetApprovedPublishAppContent(string appName)
+        {
+            var content = EmailConstants.APPROVED_PUBLISH_REQUEST_CONTENT.Replace("APP", appName);
+            return content;
+        }
+
+        public static string GetDeniedPublishAppContent(string appName)
+        {
+            var content = EmailConstants.DENIED_PUBLISH_REQUEST_CONTENT.Replace("APP", appName);
+            return content;
+        }
     }
 }
