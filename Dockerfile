@@ -4,6 +4,7 @@
 #For more information, please see https://aka.ms/containercompat
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
+ENV TZ="Asia/Ho_Chi_Minh"
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
