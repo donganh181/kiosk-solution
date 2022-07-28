@@ -33,5 +33,15 @@
                                                     "Quý đối tác vui lòng vào trang quản lý và đăng nhập vài tài khoản [ EMAIL ] để cài đặt thêm những thông tin cần thiết cho kiosk và kích hoạt kiosk. <br/>" +
                                                     "<br/><br/>Thanks and best regards," +
                                                     "<br/>Tika - Tourist Interact Kiosk Application";
+
+        public static string STOP_APP_SUBJECT = "Tình trạng ứng dụng của quý khách - Tourist Interact Kiosk Application";
+        public static string STOP_APP_CONTENT = "Kính gửi quý đối tác,<br/>" +
+                                                "Chúng tôi chân thành cảm ơn đã hợp tác suốt thời gian qua, " +
+                                                "do HỢP ĐỒNG HẾT HIỆU LỰC hoặc quý đối tác đã VI PHẠM ĐIỀU LỆ trong hợp đồng " +
+                                                "nên chúng tôi quyết định vô hiệu hóa ứng dụng [ APP ]. <br/>" +
+                                                "Nếu có sai sót xin hãy liên hệ với chúng tôi." +
+                                                "<br/><br/>Thanks and best regards," +
+                                                "<br/>Tika - Tourist Interact Kiosk Application";
+
     }
 }
