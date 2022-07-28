@@ -193,7 +193,10 @@ namespace kiosk_solution.Business.Services.impl
             var noti = new NotificationCreateViewModel();
 
             var publishRequest = await _unitOfWork.ServiceApplicationPublishRequestRepository
-                .Get(p => p.Id.Equals(model.Id)).FirstOrDefaultAsync();
+                .Get(p => p.Id.Equals(model.Id))
+                .Include(a => a.ServiceApplication)
+                .Include(b => b.Creator)
+                .FirstOrDefaultAsync();
             if (publishRequest == null)
             {
                 _logger.LogInformation("Can not found.");
@@ -226,6 +229,10 @@ namespace kiosk_solution.Business.Services.impl
                         .Replace("APP", publishRequest.ServiceApplication.Name);
 
                     var check = await _notiService.Create(noti);
+
+                    var subject = EmailConstants.PUBLISH_REQUEST_SUBJECT;
+                    var content = EmailUtil.GetApprovedPublishAppContent(publishRequest.ServiceApplication.Name);
+                    await EmailUtil.SendEmail(publishRequest.Creator.Email, subject, content);
                 }
                 else if (publishRequest.Status.Equals(StatusConstants.DENIED))
                 {
@@ -240,6 +247,10 @@ namespace kiosk_solution.Business.Services.impl
                         .Replace("APP", publishRequest.ServiceApplication.Name);
 
                     var check = await _notiService.Create(noti);
+
+                    var subject = EmailConstants.PUBLISH_REQUEST_SUBJECT;
+                    var content = EmailUtil.GetDeniedPublishAppContent(publishRequest.ServiceApplication.Name);
+                    await EmailUtil.SendEmail(publishRequest.Creator.Email, subject, content);
                 }
                 else
                 {
