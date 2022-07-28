@@ -14,5 +14,6 @@ namespace kiosk_solution.Business.Services
         public Task<AppCategoryViewModel> Update(AppCategoryUpdateViewModel model);
         public Task<AppCategoryViewModel> Delete(AppCategoryDeleteViewModel model);
         public Task<DynamicModelResponse<AppCategorySearchViewModel>> GetAllWithPaging(Guid? id,string role, AppCategorySearchViewModel model, int size, int pageNum);
+        public Task<AppCategoryViewModel> GetById(Guid id);
     }
 }

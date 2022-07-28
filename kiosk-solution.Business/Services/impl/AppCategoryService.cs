@@ -153,6 +153,20 @@ namespace kiosk_solution.Business.Services.impl
             return result;
         }
 
+        public async Task<AppCategoryViewModel> GetById(Guid id)
+        {
+            var cate = await _unitOfWork.AppCategoryRepository
+                .Get(c => c.Id.Equals(id))
+                .ProjectTo<AppCategoryViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+            if(cate == null)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
+            return cate;
+        }
+
         public async Task<AppCategoryViewModel> Update(AppCategoryUpdateViewModel model)
         {
             var cate = await _unitOfWork.AppCategoryRepository
