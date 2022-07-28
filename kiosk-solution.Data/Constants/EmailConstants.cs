@@ -43,5 +43,21 @@
                                                 "<br/><br/>Thanks and best regards," +
                                                 "<br/>Tika - Tourist Interact Kiosk Application";
 
+        public static string PUBLISH_REQUEST_SUBJECT = "Yêu cầu đăng tải ứng dụng của quý khách - Tourist Interact Kiosk Application";
+        public static string APPROVED_PUBLISH_REQUEST_CONTENT = "Kính gửi quý đối tác,<br/>" +
+                                                "Chúng tôi chân thành cảm ơn đã hợp tác, " +
+                                                "ứng dụng của quý đối tác phù hợp với tiêu chuẩn của chúng tôi " +
+                                                "nên chúng tôi đã đăng tải ứng dụng [ APP ] của quý đối tác lên hệ thống của chúng tôi. <br/>" +
+                                                "Nếu có sai sót xin hãy liên hệ với chúng tôi." +
+                                                "<br/><br/>Thanks and best regards," +
+                                                "<br/>Tika - Tourist Interact Kiosk Application";
+
+        public static string DENIED_PUBLISH_REQUEST_CONTENT = "Kính gửi quý đối tác,<br/>" +
+                                                "Chúng tôi chân thành cảm ơn đã hợp tác, " +
+                                                "ứng dụng của quý đối tác không phù hợp với tiêu chuẩn của chúng tôi " +
+                                                "nên chúng tôi không thể đăng tải ứng dụng [ APP ] của quý đối tác lên hệ thống của chúng tôi. <br/>" +
+                                                "Nếu có sai sót xin hãy liên hệ với chúng tôi." +
+                                                "<br/><br/>Thanks and best regards," +
+                                                "<br/>Tika - Tourist Interact Kiosk Application";
     }
 }
