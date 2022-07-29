@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
 using kiosk_solution.Data.Responses;
@@ -36,6 +37,14 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<AppCategoryPositionViewModel> Create(Guid partyId, AppCategoryPositionCreateViewModel model)
         {
+            //check if template is deleted
+            var template = await _templateService.GetById(Guid.Parse(model.TemplateId + ""));
+            if (template.Status.Equals(StatusConstants.DELETED))
+            {
+                _logger.LogInformation("Template is deleted.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Template is deleted.");
+            }
+
             //check if there are 2 or more cate are in the same position
             if (model.ListPosition.GroupBy(x => new {x.RowIndex, x.ColumnIndex}).Where(x => x.Count() > 1)
                 .FirstOrDefault() != null)
@@ -83,8 +92,18 @@ namespace kiosk_solution.Business.Services.impl
                 }
 
                 await _unitOfWork.SaveAsync();
-                var template = await _unitOfWork.TemplateRepository.Get(t => t.Id.Equals(model.TemplateId))
-                    .FirstOrDefaultAsync();
+                
+
+                if (!template.Status.Equals(StatusConstants.COMPLETE))
+                {
+                    var check = await _templateService.UpdateStatusToComplete(partyId, template.Id);
+                    if (!check)
+                    {
+                        _logger.LogInformation("Server error.");
+                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server error.");
+                    }
+                }
+
                 var listPos = await _unitOfWork.AppCategoryPositionRepository
                     .Get(p => p.TemplateId.Equals(model.TemplateId))
                     .Include(p => p.Template)
