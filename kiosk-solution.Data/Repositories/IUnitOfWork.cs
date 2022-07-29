@@ -25,6 +25,7 @@ namespace kiosk_solution.Data.Repositories
         INotificationRepository NotificationRepository { get; }
         IPartyNotificationRepository PartyNotificationRepository { get; }
         IServiceApplicationFeedBackRepository ServiceApplicationFeedBackRepository { get; }
+        IServiceOrderRepository ServiceOrderRepository { get; }
         void Save();
         Task SaveAsync();
     }

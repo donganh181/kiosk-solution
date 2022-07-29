@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 
-#nullable disable
-
-namespace kiosk_solution.Data.Models
+namespace kiosk_solution.Data.ViewModels
 {
-    public partial class ServiceOrder
+    public class ServiceOrderViewModel
     {
         public Guid Id { get; set; }
         public decimal? Income { get; set; }
@@ -13,8 +10,5 @@ namespace kiosk_solution.Data.Models
         public string OrderDetail { get; set; }
         public Guid? KioskId { get; set; }
         public Guid? ServiceApplicationId { get; set; }
-
-        public virtual Kiosk Kiosk { get; set; }
-        public virtual ServiceApplication ServiceApplication { get; set; }
     }
 }
