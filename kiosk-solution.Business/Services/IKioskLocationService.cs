@@ -14,6 +14,6 @@ namespace kiosk_solution.Business.Services
         Task<KioskLocationViewModel> UpdateInformation(Guid partyId, UpdateKioskLocationViewModel model);
         Task<DynamicModelResponse<KioskLocationSearchViewModel>> GetAllWithPaging(Guid partyId, KioskLocationSearchViewModel model, int size, int pageNum);
         Task<KioskLocationViewModel> ReplaceImage(Guid partyId, ImageReplaceViewModel model);
-        Task<KioskLocationViewModel> GetById(Guid id);
+        Task<KioskLocationViewModel> GetById(Guid id, bool isNotDes);
     }
 }

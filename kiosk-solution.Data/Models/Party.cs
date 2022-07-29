@@ -21,7 +21,6 @@ namespace kiosk_solution.Data.Models
             ServiceApplicationPublishRequestCreators = new HashSet<ServiceApplicationPublishRequest>();
             ServiceApplicationPublishRequestHandlers = new HashSet<ServiceApplicationPublishRequest>();
             ServiceApplications = new HashSet<ServiceApplication>();
-            ServiceOrders = new HashSet<ServiceOrder>();
             Templates = new HashSet<Template>();
         }
 
@@ -53,7 +52,6 @@ namespace kiosk_solution.Data.Models
         public virtual ICollection<ServiceApplicationPublishRequest> ServiceApplicationPublishRequestCreators { get; set; }
         public virtual ICollection<ServiceApplicationPublishRequest> ServiceApplicationPublishRequestHandlers { get; set; }
         public virtual ICollection<ServiceApplication> ServiceApplications { get; set; }
-        public virtual ICollection<ServiceOrder> ServiceOrders { get; set; }
         public virtual ICollection<Template> Templates { get; set; }
     }
 }
