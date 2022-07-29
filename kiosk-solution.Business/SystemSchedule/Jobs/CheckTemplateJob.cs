@@ -22,7 +22,7 @@ namespace kiosk_solution.Business.SystemSchedule.Jobs
 
         public async Task Execute(IJobExecutionContext context)
         {
-            var listKiosk = await _kioskService.GetListSpecificKiosk();
+            /*var listKiosk = await _kioskService.GetListSpecificKiosk();
 
             foreach(var item in listKiosk)
             {
@@ -38,7 +38,7 @@ namespace kiosk_solution.Business.SystemSchedule.Jobs
                     await _fcmService.SendNotificationToChangeTemplate(item.KioskScheduleTemplate.Template, item.DeviceId);
                     _logger.LogInformation($"Send notification to change specific template to Kiosk {item.Id}");
                 }
-            }
+            }*/
             _logger.LogInformation("check template job running...");
             return;
         }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using kiosk_solution.Data.Responses;
+using kiosk_solution.Data.Models;
 
 namespace kiosk_solution.Business.Services
 {
@@ -19,6 +20,7 @@ namespace kiosk_solution.Business.Services
         Task<EventViewModel> Delete(Guid partyId, string roleName, Guid eventId);
         Task<EventViewModel> GetById(Guid id);
         Task<EventViewModel> ReplaceImage(Guid partyId, string roleName, ImageReplaceViewModel model);
-        public Task<DynamicModelResponse<EventNearbySearchViewModel>> GetEventNearby(Guid partyId, EventNearbySearchViewModel model, int size, int pageNum);
+        Task<DynamicModelResponse<EventNearbySearchViewModel>> GetEventNearby(Guid partyId, EventNearbySearchViewModel model, int size, int pageNum);
+        Task<bool> ValidateStatusOfEventByDay();
     }
 }
