@@ -161,5 +161,31 @@ namespace kiosk_solution.Business.Services.impl
             var result = _mapper.Map<TemplateViewModel>(template);
             return result;
         }
+
+        public async Task<bool> UpdateStatusToComplete(Guid updaterId, Guid templateId)
+        {
+            var template = await _unitOfWork.TemplateRepository
+                .Get(t => t.Id.Equals(templateId))
+                .FirstOrDefaultAsync();
+
+            if (!template.PartyId.Equals(updaterId))
+            {
+                _logger.LogInformation("Your account cannot update template of other account.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot update template of other account.");
+            }
+            template.Status = StatusConstants.COMPLETE;
+            try
+            {
+                _unitOfWork.TemplateRepository.Update(template);
+                await _unitOfWork.SaveAsync();
+                var result = _mapper.Map<TemplateViewModel>(template);
+                return true;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
+            }
+        }
     }
 }
