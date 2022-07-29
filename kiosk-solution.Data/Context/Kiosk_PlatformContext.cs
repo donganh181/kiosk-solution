@@ -41,15 +41,6 @@ namespace kiosk_solution.Data.Context
         public virtual DbSet<ServiceOrder> ServiceOrders { get; set; }
         public virtual DbSet<Template> Templates { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=45.119.212.77, 9943;Database=Kiosk_Platform;User Id =sa;Password=Goboi123;Trusted_Connection=False;Persist Security Info=True");
-            }
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
