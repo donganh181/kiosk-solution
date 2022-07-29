@@ -27,10 +27,11 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IFileService _fileService;
         private readonly INotificationService _notificationService;
         private readonly IServiceApplicationFeedBackService _serviceApplicationFeedBackService;
+        private readonly IPartyServiceApplicationService _partyServiceApplicationService;
 
         public ServiceApplicationService(IUnitOfWork unitOfWork, IMapper mapper,
             ILogger<ServiceApplicationService> logger, IFileService fileService, INotificationService notificationService,
-            IServiceApplicationFeedBackService serviceApplicationFeedBackService)
+            IServiceApplicationFeedBackService serviceApplicationFeedBackService, IPartyServiceApplicationService partyServiceApplicationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -38,6 +39,7 @@ namespace kiosk_solution.Business.Services.impl
             _fileService = fileService;
             _notificationService = notificationService;
             _serviceApplicationFeedBackService = serviceApplicationFeedBackService;
+            _partyServiceApplicationService = partyServiceApplicationService;
         }
 
         public async Task<DynamicModelResponse<ServiceApplicationSearchViewModel>> GetAllWithPaging(string role,
@@ -45,6 +47,7 @@ namespace kiosk_solution.Business.Services.impl
         {
             
             IQueryable<ServiceApplicationSearchViewModel> apps = null;
+            var userCounter = 0;
             if (string.IsNullOrEmpty(role) || role.Equals(RoleConstants.ADMIN))
             {
                 apps = _unitOfWork.ServiceApplicationRepository
@@ -109,6 +112,9 @@ namespace kiosk_solution.Business.Services.impl
                 }
 
                 app.ListFeedback = await _serviceApplicationFeedBackService.GetListFeedbackByAppId(Guid.Parse(app.Id + ""));
+
+                userCounter = await _partyServiceApplicationService.CountUserByAppId(Guid.Parse(app.Id+""));
+                app.UserInstalled = userCounter;
             }
 
             var listPaging =
@@ -227,6 +233,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<ServiceApplicationSpecificViewModel> GetById(Guid? partyId, Guid id)
         {
+            var userCounter = 0;
             ServiceApplicationSpecificViewModel app = null;
             if (partyId == null)
             {
@@ -267,6 +274,9 @@ namespace kiosk_solution.Business.Services.impl
             }
 
             app.ListFeedback = await _serviceApplicationFeedBackService.GetListFeedbackByAppId(Guid.Parse(app.Id + ""));
+
+            userCounter = await _partyServiceApplicationService.CountUserByAppId(Guid.Parse(app.Id + ""));
+            app.UserInstalled = userCounter;
             return app;
         }
 
