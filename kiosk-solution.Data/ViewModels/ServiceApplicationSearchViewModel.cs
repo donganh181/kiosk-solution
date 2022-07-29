@@ -27,5 +27,6 @@ namespace kiosk_solution.Data.ViewModels
         [BindNever] public double? AverageRating { get; set; }
         [BindNever] public int? NumberOfRating { get; set; }
         [BindNever] public List<ServiceApplicationFeedBackViewModel> ListFeedback { get; set; }
+        [BindNever] public int? UserInstalled { get; set; }
     }
 }

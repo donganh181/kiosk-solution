@@ -193,5 +193,15 @@ namespace kiosk_solution.Business.Services.impl
             }
             return true;
         }
+
+        public async Task<int> CountUserByAppId(Guid appId)
+        {
+            var apps = await _unitOfWork.PartyServiceApplicationRepository
+                .Get(a => a.ServiceApplicationId.Equals(appId))
+                .ToListAsync();
+
+            var result = apps.Count;
+            return result;
+        }
     }
 }

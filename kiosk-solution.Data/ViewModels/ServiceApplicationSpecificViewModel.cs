@@ -23,5 +23,6 @@ namespace kiosk_solution.Data.ViewModels
         public int? NumberOfRating { get; set; }
         public List<ServiceApplicationFeedBackViewModel> ListFeedback { get; set; }
         public ServiceApplicationFeedBackViewModel MyFeedback { get; set; }
+        public int? UserInstalled { get; set; }
     }
 }
