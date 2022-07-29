@@ -80,6 +80,9 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<EventViewModel> Create(Guid creatorId, string role, EventCreateViewModel model)
         {
             List<ImageViewModel> listEventImage = new List<ImageViewModel>();
+            var now = TimeZoneInfo.ConvertTime(DateTime.Now,
+                 TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+
             var newEvent = _mapper.Map<Event>(model);
 
             newEvent.CreatorId = creatorId;
@@ -96,21 +99,16 @@ namespace kiosk_solution.Business.Services.impl
             }
 
             ///case now > time end
-            if (DateTime.Compare(DateTime.Now, TimeEnd) > 0)
+            if (DateTime.Compare(now, TimeEnd) > 0)
             {
                 _logger.LogInformation("This event is end.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "This event is end.");
             }
 
-            //case time now < start
-            if (DateTime.Compare(TimeStart, DateTime.Now) > 0)
+            //case time now < start or time start <  now  < time end
+            else
             {
                 newEvent.Status = StatusConstants.COMING_SOON;
-            }
-            //case time start <  now  < time end
-            else if (DateTime.Compare(TimeStart, DateTime.Now) < 0 && DateTime.Compare(DateTime.Now, TimeEnd) < 0)
-            {
-                newEvent.Status = StatusConstants.ON_GOING;
             }
 
             if (role.Equals(RoleConstants.ADMIN))
@@ -130,7 +128,7 @@ namespace kiosk_solution.Business.Services.impl
             var geoCodeing = await _mapService.GetForwardGeocode(address);
             newEvent.Longtitude = geoCodeing.GeoMetries[0].Lng;
             newEvent.Latitude = geoCodeing.GeoMetries[0].Lat;
-            newEvent.CreateDate = DateTime.Now;
+            newEvent.CreateDate = now;
             try
             {                
                 await _unitOfWork.EventRepository.InsertAsync(newEvent);
@@ -157,6 +155,12 @@ namespace kiosk_solution.Business.Services.impl
 
                 result.Thumbnail = thumbnail;
                 result.ListImage = eventImage;
+
+                if (DateTime.Compare(TimeStart, now) < 0 && DateTime.Compare(now, TimeEnd) < 0)
+                {
+                    result.Status = StatusConstants.ON_GOING;
+                }
+
                 return result;
             }
             catch (Exception)
@@ -275,6 +279,8 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<DynamicModelResponse<EventSearchViewModel>> GetAllWithPaging(Guid? partyId, string roleName,
             EventSearchViewModel model, int size, int pageNum)
         {
+            var now = TimeZoneInfo.ConvertTime(DateTime.Now,
+                 TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
             IQueryable<EventSearchViewModel> events = null;
             if (!string.IsNullOrEmpty(roleName) && roleName.Equals(RoleConstants.LOCATION_OWNER))
             {
@@ -301,6 +307,12 @@ namespace kiosk_solution.Business.Services.impl
 
             foreach (var item in listEvent)
             {
+
+                if (DateTime.Compare((DateTime)item.TimeStart, now) < 0 && DateTime.Compare(now, (DateTime)item.TimeEnd) < 0)
+                {
+                    item.Status = StatusConstants.ON_GOING;
+                }
+
                 var listImage = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(item.Id + ""), CommonConstants.EVENT_IMAGE);
                 if (listImage == null)
                 {
@@ -354,10 +366,17 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<EventViewModel> GetById(Guid id)
         {
+            var now = TimeZoneInfo.ConvertTime(DateTime.Now,
+                 TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
             var myEvent = await _unitOfWork.EventRepository
                 .Get(e => e.Id.Equals(id))
                 .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
+
+            if (DateTime.Compare((DateTime)myEvent.TimeStart, now) < 0 && DateTime.Compare(now, (DateTime)myEvent.TimeEnd) < 0)
+            {
+                myEvent.Status = StatusConstants.ON_GOING;
+            }
 
             var listImage = await _imageService.GetByKeyIdAndKeyType(id, CommonConstants.EVENT_IMAGE);
             if (listImage == null)
@@ -388,6 +407,8 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<EventViewModel> Update(Guid partyId, EventUpdateViewModel model, string roleName)
         {
+            var now = TimeZoneInfo.ConvertTime(DateTime.Now,
+                 TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
             var eventUpdate = await _unitOfWork.EventRepository
                 .Get(e => e.Id.Equals(model.Id))
                 .FirstOrDefaultAsync();
@@ -432,21 +453,16 @@ namespace kiosk_solution.Business.Services.impl
             }
 
             ///case now > time end
-            if (DateTime.Compare(DateTime.Now, TimeEnd) > 0)
+            if (DateTime.Compare(now, TimeEnd) > 0)
             {
                 _logger.LogInformation("This event is end.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "This event is end.");
             }
 
-            //case time now < start
-            if (DateTime.Compare(TimeStart, DateTime.Now) > 0)
+            //case time now < start or case time start <  now  < time end
+            else
             {
                 eventUpdate.Status = StatusConstants.COMING_SOON;
-            }
-            //case time start <  now  < time end
-            else if (DateTime.Compare(TimeStart, DateTime.Now) < 0 && DateTime.Compare(DateTime.Now, TimeEnd) < 0)
-            {
-                eventUpdate.Status = StatusConstants.ON_GOING;
             }
 
             try
@@ -512,6 +528,12 @@ namespace kiosk_solution.Business.Services.impl
                         }
                     }
                     result.ListImage = _mapper.Map<List<EventImageDetailViewModel>>(listSourceImage);
+
+                    if (DateTime.Compare(TimeStart, now) < 0 && DateTime.Compare(now, TimeEnd) < 0)
+                    {
+                        result.Status = StatusConstants.ON_GOING;
+                    }
+
                     return result;
                 }
             }
@@ -714,6 +736,35 @@ namespace kiosk_solution.Business.Services.impl
                 Data = listPaging.Data.ToList()
             };
             return result;
+        }
+
+        public async Task<bool> ValidateStatusOfEventByDay()
+        {
+            var now = TimeZoneInfo.ConvertTime(DateTime.Now,
+                TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+
+            var listEvent = await _unitOfWork.EventRepository
+                .Get(e => !e.Status.Equals(StatusConstants.END) 
+                        && DateTime.Compare((DateTime)e.TimeEnd, now) < 0)
+                .ToListAsync();
+            try
+            {
+                foreach (var eventUpdate in listEvent)
+                {
+                    eventUpdate.Status = StatusConstants.END;
+
+                    _unitOfWork.EventRepository.Update(eventUpdate);
+                    await _unitOfWork.SaveAsync();
+                    _logger.LogInformation($"Event {eventUpdate.Name} status is changed to End.");
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
+            }
         }
     }
 }
