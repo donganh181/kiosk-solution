@@ -110,9 +110,9 @@ namespace kiosk_solution.Controllers
         /// <returns></returns>
         [HttpGet("id")]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> Get([FromQuery] Guid id)
+        public async Task<IActionResult> Get([FromQuery] Guid id, bool isNotDes)
         {
-            var result = await _kioskLocationService.GetById(id);
+            var result = await _kioskLocationService.GetById(id, isNotDes);
             _logger.LogInformation($"Get information of location {result.Name} by guest");
             return Ok(new SuccessResponse<KioskLocationViewModel>((int)HttpStatusCode.OK, "Search success.", result));
         }

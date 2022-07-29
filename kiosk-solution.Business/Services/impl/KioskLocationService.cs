@@ -137,7 +137,7 @@ namespace kiosk_solution.Business.Services.impl
             return result;
         }
 
-        public async Task<KioskLocationViewModel> GetById(Guid id)
+        public async Task<KioskLocationViewModel> GetById(Guid id, bool isNotDes)
         {
             var location = await _unitOfWork.KioskLocationRepository
                 .Get(l => l.Id.Equals(id))
@@ -148,6 +148,10 @@ namespace kiosk_solution.Business.Services.impl
             {
                 _logger.LogInformation("Can not found.");
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+            if (isNotDes)
+            {
+                location.Description = String.Empty;
             }
             var listImage = await _imageService.GetByKeyIdAndKeyType(Guid.Parse(location.Id + ""), CommonConstants.LOCATION_IMAGE);
             if (listImage == null)
