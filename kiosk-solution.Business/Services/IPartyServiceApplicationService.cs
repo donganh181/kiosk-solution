@@ -15,5 +15,6 @@ namespace kiosk_solution.Business.Services
         public Task<bool> CheckAppExist(Guid partyId, Guid cateId);
         public Task<bool> CheckAppExistByPartyIdAndServiceApplicationId(Guid partyId, Guid serviceApplicationId);
         public Task<PartyServiceApplicationViewModel> UpdateStatus(Guid partyId, PartyServiceApplicationUpdateViewModel model);
+        public Task<int> CountUserByAppId(Guid appId);
     }
 }
