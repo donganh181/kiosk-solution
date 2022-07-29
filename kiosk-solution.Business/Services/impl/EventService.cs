@@ -41,12 +41,18 @@ namespace kiosk_solution.Business.Services.impl
             List<ImageViewModel> listEventImage = new List<ImageViewModel>();
             var myEvent = await _unitOfWork.EventRepository.Get(e => e.Id.Equals(model.Id)).FirstOrDefaultAsync();
 
+            //check if exist
             if (myEvent == null)
             {
                 _logger.LogInformation("Can not found.");
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
             }
-
+            //check if deleted
+            if (myEvent.Status.Equals(StatusConstants.DELETED))
+            {
+                _logger.LogInformation("Event is deleted.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Event is deleted.");
+            }
             if (myEvent.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
             {
                 _logger.LogInformation("You can not use this feature.");
@@ -189,6 +195,12 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
             }
 
+            if (myEvent.Status.Equals(StatusConstants.DELETED))
+            {
+                _logger.LogInformation("Event is deleted.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Event is deleted.");
+            }
+
             if (myEvent.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
             {
                 _logger.LogInformation("You can not use this feature.");
@@ -262,9 +274,11 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
             }
 
+            evt.Status = StatusConstants.DELETED;
+
             try
             {
-                _unitOfWork.EventRepository.Delete(evt);
+                _unitOfWork.EventRepository.Update(evt);
                 await _unitOfWork.SaveAsync();
                 var result = _mapper.Map<EventViewModel>(evt);
                 return result;
@@ -285,15 +299,16 @@ namespace kiosk_solution.Business.Services.impl
             if (!string.IsNullOrEmpty(roleName) && roleName.Equals(RoleConstants.LOCATION_OWNER))
             {
                 events = _unitOfWork.EventRepository
-                    .Get(e => (e.CreatorId.Equals(partyId) &&
-                               e.Type.Equals(TypeConstants.LOCAL_TYPE)) || e.Type.Equals(TypeConstants.SERVER_TYPE))
+                    .Get(e => (!e.Status.Equals(StatusConstants.DELETED) &&
+                        (e.Type.Equals(TypeConstants.SERVER_TYPE) || 
+                        (e.Type.Equals(TypeConstants.LOCAL_TYPE) && e.CreatorId.Equals(partyId)))))
                     .Include(e => e.Creator)
                     .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider);
             }
             else if(string.IsNullOrEmpty(roleName) || roleName.Equals(RoleConstants.ADMIN))
             {
                 events = _unitOfWork.EventRepository
-                    .Get()
+                    .Get(e => !e.Status.Equals(StatusConstants.DELETED))
                     .Include(e => e.Creator)
                     .ProjectTo<EventSearchViewModel>(_mapper.ConfigurationProvider);
             }
@@ -373,6 +388,18 @@ namespace kiosk_solution.Business.Services.impl
                 .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
 
+            if(myEvent == null)
+            {
+                 _logger.LogInformation("Can not found.");
+                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            if (myEvent.Status.Equals(StatusConstants.DELETED))
+            {
+                _logger.LogInformation("Event is deleted.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Event is deleted.");
+            }
+
             if (DateTime.Compare((DateTime)myEvent.TimeStart, now) < 0 && DateTime.Compare(now, (DateTime)myEvent.TimeEnd) < 0)
             {
                 myEvent.Status = StatusConstants.ON_GOING;
@@ -412,10 +439,17 @@ namespace kiosk_solution.Business.Services.impl
             var eventUpdate = await _unitOfWork.EventRepository
                 .Get(e => e.Id.Equals(model.Id))
                 .FirstOrDefaultAsync();
+
             if (eventUpdate == null)
             {
                 _logger.LogInformation("Can not found.");
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            if (eventUpdate.Status.Equals(StatusConstants.DELETED))
+            {
+                _logger.LogInformation("Event is deleted.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Event is deleted.");
             }
 
             if (eventUpdate.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
@@ -561,6 +595,12 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
             }
 
+            if (myEvent.Status.Equals(StatusConstants.DELETED))
+            {
+                _logger.LogInformation("Event is deleted.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Event is deleted.");
+            }
+
             if (myEvent.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
             {
                 _logger.LogInformation("You can not use this feature.");
@@ -591,7 +631,14 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Can not found.");
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
             }
-            if(model.RemoveFields != null)
+
+            if (checkEvent.Status.Equals(StatusConstants.DELETED))
+            {
+                _logger.LogInformation("Event is deleted.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Event is deleted.");
+            }
+
+            if (model.RemoveFields != null)
             {
                 foreach (var imageId in model.RemoveFields)
                 {
@@ -744,7 +791,7 @@ namespace kiosk_solution.Business.Services.impl
                 TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
 
             var listEvent = await _unitOfWork.EventRepository
-                .Get(e => !e.Status.Equals(StatusConstants.END) 
+                .Get(e => !e.Status.Equals(StatusConstants.END) && !e.Status.Equals(StatusConstants.DELETED)
                         && DateTime.Compare((DateTime)e.TimeEnd, now) < 0)
                 .ToListAsync();
             try
