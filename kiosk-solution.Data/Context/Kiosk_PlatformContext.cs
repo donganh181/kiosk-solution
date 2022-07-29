@@ -25,6 +25,7 @@ namespace kiosk_solution.Data.Context
         public virtual DbSet<Image> Images { get; set; }
         public virtual DbSet<Kiosk> Kiosks { get; set; }
         public virtual DbSet<KioskLocation> KioskLocations { get; set; }
+        public virtual DbSet<KioskRating> KioskRatings { get; set; }
         public virtual DbSet<KioskScheduleTemplate> KioskScheduleTemplates { get; set; }
         public virtual DbSet<Notification> Notifications { get; set; }
         public virtual DbSet<Party> Parties { get; set; }
@@ -39,6 +40,15 @@ namespace kiosk_solution.Data.Context
         public virtual DbSet<ServiceApplicationPublishRequest> ServiceApplicationPublishRequests { get; set; }
         public virtual DbSet<ServiceOrder> ServiceOrders { get; set; }
         public virtual DbSet<Template> Templates { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=45.119.212.77, 9943;Database=Kiosk_Platform;User Id =sa;Password=Goboi123;Trusted_Connection=False;Persist Security Info=True");
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -194,6 +204,20 @@ namespace kiosk_solution.Data.Context
                     .WithMany(p => p.KioskLocations)
                     .HasForeignKey(d => d.OwnerId)
                     .HasConstraintName("FK__KioskLoca__Owner__18EBB532");
+            });
+
+            modelBuilder.Entity<KioskRating>(entity =>
+            {
+                entity.ToTable("Kiosk_Rating");
+
+                entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+
+                entity.Property(e => e.CreateDate).HasColumnType("datetime");
+
+                entity.HasOne(d => d.Kiosk)
+                    .WithMany(p => p.KioskRatings)
+                    .HasForeignKey(d => d.KioskId)
+                    .HasConstraintName("FK__Kiosk_Rat__Kiosk__208CD6FA");
             });
 
             modelBuilder.Entity<KioskScheduleTemplate>(entity =>
@@ -499,26 +523,15 @@ namespace kiosk_solution.Data.Context
 
                 entity.Property(e => e.OrderDetail).IsUnicode(false);
 
-                entity.Property(e => e.Status)
-                    .HasMaxLength(20)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.SubmitDate).HasColumnType("datetime");
-
                 entity.HasOne(d => d.Kiosk)
                     .WithMany(p => p.ServiceOrders)
                     .HasForeignKey(d => d.KioskId)
-                    .HasConstraintName("FK__ServiceOr__Kiosk__6C190EBB");
-
-                entity.HasOne(d => d.Party)
-                    .WithMany(p => p.ServiceOrders)
-                    .HasForeignKey(d => d.PartyId)
-                    .HasConstraintName("FK__ServiceOr__Party__6B24EA82");
+                    .HasConstraintName("FK__ServiceOr__Kiosk__25518C17");
 
                 entity.HasOne(d => d.ServiceApplication)
                     .WithMany(p => p.ServiceOrders)
                     .HasForeignKey(d => d.ServiceApplicationId)
-                    .HasConstraintName("FK__ServiceOr__Servi__6A30C649");
+                    .HasConstraintName("FK__ServiceOr__Servi__245D67DE");
             });
 
             modelBuilder.Entity<Template>(entity =>
