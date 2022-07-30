@@ -314,6 +314,19 @@ namespace kiosk_solution.Business.Services.impl
                                                                       (TimeSpan) d.Schedule.TimeEnd) < 0
                 ))
                 .ThenInclude(b => b.Template)
+                .ThenInclude(c => c.AppCategoryPositions)
+                .ThenInclude(d => d.AppCategory)
+                .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
+                                                                  && d.Schedule.DayOfWeek.Contains(daynow)
+                                                                  && d.Schedule.Status.Equals(StatusConstants.ON)
+                                                                  && TimeSpan.Compare(timeNow,
+                                                                      (TimeSpan)d.Schedule.TimeStart) >= 0
+                                                                  && TimeSpan.Compare(timeNow,
+                                                                      (TimeSpan)d.Schedule.TimeEnd) < 0
+                ))
+                .ThenInclude(b => b.Template)
+                .ThenInclude(c => c.EventPositions)
+                .ThenInclude(d => d.Event)
                 .ToList()
                 .AsQueryable()
                 .ProjectTo<KioskDetailViewModel>(_mapper)
