@@ -86,8 +86,7 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<EventViewModel> Create(Guid creatorId, string role, EventCreateViewModel model)
         {
             List<ImageViewModel> listEventImage = new List<ImageViewModel>();
-            var now = TimeZoneInfo.ConvertTime(DateTime.Now,
-                 TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+            var now = DateTime.Now;
 
             var newEvent = _mapper.Map<Event>(model);
 
@@ -293,8 +292,7 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<DynamicModelResponse<EventSearchViewModel>> GetAllWithPaging(Guid? partyId, string roleName,
             EventSearchViewModel model, int size, int pageNum)
         {
-            var now = TimeZoneInfo.ConvertTime(DateTime.Now,
-                 TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+            var now = DateTime.Now;
             IQueryable<EventSearchViewModel> events = null;
             if (!string.IsNullOrEmpty(roleName) && roleName.Equals(RoleConstants.LOCATION_OWNER))
             {
@@ -381,8 +379,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<EventViewModel> GetById(Guid id)
         {
-            var now = TimeZoneInfo.ConvertTime(DateTime.Now,
-                 TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+            var now = DateTime.Now;
             var myEvent = await _unitOfWork.EventRepository
                 .Get(e => e.Id.Equals(id))
                 .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
@@ -434,8 +431,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<EventViewModel> Update(Guid partyId, EventUpdateViewModel model, string roleName)
         {
-            var now = TimeZoneInfo.ConvertTime(DateTime.Now,
-                 TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+            var now = DateTime.Now;
             var eventUpdate = await _unitOfWork.EventRepository
                 .Get(e => e.Id.Equals(model.Id))
                 .FirstOrDefaultAsync();
@@ -787,8 +783,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<bool> ValidateStatusOfEventByDay()
         {
-            var now = TimeZoneInfo.ConvertTime(DateTime.Now,
-                TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+            var now = DateTime.Now;
 
             var listEvent = await _unitOfWork.EventRepository
                 .Get(e => !e.Status.Equals(StatusConstants.END) && !e.Status.Equals(StatusConstants.DELETED)

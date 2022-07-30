@@ -97,13 +97,13 @@ namespace kiosk_solution.Controllers
             if (token == null)
             {
                 var result = await _serviceApplicationService.GetById(null, id);
-                _logger.LogInformation($"Get application {result.Name} by guest");
+                _logger.LogInformation("Get application by guest");
                 return Ok(new SuccessResponse<ServiceApplicationSpecificViewModel>((int)HttpStatusCode.OK, "Search success.", result));
             }
             else
             {
                 var result = await _serviceApplicationService.GetById(token.Id, id);
-                _logger.LogInformation($"Get application {result.Name} by {token.Mail}");
+                _logger.LogInformation("Get application by {token.Mail}");
                 return Ok(new SuccessResponse<ServiceApplicationSpecificViewModel>((int)HttpStatusCode.OK, "Search success.", result));
             }
                 

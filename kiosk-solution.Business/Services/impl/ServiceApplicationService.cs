@@ -261,22 +261,25 @@ namespace kiosk_solution.Business.Services.impl
                 .ProjectTo<ServiceApplicationSpecificViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefault();
             }
-            var rating = await _serviceApplicationFeedBackService.GetAverageRatingOfApp(Guid.Parse(app.Id + ""));
-            if (rating.FirstOrDefault().Value != 0)
+            if(app != null)
             {
-                app.NumberOfRating = rating.FirstOrDefault().Key;
-                app.AverageRating = rating.FirstOrDefault().Value;
-            }
-            else
-            {
-                app.NumberOfRating = 0;
-                app.AverageRating = 0;
-            }
+                var rating = await _serviceApplicationFeedBackService.GetAverageRatingOfApp(Guid.Parse(app.Id + ""));
+                if (rating.FirstOrDefault().Value != 0)
+                {
+                    app.NumberOfRating = rating.FirstOrDefault().Key;
+                    app.AverageRating = rating.FirstOrDefault().Value;
+                }
+                else
+                {
+                    app.NumberOfRating = 0;
+                    app.AverageRating = 0;
+                }
 
-            app.ListFeedback = await _serviceApplicationFeedBackService.GetListFeedbackByAppId(Guid.Parse(app.Id + ""));
+                app.ListFeedback = await _serviceApplicationFeedBackService.GetListFeedbackByAppId(Guid.Parse(app.Id + ""));
 
-            userCounter = await _partyServiceApplicationService.CountUserByAppId(Guid.Parse(app.Id + ""));
-            app.UserInstalled = userCounter;
+                userCounter = await _partyServiceApplicationService.CountUserByAppId(Guid.Parse(app.Id + ""));
+                app.UserInstalled = userCounter;
+            }
             return app;
         }
 
