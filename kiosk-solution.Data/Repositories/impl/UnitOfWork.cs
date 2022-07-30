@@ -30,6 +30,8 @@ namespace kiosk_solution.Data.Repositories.impl
         public IServiceApplicationFeedBackRepository ServiceApplicationFeedBackRepository { get; set; }
         public IServiceOrderRepository ServiceOrderRepository { get; }
 
+        public IKioskRatingRepository KioskRatingRepository { get; }
+
         public UnitOfWork(Kiosk_PlatformContext context, IRoleRepository roleRepository,
             IKioskRepository kioskRepository,
             IPartyRepository partyRepository, IKioskLocationRepository kioskLocationRepository,
@@ -45,7 +47,8 @@ namespace kiosk_solution.Data.Repositories.impl
             INotificationRepository notificationRepository,
             IPartyNotificationRepository partyNotificationRepository,
             IServiceApplicationFeedBackRepository serviceApplicationFeedBackRepository,
-            IServiceOrderRepository serviceOrderRepository)
+            IServiceOrderRepository serviceOrderRepository,
+            IKioskRatingRepository kioskRatingRepository)
         {
             _context = context;
             RoleRepository = roleRepository;
@@ -69,6 +72,7 @@ namespace kiosk_solution.Data.Repositories.impl
             PartyNotificationRepository = partyNotificationRepository;
             ServiceApplicationFeedBackRepository = serviceApplicationFeedBackRepository;
             ServiceOrderRepository = serviceOrderRepository;
+            KioskRatingRepository = kioskRatingRepository;
         }
 
         public void Save()

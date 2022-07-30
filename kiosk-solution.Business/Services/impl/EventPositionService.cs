@@ -22,16 +22,18 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITemplateService _templateService;
         private readonly IPartyServiceApplicationService _partyServiceApplicationService;
+        private readonly IEventService _eventService;
         
         public EventPositionService(IMapper mapper, ILogger<IEventPositionService> logger, 
             IUnitOfWork unitOfWork, IPartyServiceApplicationService partyServiceApplicationService,
-            ITemplateService templateService)
+            ITemplateService templateService, IEventService eventService)
         {
             _mapper = mapper;
             _logger = logger;
             _unitOfWork = unitOfWork;
             _partyServiceApplicationService = partyServiceApplicationService;
             _templateService = templateService;
+            _eventService = eventService;
         }
         
         public async Task<EventPositionViewModel> Create(Guid partyId, EventPositionCreateViewModel model)
@@ -73,6 +75,9 @@ namespace kiosk_solution.Business.Services.impl
                         _logger.LogInformation($"Event id is required.");
                         throw new ErrorResponse((int)HttpStatusCode.BadRequest, $"Event id is required.");
                     }
+                    //check if event is deleted or not
+                    var checkEvent = await _eventService.GetById(Guid.Parse(position.EventId + ""));
+
                     await _unitOfWork.EventPositionRepository.InsertAsync(position);
                 }
                 await _unitOfWork.SaveAsync();

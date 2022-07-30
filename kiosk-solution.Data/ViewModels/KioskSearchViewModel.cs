@@ -30,5 +30,8 @@ namespace kiosk_solution.Data.ViewModels
         public string Latitude { get; set; }
         [BindNever]
         public string DeviceId { get; set; }
+        [BindNever] public List<KioskRatingViewModel> ListFeedback { get; set; }
+        [BindNever] public double? AverageRating { get; set; }
+        [BindNever] public int? NumberOfRating { get; set; }
     }
 }
