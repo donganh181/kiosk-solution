@@ -300,18 +300,18 @@ namespace kiosk_solution.Business.Services.impl
                                                                   && d.Schedule.DayOfWeek.Contains(daynow)
                                                                   && d.Schedule.Status.Equals(StatusConstants.ON)
                                                                   && TimeSpan.Compare(timeNow,
-                                                                      (TimeSpan) d.Schedule.TimeStart) >= 0
+                                                                      (TimeSpan)d.Schedule.TimeStart) >= 0
                                                                   && TimeSpan.Compare(timeNow,
-                                                                      (TimeSpan) d.Schedule.TimeEnd) < 0
+                                                                      (TimeSpan)d.Schedule.TimeEnd) < 0
                 ))
                 .ThenInclude(b => b.Schedule)
                 .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
                                                                   && d.Schedule.DayOfWeek.Contains(daynow)
                                                                   && d.Schedule.Status.Equals(StatusConstants.ON)
                                                                   && TimeSpan.Compare(timeNow,
-                                                                      (TimeSpan) d.Schedule.TimeStart) >= 0
+                                                                      (TimeSpan)d.Schedule.TimeStart) >= 0
                                                                   && TimeSpan.Compare(timeNow,
-                                                                      (TimeSpan) d.Schedule.TimeEnd) < 0
+                                                                      (TimeSpan)d.Schedule.TimeEnd) < 0
                 ))
                 .ThenInclude(b => b.Template)
                 .ThenInclude(c => c.AppCategoryPositions)
@@ -331,6 +331,12 @@ namespace kiosk_solution.Business.Services.impl
                 .AsQueryable()
                 .ProjectTo<KioskDetailViewModel>(_mapper)
                 .FirstOrDefault();
+
+            if(kiosk == null)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+            }
 
             if (kiosk.KioskScheduleTemplate == null)
             {
