@@ -26,16 +26,19 @@ namespace kiosk_solution.Business.Services.impl
         private readonly ILogger<IKioskService> _logger;
         private readonly INotiService _fcmService;
         private readonly IEventService _eventService;
+        private readonly IKioskRatingService _kioskRatingService;
         private readonly IHubContext<SystemEventHub> _eventHub;
 
         public KioskService(IMapper mapper, IUnitOfWork unitOfWork, ILogger<IKioskService> logger
-            , INotiService fcmService, IEventService eventService, IHubContext<SystemEventHub> eventHub)
+            , INotiService fcmService, IEventService eventService, IKioskRatingService kioskRatingService,
+            IHubContext<SystemEventHub> eventHub)
         {
             _mapper = mapper.ConfigurationProvider;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _fcmService = fcmService;
             _eventService = eventService;
+            _kioskRatingService = kioskRatingService;
             _eventHub = eventHub;
         }
 
@@ -104,7 +107,7 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<DynamicModelResponse<KioskSearchViewModel>> GetAllWithPaging(string role, Guid id,
             KioskSearchViewModel model, int size, int pageNum)
         {
-            object kiosks = null;
+            IQueryable<KioskSearchViewModel> kiosks = null;
             if (role.Equals(RoleConstants.ADMIN))
             {
                 kiosks = _unitOfWork.KioskRepository.Get().ProjectTo<KioskSearchViewModel>(_mapper)
@@ -127,9 +130,26 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
 
-            var listKiosk = (IQueryable<KioskSearchViewModel>) kiosks;
+            var listKiosk = kiosks.ToList();
 
-            var listPaging = listKiosk
+            foreach(var kiosk in listKiosk)
+            {
+                var rating = await _kioskRatingService.GetAverageRatingOfKiosk(Guid.Parse(kiosk.Id + ""));
+                if (rating.FirstOrDefault().Value != 0)
+                {
+                    kiosk.NumberOfRating = rating.FirstOrDefault().Key;
+                    kiosk.AverageRating = rating.FirstOrDefault().Value;
+                }
+                else
+                {
+                    kiosk.NumberOfRating = 0;
+                    kiosk.AverageRating = 0;
+                }
+
+                kiosk.ListFeedback = await _kioskRatingService.GetListFeedbackByKioskId(Guid.Parse(kiosk.Id + ""));
+            }
+
+            var listPaging = listKiosk.AsQueryable()
                 .PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
 
             if (listPaging.Data.ToList().Count < 1)
@@ -157,7 +177,23 @@ namespace kiosk_solution.Business.Services.impl
                 .Get(k => k.Id.Equals(kioskId))
                 .ProjectTo<KioskViewModel>(_mapper)
                 .FirstOrDefaultAsync();
+            if(result != null)
+            {
+                var rating = await _kioskRatingService.GetAverageRatingOfKiosk(Guid.Parse(result.Id + ""));
+                if (rating.FirstOrDefault().Value != 0)
+                {
+                    result.NumberOfRating = rating.FirstOrDefault().Key;
+                    result.AverageRating = rating.FirstOrDefault().Value;
+                }
+                else
+                {
+                    result.NumberOfRating = 0;
+                    result.AverageRating = 0;
+                }
 
+                result.ListFeedback = await _kioskRatingService.GetListFeedbackByKioskId(Guid.Parse(result.Id + ""));
+
+            }
             return result;
         }
 
@@ -193,8 +229,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<List<KioskDetailViewModel>> GetListSpecificKiosk()
         {
-            var now = TimeZoneInfo.ConvertTime(DateTime.Now,
-                 TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+            var now = DateTime.Now;
             var timeNow = now.TimeOfDay;
 
             var thisDay = now.ToString("dddd");

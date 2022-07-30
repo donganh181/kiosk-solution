@@ -84,6 +84,9 @@ namespace kiosk_solution.Business.DI
 
             services.AddScoped<IServiceOrderRepository, ServiceOrderRepository>();
             services.AddScoped<IServiceOrderService, ServiceOrderService>();
+
+            services.AddScoped<IKioskRatingRepository, KioskRatingRepository>();
+            services.AddScoped<IKioskRatingService, KioskRatingService>();
         }
     }
 }

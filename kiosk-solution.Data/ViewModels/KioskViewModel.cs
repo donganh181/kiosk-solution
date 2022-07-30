@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace kiosk_solution.Data.ViewModels
 {
@@ -13,5 +14,8 @@ namespace kiosk_solution.Data.ViewModels
         public string Longtitude { get; set; }
         public string Latitude { get; set; }
         public string DeviceId { get; set; }
+        public List<KioskRatingViewModel> ListFeedback { get; set; }
+        public double? AverageRating { get; set; }
+        public int? NumberOfRating { get; set; }
     }
 }

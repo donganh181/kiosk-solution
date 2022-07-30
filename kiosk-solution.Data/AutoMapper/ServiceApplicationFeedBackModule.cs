@@ -23,7 +23,6 @@ namespace kiosk_solution.Data.AutoMapper
             
             mc.CreateMap<ServiceApplicationFeedBack, ServiceApplicationFeedBackUpdateViewModel>();
             mc.CreateMap<ServiceApplicationFeedBackUpdateViewModel, ServiceApplicationFeedBack>();
-
         }
     }
 }

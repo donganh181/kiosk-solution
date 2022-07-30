@@ -35,6 +35,7 @@ namespace kiosk_solution.App_Start
                 mc.ConfigPartyNotificationModule();
                 mc.ConfigServiceApplicationFeedBackModule();
                 mc.ConfigServiceOrderModule();
+                mc.ConfigKioskRatingModule();
             });
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
