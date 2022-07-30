@@ -294,7 +294,7 @@ namespace kiosk_solution.Business.Services.impl
             var timeNow = now.TimeOfDay;
             var daynow = now.ToString("dddd");
 
-            var kiosk = await _unitOfWork.KioskRepository
+            var kiosk = _unitOfWork.KioskRepository
                 .Get(k => k.Status.Equals(StatusConstants.ACTIVATE) && k.Id.Equals(id))
                 .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
                                                                   && d.Schedule.DayOfWeek.Contains(daynow)
@@ -314,8 +314,10 @@ namespace kiosk_solution.Business.Services.impl
                                                                       (TimeSpan) d.Schedule.TimeEnd) < 0
                 ))
                 .ThenInclude(b => b.Template)
+                .ToList()
+                .AsQueryable()
                 .ProjectTo<KioskDetailViewModel>(_mapper)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
 
             if (kiosk.KioskScheduleTemplate == null)
             {
