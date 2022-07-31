@@ -76,6 +76,14 @@ namespace kiosk_solution.Business.Services.impl
                     "This template and schedule are already set for kiosk.");
             }
 
+            var template = await _templateService.GetById(model.TemplateId);
+            if (template.Status.Equals(StatusConstants.INCOMPLETE))
+            {
+                _logger.LogInformation("This template is incomplete.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest,
+                    "This template is incomplete.");
+            }
+
             var schedule = await _scheduleService.GetById(model.ScheduleId);
             var listDay = schedule.DayOfWeek.Split("-").ToList();
             var conflictData = await _unitOfWork.KioskScheduleTemplateRepository
