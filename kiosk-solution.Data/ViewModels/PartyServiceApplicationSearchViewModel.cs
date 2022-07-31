@@ -20,7 +20,7 @@ namespace kiosk_solution.Data.ViewModels
         [BindNever] public string ServiceApplicationDescription { get; set; }
         [BindNever] public string ServiceApplicationLogo { get; set; }
         [BindNever] public string ServiceApplicationLink { get; set; }
-        [BindNever] public Guid? AppCategoryId { get; set; }
+        [Guid] public Guid? AppCategoryId { get; set; }
         [BindNever] public string AppcategoryName { get; set; }
         [String] public string Status { get; set; }
 
