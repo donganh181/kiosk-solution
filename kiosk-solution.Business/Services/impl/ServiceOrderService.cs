@@ -33,8 +33,11 @@ namespace kiosk_solution.Business.Services.impl
         {
             var serviceOrder = _mapper.Map<ServiceOrder>(model);
             dynamic order = JObject.Parse(model.OrderDetail);
-
-            serviceOrder.Income = order.total;
+            serviceOrder.Income = 0;
+            foreach (var item in order.items)
+            {
+                serviceOrder.Income += item.price;
+            }
             serviceOrder.KioskId = model.KioskId;
             serviceOrder.ServiceApplicationId = model.ServiceApplicationId;
             serviceOrder.CreateDate = DateTime.Now;
