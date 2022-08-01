@@ -21,23 +21,28 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<IServiceOrderService> _logger;
+        private readonly IServiceApplicationService _serviceApplicationService;
 
-        public ServiceOrderService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IServiceOrderService> logger)
+        public ServiceOrderService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IServiceOrderService> logger,IServiceApplicationService serviceApplicationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _serviceApplicationService = serviceApplicationService;
         }
 
         public async Task<ServiceOrderViewModel> Create(ServiceOrderCreateViewModel model)
         {
             var serviceOrder = _mapper.Map<ServiceOrder>(model);
             dynamic order = JObject.Parse(model.OrderDetail);
-            serviceOrder.Income = 0;
+            serviceOrder.Total = 0;
             foreach (var item in order.items)
             {
-                serviceOrder.Income += Decimal.Parse(item.Price.ToString());
+                serviceOrder.Total += Decimal.Parse(item.Price.ToString());
             }
+
+            var appCate = await _serviceApplicationService.GetCommissionById(model.ServiceApplicationId);
+            serviceOrder.Commission = serviceOrder.Total * Decimal.Parse(appCate.CommissionPercentage.ToString());
             serviceOrder.KioskId = model.KioskId;
             serviceOrder.ServiceApplicationId = model.ServiceApplicationId;
             serviceOrder.CreateDate = DateTime.Now;

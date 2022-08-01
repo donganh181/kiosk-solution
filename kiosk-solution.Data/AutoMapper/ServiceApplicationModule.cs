@@ -23,18 +23,24 @@ namespace kiosk_solution.Data.AutoMapper
                 .ForMember(src => src.PartyName, opt => opt.MapFrom(des => des.Party.FirstName))
                 .ForMember(src => src.PartyEmail, opt => opt.MapFrom(des => des.Party.Email))
                 .ForMember(src => src.AppCategoryName, opt => opt.MapFrom(des => des.AppCategory.Name))
-                .ForMember(src => src.MyFeedback, opt => opt.MapFrom(des => des.ServiceApplicationFeedBacks.FirstOrDefault()));
+                .ForMember(src => src.MyFeedback,
+                    opt => opt.MapFrom(des => des.ServiceApplicationFeedBacks.FirstOrDefault()));
             mc.CreateMap<ServiceApplicationSpecificViewModel, ServiceApplication>();
 
             mc.CreateMap<ServiceApplication, ServiceApplicationSearchViewModel>()
                 .ForMember(src => src.PartyName, opt => opt.MapFrom(des => des.Party.FirstName))
                 .ForMember(src => src.PartyEmail, opt => opt.MapFrom(des => des.Party.Email))
-                .ForMember(src => src.PartyServiceApplication, opt => opt.MapFrom(des => des.PartyServiceApplications.FirstOrDefault()))
+                .ForMember(src => src.PartyServiceApplication,
+                    opt => opt.MapFrom(des => des.PartyServiceApplications.FirstOrDefault()))
                 .ForMember(src => src.AppCategoryName, opt => opt.MapFrom(des => des.AppCategory.Name));
             mc.CreateMap<ServiceApplicationSearchViewModel, ServiceApplication>();
 
             mc.CreateMap<ServiceApplication, CreateServiceApplicationViewModel>();
             mc.CreateMap<CreateServiceApplicationViewModel, ServiceApplication>();
+
+            mc.CreateMap<ServiceApplication, ServiceApplicationCommissionViewModel>().
+                ForMember(src => src.CommissionPercentage, opt => opt.MapFrom(des => des.AppCategory.CommissionPercentage));
+            mc.CreateMap<ServiceApplicationCommissionViewModel, ServiceApplication>();
         }
     }
 }

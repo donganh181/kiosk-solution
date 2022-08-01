@@ -283,6 +283,13 @@ namespace kiosk_solution.Business.Services.impl
             return app;
         }
 
+        public async Task<ServiceApplicationCommissionViewModel> GetCommissionById(Guid serviceApplicationId)
+        {
+            var app = await _unitOfWork.ServiceApplicationRepository.Get(a => a.Id.Equals(serviceApplicationId))
+                .ProjectTo<ServiceApplicationCommissionViewModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
+            return app;
+        }
+
         public async Task<bool> SetStatus(Guid id, string status)
         {
             var app = await _unitOfWork.ServiceApplicationRepository.Get(a => a.Id.Equals(id)).FirstOrDefaultAsync();
