@@ -9,5 +9,6 @@ namespace kiosk_solution.Data.ViewModels
         public string Link { get; set; }
         public string Logo { get; set; }
         public Guid? AppCategoryId { get; set; }
+        public bool? IsAffiliate { get; set; }
     }
 }

@@ -13,5 +13,7 @@ namespace kiosk_solution.Data.ViewModels
         public string Name { get; set; }
         [Required]
         public string Logo { get; set; }
+        [Required]
+        public double CommissionPercentage { get; set; }
     }
 }

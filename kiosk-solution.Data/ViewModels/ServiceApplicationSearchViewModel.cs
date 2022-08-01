@@ -28,5 +28,7 @@ namespace kiosk_solution.Data.ViewModels
         [BindNever] public int? NumberOfRating { get; set; }
         [BindNever] public List<ServiceApplicationFeedBackViewModel> ListFeedback { get; set; }
         [BindNever] public int? UserInstalled { get; set; }
+        
+        [BindNever]public bool? IsAffiliate { get; set; }
     }
 }
