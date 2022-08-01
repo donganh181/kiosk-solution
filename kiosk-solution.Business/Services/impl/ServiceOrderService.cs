@@ -36,7 +36,7 @@ namespace kiosk_solution.Business.Services.impl
             serviceOrder.Income = 0;
             foreach (var item in order.items)
             {
-                serviceOrder.Income += item.price;
+                serviceOrder.Income += item.Price;
             }
             serviceOrder.KioskId = model.KioskId;
             serviceOrder.ServiceApplicationId = model.ServiceApplicationId;
