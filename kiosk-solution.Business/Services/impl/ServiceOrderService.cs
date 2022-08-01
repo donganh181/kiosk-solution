@@ -36,7 +36,7 @@ namespace kiosk_solution.Business.Services.impl
             serviceOrder.Income = 0;
             foreach (var item in order.items)
             {
-                serviceOrder.Income += item.Price;
+                serviceOrder.Income += Decimal.Parse(item.Price.ToString());
             }
             serviceOrder.KioskId = model.KioskId;
             serviceOrder.ServiceApplicationId = model.ServiceApplicationId;
