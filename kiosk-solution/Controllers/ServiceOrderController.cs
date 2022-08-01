@@ -35,6 +35,7 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Create order of application {model.ServiceApplicationId} at kiosk {model.KioskId} success");
             return Ok(new SuccessResponse<ServiceOrderViewModel>((int)HttpStatusCode.OK, "Create success.", result));
         }
+
         
         [HttpGet]
         [MapToApiVersion("1")]
@@ -43,7 +44,7 @@ namespace kiosk_solution.Controllers
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _serviceOrderService.GetAllWithPaging(token.Id, model, size, page);
-            _logger.LogInformation($"Get all templates by party {token.Mail}");
+            _logger.LogInformation($"Get all order by party {token.Mail}");
             return Ok(new SuccessResponse<DynamicModelResponse<ServiceOrderSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
 
