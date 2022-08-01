@@ -24,6 +24,7 @@ namespace kiosk_solution.Data.Models
         public Guid? AppCategoryId { get; set; }
         public string Status { get; set; }
         public DateTime? CreateDate { get; set; }
+        public bool? IsAffiliate { get; set; }
 
         public virtual AppCategory AppCategory { get; set; }
         public virtual Party Party { get; set; }
