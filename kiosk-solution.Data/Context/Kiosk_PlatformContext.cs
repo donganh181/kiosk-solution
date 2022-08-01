@@ -1,4 +1,4 @@
-﻿    using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using kiosk_solution.Data.Models;
@@ -510,11 +510,13 @@ namespace kiosk_solution.Data.Context
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
 
+                entity.Property(e => e.Commission).HasColumnType("decimal(18, 2)");
+
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
-                entity.Property(e => e.Income).HasColumnType("decimal(18, 2)");
-
                 entity.Property(e => e.OrderDetail).IsUnicode(false);
+
+                entity.Property(e => e.Total).HasColumnType("decimal(18, 2)");
 
                 entity.HasOne(d => d.Kiosk)
                     .WithMany(p => p.ServiceOrders)

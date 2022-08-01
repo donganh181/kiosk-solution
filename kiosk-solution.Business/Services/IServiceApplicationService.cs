@@ -14,6 +14,7 @@ namespace kiosk_solution.Business.Services
         Task<DynamicModelResponse<ServiceApplicationSearchViewModel>> GetAllWithPaging(string role, Guid? id, ServiceApplicationSearchViewModel model, int size, int pageNum);
         Task<ServiceApplicationViewModel> Create(Guid partyId, CreateServiceApplicationViewModel model);
         Task<ServiceApplicationSpecificViewModel> GetById(Guid? partyId, Guid id);
+        Task<ServiceApplicationCommissionViewModel> GetCommissionById(Guid serviceApplicationId);
         Task<bool> SetStatus(Guid id, string status);
         Task<bool> HasApplicationOnCategory(Guid appCategoryId);
         Task<ServiceApplicationViewModel> UpdateStatus(ServiceApplicationUpdateStatusViewModel model);
