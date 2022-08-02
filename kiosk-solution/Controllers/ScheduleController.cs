@@ -74,5 +74,17 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Get schedule {result.Name} by party {token.Mail}.");
             return Ok(new SuccessResponse<ScheduleViewModel>((int) HttpStatusCode.OK, "Get success.", result));
         }
+
+        [Authorize(Roles = "Location Owner")]
+        [HttpPatch]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> ChangeStatus([FromQuery] Guid scheduleId)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _scheduleService.ChangeStatus(token.Id, scheduleId);
+            _logger.LogInformation($"Change status of schedule {result.Name} to {result.Status} by party {token.Mail}.");
+            return Ok(new SuccessResponse<ScheduleViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
     }
 }

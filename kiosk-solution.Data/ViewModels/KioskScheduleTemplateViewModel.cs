@@ -12,6 +12,7 @@ namespace kiosk_solution.Data.ViewModels
         public Guid? ScheduleId { get; set; }
         public Guid? TemplateId { get; set; }
         public Guid? KioskId { get; set; }
+        public string Status { get; set; }
         public TemplateViewModel Template { get; set; }
         public ScheduleViewModel Schedule { get; set; }
     }

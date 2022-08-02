@@ -112,6 +112,7 @@ namespace kiosk_solution.Business.Services.impl
             try
             {
                 var data = _mapper.Map<KioskScheduleTemplate>(model);
+                data.Status = StatusConstants.ACTIVATE;
                 await _unitOfWork.KioskScheduleTemplateRepository.InsertAsync(data);
                 await _unitOfWork.SaveAsync();
 
@@ -282,6 +283,46 @@ namespace kiosk_solution.Business.Services.impl
                 Data = listObj.Data.ToList()
             };
             return result;
+        }
+
+        public async Task<KioskScheduleTemplateViewModel> ChangeStatus(Guid partyId, Guid kioskScheduleTemplateId)
+        {
+            var target = await _unitOfWork.KioskScheduleTemplateRepository
+                .Get(a => a.Id.Equals(kioskScheduleTemplateId))
+                .Include(x => x.Kiosk)
+                .FirstOrDefaultAsync();
+
+            if (!target.Kiosk.PartyId.Equals(partyId))
+            {
+                _logger.LogInformation("You cannot update kiosk schedule template of other user.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You cannot update kiosk schedule template of other user.");
+            }
+            if (target.Status.Equals(StatusConstants.ACTIVATE))
+            {
+                target.Status = StatusConstants.DEACTIVATE;
+            }
+            else
+            {
+                target.Status = StatusConstants.ACTIVATE;
+            }
+            try
+            {
+                _unitOfWork.KioskScheduleTemplateRepository.Update(target);
+                await _unitOfWork.SaveAsync();
+
+                var result = await _unitOfWork.KioskScheduleTemplateRepository
+                .Get(a => a.Id.Equals(kioskScheduleTemplateId))
+                .Include(x => x.Kiosk)
+                .ProjectTo<KioskScheduleTemplateViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
+            }
         }
     }
 }
