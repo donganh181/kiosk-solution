@@ -236,7 +236,8 @@ namespace kiosk_solution.Business.Services.impl
 
             var listKiosk = _unitOfWork.KioskRepository
                 .Get(k => k.Status.Equals(StatusConstants.ACTIVATE))
-                .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
+                .Include(a => a.KioskScheduleTemplates.Where(d => d.Status.Equals(StatusConstants.ACTIVATE)
+                                                                  && d.Template.Status.Equals(StatusConstants.COMPLETE)
                                                                   && d.Schedule.DayOfWeek.Contains(thisDay)
                                                                   && d.Schedule.Status.Equals(StatusConstants
                                                                       .ON) //bỏ status
@@ -246,7 +247,8 @@ namespace kiosk_solution.Business.Services.impl
                                                                       (TimeSpan) d.Schedule.TimeEnd) < 0
                 ))
                 .ThenInclude(b => b.Schedule)
-                .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
+                .Include(a => a.KioskScheduleTemplates.Where(d => d.Status.Equals(StatusConstants.ACTIVATE)
+                                                                  && d.Template.Status.Equals(StatusConstants.COMPLETE)
                                                                   && d.Schedule.DayOfWeek.Contains(thisDay)
                                                                   && d.Schedule.Status.Equals(StatusConstants.ON)
                                                                   && TimeSpan.Compare(timeNow,
@@ -257,7 +259,8 @@ namespace kiosk_solution.Business.Services.impl
                 .ThenInclude(b => b.Template)
                 .ThenInclude(c => c.AppCategoryPositions)
                 .ThenInclude(d => d.AppCategory)
-                .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
+                .Include(a => a.KioskScheduleTemplates.Where(d => d.Status.Equals(StatusConstants.ACTIVATE)
+                                                                  && d.Template.Status.Equals(StatusConstants.COMPLETE)
                                                                   && d.Schedule.DayOfWeek.Contains(thisDay)
                                                                   && d.Schedule.Status.Equals(StatusConstants.ON)
                                                                   && TimeSpan.Compare(timeNow,
@@ -296,7 +299,8 @@ namespace kiosk_solution.Business.Services.impl
 
             var kiosk = _unitOfWork.KioskRepository
                 .Get(k => k.Status.Equals(StatusConstants.ACTIVATE) && k.Id.Equals(id))
-                .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
+                .Include(a => a.KioskScheduleTemplates.Where(d => d.Status.Equals(StatusConstants.ACTIVATE)
+                                                                  && d.Template.Status.Equals(StatusConstants.COMPLETE)
                                                                   && d.Schedule.DayOfWeek.Contains(daynow)
                                                                   && d.Schedule.Status.Equals(StatusConstants.ON)
                                                                   && TimeSpan.Compare(timeNow,
@@ -305,7 +309,8 @@ namespace kiosk_solution.Business.Services.impl
                                                                       (TimeSpan)d.Schedule.TimeEnd) < 0
                 ))
                 .ThenInclude(b => b.Schedule)
-                .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
+                .Include(a => a.KioskScheduleTemplates.Where(d => d.Status.Equals(StatusConstants.ACTIVATE)
+                                                                  && d.Template.Status.Equals(StatusConstants.COMPLETE)
                                                                   && d.Schedule.DayOfWeek.Contains(daynow)
                                                                   && d.Schedule.Status.Equals(StatusConstants.ON)
                                                                   && TimeSpan.Compare(timeNow,
@@ -316,7 +321,8 @@ namespace kiosk_solution.Business.Services.impl
                 .ThenInclude(b => b.Template)
                 .ThenInclude(c => c.AppCategoryPositions)
                 .ThenInclude(d => d.AppCategory)
-                .Include(a => a.KioskScheduleTemplates.Where(d => d.Template.Status.Equals(StatusConstants.COMPLETE)
+                .Include(a => a.KioskScheduleTemplates.Where(d => d.Status.Equals(StatusConstants.ACTIVATE)
+                                                                  && d.Template.Status.Equals(StatusConstants.COMPLETE)
                                                                   && d.Schedule.DayOfWeek.Contains(daynow)
                                                                   && d.Schedule.Status.Equals(StatusConstants.ON)
                                                                   && TimeSpan.Compare(timeNow,

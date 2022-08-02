@@ -76,5 +76,17 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Get template and schedule of kiosk {kioskId} by party {token.Id}.");
             return Ok(new SuccessResponse<DynamicModelResponse<KioskScheduleTemplateViewModel>>((int) HttpStatusCode.OK,"Get success.", result));
         }
+
+        [Authorize(Roles = "Location Owner")]
+        [HttpPatch]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> ChangeStatus([FromQuery] Guid kioskScheduleTemplateId)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _kioskScheduleTemplateService.ChangeStatus(token.Id, kioskScheduleTemplateId);
+            _logger.LogInformation($"Change status of kiosk schedule template id {result.Id} to Status {result.Status} by party {token.Id}.");
+            return Ok(new SuccessResponse<KioskScheduleTemplateViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
     }
 }
