@@ -217,6 +217,10 @@ namespace kiosk_solution.Data.Context
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
 
+                entity.Property(e => e.Status)
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
+
                 entity.HasOne(d => d.Kiosk)
                     .WithMany(p => p.KioskScheduleTemplates)
                     .HasForeignKey(d => d.KioskId)
