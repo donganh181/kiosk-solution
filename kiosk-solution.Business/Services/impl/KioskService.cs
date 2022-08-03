@@ -452,13 +452,23 @@ namespace kiosk_solution.Business.Services.impl
             }
 
             if (kiosk.Status.Equals(StatusConstants.ACTIVATE))
+            {
                 kiosk.Status = StatusConstants.DEACTIVATE;
+            }
+
             else
-                kiosk.Status = StatusConstants.ACTIVATE;
+            {
+                _logger.LogInformation("You cannot change to status activate.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You cannot change to status activate.");
+            }
             try
             {
                 _unitOfWork.KioskRepository.Update(kiosk);
                 await _unitOfWork.SaveAsync();
+                await _eventHub.Clients.Group(kiosk.Id.ToString())
+                    .SendAsync(SystemEventHub.KIOSK_CONNECTION_CHANNEL,
+                        SystemEventHub.SYSTEM_BOT, "CHANGE_STATUS_TO_DEACTIVATE");
+
                 var result = _mapper.CreateMapper().Map<KioskViewModel>(kiosk);
                 return result;
             }
