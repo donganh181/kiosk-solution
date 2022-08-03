@@ -105,7 +105,12 @@ namespace kiosk_solution
             app.UseRouting();
             app.UseCors(builder =>
             {
-                builder.WithOrigins("http://localhost:3000","https://tikap.cf:9930","http://localhost:3001").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+                builder.WithOrigins(
+                    "http://localhost:5099",
+                    "http://booking-sample:5099",
+                    "http://localhost:3000",
+                    "https://tikap.cf:9930",
+                    "http://localhost:3001").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
             });
             app.UseAuthentication();
             app.UseAuthorization();
