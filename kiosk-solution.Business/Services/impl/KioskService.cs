@@ -257,7 +257,7 @@ namespace kiosk_solution.Business.Services.impl
                                                                       (TimeSpan) d.Schedule.TimeEnd) < 0
                 ))
                 .ThenInclude(b => b.Template)
-                .ThenInclude(c => c.AppCategoryPositions)
+                .ThenInclude(c => c.AppCategoryPositions.Where(x => x!=null))
                 .ThenInclude(d => d.AppCategory)
                 .Include(a => a.KioskScheduleTemplates.Where(d => d.Status.Equals(StatusConstants.ACTIVATE)
                                                                   && d.Template.Status.Equals(StatusConstants.COMPLETE)
@@ -269,7 +269,7 @@ namespace kiosk_solution.Business.Services.impl
                                                                       (TimeSpan) d.Schedule.TimeEnd) < 0
                 ))
                 .ThenInclude(b => b.Template)
-                .ThenInclude(c => c.EventPositions)
+                .ThenInclude(c => c.EventPositions.Where(y => y!=null))
                 .ThenInclude(d => d.Event)
                 .ToList()
                 .AsQueryable()
@@ -319,7 +319,7 @@ namespace kiosk_solution.Business.Services.impl
                                                                       (TimeSpan)d.Schedule.TimeEnd) < 0
                 ))
                 .ThenInclude(b => b.Template)
-                .ThenInclude(c => c.AppCategoryPositions)
+                .ThenInclude(c => c.AppCategoryPositions.Where(x => x!=null))
                 .ThenInclude(d => d.AppCategory)
                 .Include(a => a.KioskScheduleTemplates.Where(d => d.Status.Equals(StatusConstants.ACTIVATE)
                                                                   && d.Template.Status.Equals(StatusConstants.COMPLETE)
@@ -331,7 +331,7 @@ namespace kiosk_solution.Business.Services.impl
                                                                       (TimeSpan)d.Schedule.TimeEnd) < 0
                 ))
                 .ThenInclude(b => b.Template)
-                .ThenInclude(c => c.EventPositions)
+                .ThenInclude(c => c.EventPositions.Where(y => y!=null))
                 .ThenInclude(d => d.Event)
                 .ToList()
                 .AsQueryable()
@@ -436,7 +436,9 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<KioskViewModel> UpdateStatus(Guid updaterId, Guid kioskId)
         {
-            var kiosk = await _unitOfWork.KioskRepository.Get(k => k.Id.Equals(kioskId)).FirstOrDefaultAsync();
+            var kiosk = await _unitOfWork.KioskRepository
+                .Get(k => k.Id.Equals(kioskId))
+                .FirstOrDefaultAsync();
             if (kiosk == null)
             {
                 _logger.LogInformation("Kiosk not found.");
