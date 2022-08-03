@@ -9,7 +9,11 @@ namespace kiosk_solution.Data.ViewModels
         [BindNever]
         public Guid? Id { get; set; }
         [BindNever]
-        public decimal? Income { get; set; }
+        public decimal? Total { get; set; }
+        [BindNever]
+        public decimal? Commission { get; set; }
+        [BindNever]
+        public decimal? SystemCommission { get; set; }
         [BindNever]
         public DateTime? CreateDate { get; set; }
         [BindNever]

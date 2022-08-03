@@ -520,6 +520,8 @@ namespace kiosk_solution.Data.Context
 
                 entity.Property(e => e.OrderDetail).IsUnicode(false);
 
+                entity.Property(e => e.SystemCommission).HasColumnType("decimal(18, 2)");
+
                 entity.Property(e => e.Total).HasColumnType("decimal(18, 2)");
 
                 entity.HasOne(d => d.Kiosk)
