@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using kiosk_solution.Business.Services;
 using kiosk_solution.Data.Constants;
@@ -47,6 +48,12 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Get all order by party {token.Mail}");
             return Ok(new SuccessResponse<DynamicModelResponse<ServiceOrderSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
-
+        [HttpGet("test")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> Get()
+        {
+            Console.WriteLine("test success");
+            return Ok();
+        }
     }
 }
