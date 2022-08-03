@@ -106,6 +106,8 @@ namespace kiosk_solution
             app.UseCors(builder =>
             {
                 builder.WithOrigins(
+                	"http://localhost:5099",
+                    "http://booking-sample:5099",
                     "https://tikap.cf:9932",
                     "https://tikap.cf:9930",
                     "http://localhost:3000",
