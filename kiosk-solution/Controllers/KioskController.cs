@@ -46,11 +46,11 @@ namespace kiosk_solution.Controllers
         [Authorize(Roles = "Location Owner")]
         [HttpPatch("status")]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> UpdateStatus(Guid id)
+        public async Task<IActionResult> UpdateStatus(Guid id, [FromQuery] bool isKioskSetup)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _kioskService.UpdateStatus(token.Id, id);
+            var result = await _kioskService.UpdateStatus(token.Id, id, isKioskSetup);
             _logger.LogInformation($"Update status of kiosk [{result.Id}] by party {token.Mail}");
             return Ok(new SuccessResponse<KioskViewModel>((int) HttpStatusCode.OK, "Update success.", result));
         }
@@ -127,6 +127,7 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<DynamicModelResponse<KioskSearchViewModel>>((int) HttpStatusCode.OK,
                 "Search success.", result));
         }
+
         [HttpGet("{kioskId}")]
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetById(Guid kioskId)
@@ -135,6 +136,7 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<KioskViewModel>((int) HttpStatusCode.OK,
                 "Search success.", result));
         }
+
         /// <summary>
         /// test get all specific kiosk base on scheduling time
         /// </summary>
@@ -158,7 +160,7 @@ namespace kiosk_solution.Controllers
         public async Task<IActionResult> GetByIdThenSendNoti([FromQuery] Guid kioskId)
         {
             var result = await _kioskService.GetSpecificKiosk(kioskId);
-            return Ok(new SuccessResponse<dynamic>((int)HttpStatusCode.OK, "Search success.", result));
+            return Ok(new SuccessResponse<dynamic>((int) HttpStatusCode.OK, "Search success.", result));
         }
 
         [HttpGet("nearby")]
