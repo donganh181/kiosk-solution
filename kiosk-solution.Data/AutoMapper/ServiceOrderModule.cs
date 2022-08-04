@@ -10,12 +10,16 @@ namespace kiosk_solution.Data.AutoMapper
         {
             mc.CreateMap<ServiceOrder, ServiceOrderCreateViewModel>();
             mc.CreateMap<ServiceOrderCreateViewModel, ServiceOrder>();
-            
+
             mc.CreateMap<ServiceOrder, ServiceOrderViewModel>();
             mc.CreateMap<ServiceOrderViewModel, ServiceOrder>();
-            
+
             mc.CreateMap<ServiceOrder, ServiceOrderSearchViewModel>();
             mc.CreateMap<ServiceOrderSearchViewModel, ServiceOrder>();
+
+            mc.CreateMap<ServiceOrder, ServiceOrderCommissionSearchViewModel>().ForMember(
+                src => src.serviceApplicationName, opt => opt.MapFrom(des => des.ServiceApplication.Name));
+            mc.CreateMap<ServiceOrderCommissionSearchViewModel, ServiceOrder>();
         }
     }
 }

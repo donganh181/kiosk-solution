@@ -42,6 +42,14 @@ namespace kiosk_solution.Business.Services.impl
             _eventHub = eventHub;
         }
 
+        public async Task<KioskViewModel> GetByIdWithParyId(Guid kioskId, Guid partyId)
+        {
+            var kiosk = await _unitOfWork.KioskRepository.Get(k => k.Id.Equals(kioskId) && k.PartyId.Equals(partyId))
+                .ProjectTo<KioskViewModel>(_mapper)
+                .FirstOrDefaultAsync();
+            return kiosk;
+        }
+
         public async Task<KioskViewModel> AddDeviceId(KioskAddDeviceIdViewModel model)
         {
             var kiosk = await _unitOfWork.KioskRepository
@@ -132,7 +140,7 @@ namespace kiosk_solution.Business.Services.impl
 
             var listKiosk = kiosks.ToList();
 
-            foreach(var kiosk in listKiosk)
+            foreach (var kiosk in listKiosk)
             {
                 var rating = await _kioskRatingService.GetAverageRatingOfKiosk(Guid.Parse(kiosk.Id + ""));
                 if (rating.FirstOrDefault().Value != 0)
@@ -177,7 +185,7 @@ namespace kiosk_solution.Business.Services.impl
                 .Get(k => k.Id.Equals(kioskId))
                 .ProjectTo<KioskViewModel>(_mapper)
                 .FirstOrDefaultAsync();
-            if(result != null)
+            if (result != null)
             {
                 var rating = await _kioskRatingService.GetAverageRatingOfKiosk(Guid.Parse(result.Id + ""));
                 if (rating.FirstOrDefault().Value != 0)
@@ -192,8 +200,8 @@ namespace kiosk_solution.Business.Services.impl
                 }
 
                 result.ListFeedback = await _kioskRatingService.GetListFeedbackByKioskId(Guid.Parse(result.Id + ""));
-
             }
+
             return result;
         }
 
@@ -257,7 +265,7 @@ namespace kiosk_solution.Business.Services.impl
                                                                       (TimeSpan) d.Schedule.TimeEnd) < 0
                 ))
                 .ThenInclude(b => b.Template)
-                .ThenInclude(c => c.AppCategoryPositions.Where(x => x!=null))
+                .ThenInclude(c => c.AppCategoryPositions.Where(x => x != null))
                 .ThenInclude(d => d.AppCategory)
                 .Include(a => a.KioskScheduleTemplates.Where(d => d.Status.Equals(StatusConstants.ACTIVATE)
                                                                   && d.Template.Status.Equals(StatusConstants.COMPLETE)
@@ -269,7 +277,7 @@ namespace kiosk_solution.Business.Services.impl
                                                                       (TimeSpan) d.Schedule.TimeEnd) < 0
                 ))
                 .ThenInclude(b => b.Template)
-                .ThenInclude(c => c.EventPositions.Where(y => y!=null))
+                .ThenInclude(c => c.EventPositions.Where(y => y != null))
                 .ThenInclude(d => d.Event)
                 .ToList()
                 .AsQueryable()
@@ -304,9 +312,9 @@ namespace kiosk_solution.Business.Services.impl
                                                                   && d.Schedule.DayOfWeek.Contains(daynow)
                                                                   && d.Schedule.Status.Equals(StatusConstants.ON)
                                                                   && TimeSpan.Compare(timeNow,
-                                                                      (TimeSpan)d.Schedule.TimeStart) >= 0
+                                                                      (TimeSpan) d.Schedule.TimeStart) >= 0
                                                                   && TimeSpan.Compare(timeNow,
-                                                                      (TimeSpan)d.Schedule.TimeEnd) < 0
+                                                                      (TimeSpan) d.Schedule.TimeEnd) < 0
                 ))
                 .ThenInclude(b => b.Schedule)
                 .Include(a => a.KioskScheduleTemplates.Where(d => d.Status.Equals(StatusConstants.ACTIVATE)
@@ -314,34 +322,34 @@ namespace kiosk_solution.Business.Services.impl
                                                                   && d.Schedule.DayOfWeek.Contains(daynow)
                                                                   && d.Schedule.Status.Equals(StatusConstants.ON)
                                                                   && TimeSpan.Compare(timeNow,
-                                                                      (TimeSpan)d.Schedule.TimeStart) >= 0
+                                                                      (TimeSpan) d.Schedule.TimeStart) >= 0
                                                                   && TimeSpan.Compare(timeNow,
-                                                                      (TimeSpan)d.Schedule.TimeEnd) < 0
+                                                                      (TimeSpan) d.Schedule.TimeEnd) < 0
                 ))
                 .ThenInclude(b => b.Template)
-                .ThenInclude(c => c.AppCategoryPositions.Where(x => x!=null))
+                .ThenInclude(c => c.AppCategoryPositions.Where(x => x != null))
                 .ThenInclude(d => d.AppCategory)
                 .Include(a => a.KioskScheduleTemplates.Where(d => d.Status.Equals(StatusConstants.ACTIVATE)
                                                                   && d.Template.Status.Equals(StatusConstants.COMPLETE)
                                                                   && d.Schedule.DayOfWeek.Contains(daynow)
                                                                   && d.Schedule.Status.Equals(StatusConstants.ON)
                                                                   && TimeSpan.Compare(timeNow,
-                                                                      (TimeSpan)d.Schedule.TimeStart) >= 0
+                                                                      (TimeSpan) d.Schedule.TimeStart) >= 0
                                                                   && TimeSpan.Compare(timeNow,
-                                                                      (TimeSpan)d.Schedule.TimeEnd) < 0
+                                                                      (TimeSpan) d.Schedule.TimeEnd) < 0
                 ))
                 .ThenInclude(b => b.Template)
-                .ThenInclude(c => c.EventPositions.Where(y => y!=null))
+                .ThenInclude(c => c.EventPositions.Where(y => y != null))
                 .ThenInclude(d => d.Event)
                 .ToList()
                 .AsQueryable()
                 .ProjectTo<KioskDetailViewModel>(_mapper)
                 .FirstOrDefault();
 
-            if(kiosk == null)
+            if (kiosk == null)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
 
             if (kiosk.KioskScheduleTemplate == null)
@@ -366,7 +374,8 @@ namespace kiosk_solution.Business.Services.impl
                     if (eventRows.ContainsKey((eventPos.RowIndex)))
                     {
                         eventRows[eventPos.RowIndex].Add(eventPos);
-                        eventRows[eventPos.RowIndex]=eventRows[eventPos.RowIndex].OrderBy(e => e.ColumnIndex).ToList();
+                        eventRows[eventPos.RowIndex] =
+                            eventRows[eventPos.RowIndex].OrderBy(e => e.ColumnIndex).ToList();
                     }
                     else
                     {
@@ -382,7 +391,7 @@ namespace kiosk_solution.Business.Services.impl
                     if (appRows.ContainsKey((appPost.RowIndex)))
                     {
                         appRows[appPost.RowIndex].Add(appPost);
-                        appRows[appPost.RowIndex]=appRows[appPost.RowIndex].OrderBy(e => e.ColumnIndex).ToList();
+                        appRows[appPost.RowIndex] = appRows[appPost.RowIndex].OrderBy(e => e.ColumnIndex).ToList();
                     }
                     else
                     {
@@ -391,6 +400,7 @@ namespace kiosk_solution.Business.Services.impl
                         appRows.Add(appPost.RowIndex, eventPositionSpecificViewModels);
                     }
                 }
+
                 var kioskResult = new
                 {
                     events = eventRows.Values,
@@ -459,8 +469,9 @@ namespace kiosk_solution.Business.Services.impl
             else
             {
                 _logger.LogInformation("You cannot change to status activate.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You cannot change to status activate.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You cannot change to status activate.");
             }
+
             try
             {
                 _unitOfWork.KioskRepository.Update(kiosk);
