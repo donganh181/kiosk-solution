@@ -13,6 +13,7 @@ namespace kiosk_solution.Business.Services
         Task<KioskViewModel> UpdateInformation(Guid updaterId, UpdateKioskViewModel model);
         Task<DynamicModelResponse<KioskSearchViewModel>> GetAllWithPaging(string role, Guid id, KioskSearchViewModel model, int size, int pageNum);
         Task<KioskViewModel> GetById(Guid kioskId);
+        Task<KioskViewModel> GetByIdWithParyId(Guid kioskId, Guid partyId);
         Task<KioskViewModel> AddDeviceId(KioskAddDeviceIdViewModel model);
         Task<List<KioskDetailViewModel>> GetListSpecificKiosk();
         Task<dynamic> GetSpecificKiosk(Guid id);

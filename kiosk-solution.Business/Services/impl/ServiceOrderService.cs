@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -22,13 +24,16 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IMapper _mapper;
         private readonly ILogger<IServiceOrderService> _logger;
         private readonly IServiceApplicationService _serviceApplicationService;
+        private readonly IKioskService _kioskService;
 
-        public ServiceOrderService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IServiceOrderService> logger,IServiceApplicationService serviceApplicationService)
+        public ServiceOrderService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<IServiceOrderService> logger,
+            IServiceApplicationService serviceApplicationService, IKioskService kioskService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _serviceApplicationService = serviceApplicationService;
+            _kioskService = kioskService;
         }
 
         public async Task<ServiceOrderViewModel> Create(ServiceOrderCreateViewModel model)
@@ -42,7 +47,8 @@ namespace kiosk_solution.Business.Services.impl
             }
 
             var appCate = await _serviceApplicationService.GetCommissionById(model.ServiceApplicationId);
-            serviceOrder.Commission = serviceOrder.Total * Decimal.Parse((appCate.CommissionPercentage-1).ToString()) / 100;
+            serviceOrder.Commission =
+                serviceOrder.Total * Decimal.Parse((appCate.CommissionPercentage - 1).ToString()) / 100;
             serviceOrder.SystemCommission = serviceOrder.Total * 1 / 100;
             serviceOrder.KioskId = model.KioskId;
             serviceOrder.ServiceApplicationId = model.ServiceApplicationId;
@@ -64,6 +70,12 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<DynamicModelResponse<ServiceOrderSearchViewModel>> GetAllWithPaging(Guid partyId,
             ServiceOrderSearchViewModel model, int size, int pageNum)
         {
+            var kiosk = await _kioskService.GetByIdWithParyId((Guid) model.KioskId, partyId);
+            if (kiosk == null)
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You can not use this feature.");
+            }
             var orders = _unitOfWork.ServiceOrderRepository.Get(o => o.Kiosk.PartyId.Equals(partyId))
                 .ProjectTo<ServiceOrderSearchViewModel>(_mapper.ConfigurationProvider)
                 .DynamicFilter(model).OrderByDescending(o => o.CreateDate).ThenBy(o => o.ServiceApplicationId);
@@ -86,6 +98,60 @@ namespace kiosk_solution.Business.Services.impl
                 Data = listPaging.Data.ToList()
             };
             return result;
+        }
+
+        public async Task<List<ServiceOrderCommissionSearchViewModel>> GetAllCommission(Guid partyId, Guid kioskId)
+        {
+            var kiosk = await _kioskService.GetByIdWithParyId(kioskId, partyId);
+            if (kiosk == null)
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You can not use this feature.");
+            }
+
+            var listApp = await _unitOfWork.ServiceOrderRepository.Get(s => s.KioskId.Equals(kioskId))
+                .ProjectTo<ServiceOrderCommissionSearchViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+            listApp = listApp.GroupBy(o => o.serviceApplicationId).Select(g => g.First()).ToList();
+            foreach (var app in listApp)
+            {
+                var commission = await _unitOfWork.ServiceOrderRepository
+                    .Get(s => s.KioskId.Equals(kioskId) && s.ServiceApplicationId.Equals(app.serviceApplicationId))
+                    .SumAsync(o => o.Commission);
+                app.totalCommission = (double) commission;
+            }
+
+            return listApp;
+        }
+
+        public async Task<List<ServiceOrderCommissionSearchViewModel>> GetAllCommissionByMonth(Guid partyId,
+            Guid kioskId,
+            int month, int year)
+        {
+            var kiosk = await _kioskService.GetByIdWithParyId(kioskId, partyId);
+            if (kiosk == null)
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You can not use this feature.");
+            }
+
+            var listApp = await _unitOfWork.ServiceOrderRepository.Get(s =>
+                    s.KioskId.Equals(kioskId) &&
+                    s.CreateDate.Value.Month == month &&
+                    s.CreateDate.Value.Year == year)
+                .ProjectTo<ServiceOrderCommissionSearchViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+            listApp = listApp.GroupBy(o => o.serviceApplicationId).Select(g => g.First()).ToList();
+            foreach (var app in listApp)
+            {
+                var commission = await _unitOfWork.ServiceOrderRepository
+                    .Get(s => s.KioskId.Equals(kioskId) &&
+                              s.ServiceApplicationId.Equals(app.serviceApplicationId) &&
+                              s.CreateDate.Value.Month == month &&
+                              s.CreateDate.Value.Year == year)
+                    .SumAsync(o => o.Commission);
+                app.totalCommission = (double) commission;
+            }
+
+            return listApp;
         }
     }
 }
