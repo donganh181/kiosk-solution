@@ -72,6 +72,5 @@ namespace kiosk_solution.Controllers
             var result = await _serviceOrderService.GetAllCommissionByMonth(token.Id, kioskId, month, year);
             return Ok(new SuccessResponse<List<ServiceOrderCommissionSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
-
     }
 }
