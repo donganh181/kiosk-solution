@@ -444,7 +444,7 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<KioskViewModel> UpdateStatus(Guid updaterId, Guid kioskId)
+        public async Task<KioskViewModel> UpdateStatus(Guid updaterId, Guid kioskId,bool isKioskSetup)
         {
             var kiosk = await _unitOfWork.KioskRepository
                 .Get(k => k.Id.Equals(kioskId))
@@ -461,29 +461,43 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Your account cannot use this feature.");
             }
 
-            if (kiosk.Status.Equals(StatusConstants.ACTIVATE))
+            if (!isKioskSetup)
             {
-                kiosk.Status = StatusConstants.DEACTIVATE;
-            }
+                if (kiosk.Status.Equals(StatusConstants.ACTIVATE))
+                {
+                    kiosk.Status = StatusConstants.DEACTIVATE;
+                }
 
+                else
+                {
+                    _logger.LogInformation("You cannot change to status activate.");
+                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You cannot change to status activate.");
+                }
+            }
             else
             {
-                _logger.LogInformation("You cannot change to status activate.");
-                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You cannot change to status activate.");
+                if (kiosk.Status.Equals(StatusConstants.ACTIVATE))
+                {
+                    kiosk.Status = StatusConstants.DEACTIVATE;
+                }
+                else
+                {
+                    kiosk.Status = StatusConstants.ACTIVATE;
+                }
             }
-
             try
             {
                 _unitOfWork.KioskRepository.Update(kiosk);
                 await _unitOfWork.SaveAsync();
-                await _eventHub.Clients.Group(kiosk.Id.ToString())
-                    .SendAsync(SystemEventHub.KIOSK_CONNECTION_CHANNEL,
-                        SystemEventHub.SYSTEM_BOT, "CHANGE_STATUS_TO_DEACTIVATE");
-
+                if (!isKioskSetup)
+                {
+                    await _eventHub.Clients.Group(kiosk.Id.ToString())
+                        .SendAsync(SystemEventHub.KIOSK_CONNECTION_CHANNEL,
+                            SystemEventHub.SYSTEM_BOT, "CHANGE_STATUS_TO_DEACTIVATE");
+                }
                 var result = _mapper.CreateMapper().Map<KioskViewModel>(kiosk);
                 return result;
-            }
-            catch (DbUpdateException)
+            }catch (DbUpdateException)
             {
                 _logger.LogInformation("Invalid Data.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
