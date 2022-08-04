@@ -76,7 +76,7 @@ namespace kiosk_solution.Controllers
         }
 
         [Authorize(Roles = "Location Owner")]
-        [HttpPatch]
+        [HttpPatch("status")]
         [MapToApiVersion("1")]
         public async Task<IActionResult> ChangeStatus([FromQuery] Guid scheduleId)
         {
