@@ -127,8 +127,7 @@ namespace kiosk_solution.Business.Services.impl
         }
 
         public async Task<List<ServiceOrderCommissionSearchViewModel>> GetAllCommissionByMonth(Guid partyId,
-            Guid kioskId,
-            int month, int year)
+            Guid kioskId, int month, int year, ServiceOrderCommissionSearchViewModel model)
         {
             var kiosk = await _kioskService.GetByIdWithParyId(kioskId, partyId);
             if (kiosk == null)
@@ -141,7 +140,7 @@ namespace kiosk_solution.Business.Services.impl
                     s.KioskId.Equals(kioskId) &&
                     s.CreateDate.Value.Month == month &&
                     s.CreateDate.Value.Year == year)
-                .ProjectTo<ServiceOrderCommissionSearchViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+                .ProjectTo<ServiceOrderCommissionSearchViewModel>(_mapper.ConfigurationProvider).DynamicFilter(model).ToListAsync();
             listApp = listApp.GroupBy(o => o.ServiceApplicationId).Select(g => g.First()).ToList();
             foreach (var app in listApp)
             {

@@ -24,7 +24,8 @@ namespace kiosk_solution.Controllers
         private readonly ILogger<ServiceOrderController> _logger;
         private IConfiguration _configuration;
 
-        public ServiceOrderController(IServiceOrderService serviceOrderService, ILogger<ServiceOrderController> logger, IConfiguration configuration)
+        public ServiceOrderController(IServiceOrderService serviceOrderService, ILogger<ServiceOrderController> logger,
+            IConfiguration configuration)
         {
             _serviceOrderService = serviceOrderService;
             _logger = logger;
@@ -36,42 +37,49 @@ namespace kiosk_solution.Controllers
         public async Task<IActionResult> Create([FromBody] ServiceOrderCreateViewModel model)
         {
             var result = await _serviceOrderService.Create(model);
-            _logger.LogInformation($"Create order of application {model.ServiceApplicationId} at kiosk {model.KioskId} success");
-            return Ok(new SuccessResponse<ServiceOrderViewModel>((int)HttpStatusCode.OK, "Create success.", result));
+            _logger.LogInformation(
+                $"Create order of application {model.ServiceApplicationId} at kiosk {model.KioskId} success");
+            return Ok(new SuccessResponse<ServiceOrderViewModel>((int) HttpStatusCode.OK, "Create success.", result));
         }
 
         [Authorize(Roles = "Location Owner")]
         [HttpGet]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> Get([FromQuery] ServiceOrderSearchViewModel model, int size, int page = CommonConstants.DefaultPage)
+        public async Task<IActionResult> Get([FromQuery] ServiceOrderSearchViewModel model, int size,
+            int page = CommonConstants.DefaultPage)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _serviceOrderService.GetAllWithPaging(token.Id, model, size, page);
             _logger.LogInformation($"Get all order by party {token.Mail}");
-            return Ok(new SuccessResponse<DynamicModelResponse<ServiceOrderSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+            return Ok(new SuccessResponse<DynamicModelResponse<ServiceOrderSearchViewModel>>((int) HttpStatusCode.OK,
+                "Search success.", result));
         }
-        
+
         [Authorize(Roles = "Location Owner")]
         [HttpGet("commission")]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> GetCommission([FromQuery]ServiceOrderCommissionSearchViewModel model, [Required]Guid kioskId)
+        public async Task<IActionResult> GetCommission([FromQuery] ServiceOrderCommissionSearchViewModel model,
+            [Required] Guid kioskId)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _serviceOrderService.GetAllCommission(token.Id, kioskId, model);
-            return Ok(new SuccessResponse<List<ServiceOrderCommissionSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+            return Ok(new SuccessResponse<List<ServiceOrderCommissionSearchViewModel>>((int) HttpStatusCode.OK,
+                "Search success.", result));
         }
-        
+
         [Authorize(Roles = "Location Owner")]
         [HttpGet("commission/monthOfYear")]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> GetCommissionByMonth([FromQuery] Guid kioskId, int month, int year)
+        public async Task<IActionResult> GetCommissionByMonth([FromQuery] ServiceOrderCommissionSearchViewModel model,
+            [Required] Guid kioskId, [Required] int month, [Required] int year)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _serviceOrderService.GetAllCommissionByMonth(token.Id, kioskId, month, year);
-            return Ok(new SuccessResponse<List<ServiceOrderCommissionSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+            var result = await _serviceOrderService.GetAllCommissionByMonth(token.Id, kioskId, month, year, model);
+            return Ok(new SuccessResponse<List<ServiceOrderCommissionSearchViewModel>>((int) HttpStatusCode.OK,
+                "Search success.", result));
         }
     }
 }
