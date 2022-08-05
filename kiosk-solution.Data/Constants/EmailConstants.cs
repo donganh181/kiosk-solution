@@ -59,5 +59,19 @@
                                                 "Nếu có sai sót xin hãy liên hệ với chúng tôi." +
                                                 "<br/><br/>Thanks and best regards," +
                                                 "<br/>Tika - Tourist Interact Kiosk Application";
+
+        public static string FORGET_PASSWORD_SUBJECT = "Quên mật khẩu - Tourist Interact Kiosk Application";
+        public static string FORGET_PASSWORD_LINK = "http://tikap.cf:9995/api/v1/parties/resetPassword?partyId=PARTY_ID&verifyCode=VERIFY_CODE";
+        public static string FORGET_PASSWORD_CONTENT = "Kính gửi quý đối tác,<br/>"+
+                                                       "Bên dưới là link để giúp quý đối tác cài lại mật khẩu, nếu có thắc mắc, sai sót hãy liên hệ chúng tôi để được hỗ trợ thêm.<br/>"+
+                                                       "LINK_RESET"+
+                                                       "<br/><br/>Thanks and best regards," +
+                                                       "<br/>Tika - Tourist Interact Kiosk Application";
+        public static string RESET_PASSWORD_SUBJECT = "Cấp mật khẩu mới - Tourist Interact Kiosk Application";
+        public static string RESET_PASSWORD_CONTENT = "Kính gửi quý đối tác,<br/>"+
+                                                       "Chúng tôi chân thành cảm ơn đã hợp tác, chúng tôi đã cấp lại mật khẩu mới cho tài khoản của quý đối tác. Hiện mật khẩu mới là:<br/>"+
+                                                       "<h2>NEW_PASSWORD</h2>"+
+                                                       "<br/><br/>Thanks and best regards," +
+                                                       "<br/>Tika - Tourist Interact Kiosk Application";
     }
 }

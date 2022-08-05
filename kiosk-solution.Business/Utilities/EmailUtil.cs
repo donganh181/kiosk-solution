@@ -127,5 +127,16 @@ namespace kiosk_solution.Data.ViewModels
             var content = EmailConstants.DENIED_PUBLISH_REQUEST_CONTENT.Replace("APP", appName);
             return content;
         }
+
+        public static string GetForgetPasswordContent(string link)
+        {
+            var content = EmailConstants.FORGET_PASSWORD_CONTENT.Replace("LINK_RESET", link);
+            return content;
+        }
+        public static string GetResetPasswordContent(string newPassword)
+        {
+            var content = EmailConstants.FORGET_PASSWORD_CONTENT.Replace("NEW_PASSWORD", newPassword);
+            return content;
+        }
     }
 }
