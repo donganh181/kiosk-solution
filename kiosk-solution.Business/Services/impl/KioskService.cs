@@ -492,7 +492,7 @@ namespace kiosk_solution.Business.Services.impl
                 if (!isKioskSetup)
                 {
                     await _eventHub.Clients.Group(kiosk.Id.ToString())
-                        .SendAsync(SystemEventHub.KIOSK_CONNECTION_CHANNEL,
+                        .SendAsync(SystemEventHub.KIOSK_STATUS_CHANNEL,
                             SystemEventHub.SYSTEM_BOT, "CHANGE_STATUS_TO_DEACTIVATE");
                 }
                 var result = _mapper.CreateMapper().Map<KioskViewModel>(kiosk);

@@ -9,6 +9,7 @@ namespace kiosk_solution.Business.Hubs
     public class SystemEventHub : Hub
     {
         public static string KIOSK_CONNECTION_CHANNEL = "KIOSK_CONNECTION_CHANNEL";
+        public static string KIOSK_STATUS_CHANNEL = "KIOSK_STATUS_CHANNEL";
         public static string KIOSK_MESSAGE_CONNECTION_CHANNEL = "KIOSK_MESSAGE_CONNECTED_CHANNEL";
         public static string SYSTEM_BOT = "SYSTEM_BOT";
 
