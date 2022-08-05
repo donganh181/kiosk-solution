@@ -1,11 +1,16 @@
 ﻿using System;
+using kiosk_solution.Data.Attributes;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace kiosk_solution.Data.ViewModels
 {
     public class ServiceOrderCommissionSearchViewModel
     {
-        public Guid serviceApplicationId { get; set; }
-        public string serviceApplicationName { get; set; }
-        public double totalCommission { get; set; }
+        [Guid]
+        public Guid? ServiceApplicationId { get; set; }
+        [BindNever]
+        public string ServiceApplicationName { get; set; }
+        [Skip]
+        public double TotalCommission { get; set; }
     }
 }
