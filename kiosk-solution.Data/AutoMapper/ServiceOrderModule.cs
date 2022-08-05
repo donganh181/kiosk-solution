@@ -18,7 +18,7 @@ namespace kiosk_solution.Data.AutoMapper
             mc.CreateMap<ServiceOrderSearchViewModel, ServiceOrder>();
 
             mc.CreateMap<ServiceOrder, ServiceOrderCommissionSearchViewModel>().ForMember(
-                src => src.serviceApplicationName, opt => opt.MapFrom(des => des.ServiceApplication.Name));
+                src => src.ServiceApplicationName, opt => opt.MapFrom(des => des.ServiceApplication.Name));
             mc.CreateMap<ServiceOrderCommissionSearchViewModel, ServiceOrder>();
         }
     }

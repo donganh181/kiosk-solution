@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Threading.Tasks;
 using kiosk_solution.Business.Services;
@@ -54,11 +55,11 @@ namespace kiosk_solution.Controllers
         [Authorize(Roles = "Location Owner")]
         [HttpGet("commission")]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> GetCommission([FromQuery] Guid kioskId)
+        public async Task<IActionResult> GetCommission([FromQuery]ServiceOrderCommissionSearchViewModel model, [Required]Guid kioskId)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _serviceOrderService.GetAllCommission(token.Id, kioskId);
+            var result = await _serviceOrderService.GetAllCommission(token.Id, kioskId, model);
             return Ok(new SuccessResponse<List<ServiceOrderCommissionSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
         
