@@ -140,5 +140,23 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Get party by kioskId success");
             return Ok(new SuccessResponse<PartyByKioskIdViewModel>((int)HttpStatusCode.OK, "Search success.", result));
         }
+        
+        [HttpGet("forgetPassword")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> ForgetPassword([FromQuery] string email)
+        {
+            var result = await _partyService.ForgetPassword(email);
+            _logger.LogInformation($"Send forget password mail to party {email}");
+            return Ok(result);
+        }
+
+        [HttpGet("resetPassword")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> ResetPassword([FromQuery] Guid partyId, string verifyCode)
+        {
+            var result = await _partyService.ResetPassword(partyId, verifyCode);
+            _logger.LogInformation($"Reset password by party {partyId}");
+            return Ok(result);
+        }
     }
 }

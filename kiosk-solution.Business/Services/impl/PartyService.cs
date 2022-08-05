@@ -29,7 +29,8 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<IPartyService> _logger;
 
-        public PartyService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration,ILogger<IPartyService> logger)
+        public PartyService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration,
+            ILogger<IPartyService> logger)
         {
             _mapper = mapper.ConfigurationProvider;
             _configuration = configuration;
@@ -46,28 +47,29 @@ namespace kiosk_solution.Business.Services.impl
             if (user == null || !BCryptNet.Verify(model.Password, user.Password))
             {
                 _logger.LogInformation("Not Found");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Not found.");
             }
-                
+
             if (user.Status.Equals(StatusConstants.DEACTIVATE))
             {
                 _logger.LogInformation($"{model.Email} has been banned.");
-                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "This user has been banned.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "This user has been banned.");
             }
+
             try
             {
                 user.DeviceId = model.DeviceId;
                 _unitOfWork.PartyRepository.Update(user);
                 await _unitOfWork.SaveAsync();
-                
+
                 var result = await _unitOfWork.PartyRepository
-                .Get(u => u.Email.Equals(model.Email))
-                .Include(u => u.Role)
-                .Include(u => u.Creator)
-                .ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
+                    .Get(u => u.Email.Equals(model.Email))
+                    .Include(u => u.Role)
+                    .Include(u => u.Creator)
+                    .ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
 
                 string token = TokenUtil.GenerateJWTWebToken(result, _configuration);
-                
+
                 result.Token = token;
 
                 if (BCryptNet.Verify(DefaultConstants.DEFAULT_PASSWORD, result.Password))
@@ -80,12 +82,11 @@ namespace kiosk_solution.Business.Services.impl
                 }
 
                 return result;
-
             }
             catch (Exception)
             {
                 _logger.LogInformation("Invalid Data.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
             }
         }
 
@@ -102,7 +103,7 @@ namespace kiosk_solution.Business.Services.impl
                 await _unitOfWork.PartyRepository.InsertAsync(account);
                 await _unitOfWork.SaveAsync();
 
-                string subject = EmailConstants.CREATE_ACCOUNT_SUBJECT; 
+                string subject = EmailConstants.CREATE_ACCOUNT_SUBJECT;
                 string content = EmailUtil.getCreateAccountContent(account.Email);
                 await EmailUtil.SendEmail(account.Email, subject, content);
 
@@ -111,29 +112,29 @@ namespace kiosk_solution.Business.Services.impl
             }
             catch (Exception e)
             {
-                if(e.InnerException.Message.Contains("Cannot insert duplicate key"))
+                if (e.InnerException.Message.Contains("Cannot insert duplicate key"))
                 {
                     _logger.LogInformation("Phone or Email is duplicated.");
-                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Phone or Email is duplicated.");
+                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Phone or Email is duplicated.");
                 }
                 else
                 {
                     _logger.LogInformation("Invalid data.");
-                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
+                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid data.");
                 }
-                
             }
         }
 
         public async Task<PartyViewModel> UpdateAccount(Guid accountId, UpdateAccountViewModel model)
         {
-            var updater = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(accountId)).Include(u => u.Role).FirstOrDefaultAsync();
+            var updater = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(accountId)).Include(u => u.Role)
+                .FirstOrDefaultAsync();
 
             if (updater.Role.Name.Equals("Admin") || updater.Id.Equals(model.Id))
             {
                 var user = await _unitOfWork.PartyRepository.Get(us => us.Id.Equals(model.Id)).FirstOrDefaultAsync();
 
-                if (user == null) throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
+                if (user == null) throw new ErrorResponse((int) HttpStatusCode.NotFound, "Not found.");
                 user.FirstName = model.FirstName;
                 user.LastName = model.LastName;
                 user.PhoneNumber = model.PhoneNumber;
@@ -149,15 +150,14 @@ namespace kiosk_solution.Business.Services.impl
                 catch (Exception)
                 {
                     _logger.LogInformation("Invalid Data.");
-                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
+                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
                 }
             }
             else
             {
                 _logger.LogInformation($"account {updater.Email} cannot use this feature.");
-                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Your account cannot use this feature.");
             }
-            
         }
 
         public async Task<PartyViewModel> UpdatePassword(Guid id, UpdatePasswordViewModel model)
@@ -166,9 +166,9 @@ namespace kiosk_solution.Business.Services.impl
             if (!BCrypt.Net.BCrypt.Verify(model.OldPassword, user.Password))
             {
                 _logger.LogInformation("Wrong old password");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Wrong old password");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Wrong old password");
             }
-                
+
             user.Password = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
             try
             {
@@ -187,12 +187,13 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<PartyViewModel> UpdateStatus(Guid id)
         {
-            var user = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(id)).Include(u => u.Role).FirstOrDefaultAsync();
+            var user = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(id)).Include(u => u.Role)
+                .FirstOrDefaultAsync();
 
             if (user == null)
             {
                 _logger.LogInformation("Not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Not found.");
             }
 
             if (user.Role.Name.Equals(RoleConstants.ADMIN))
@@ -225,9 +226,11 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<DynamicModelResponse<PartySearchViewModel>> GetAllWithPaging(PartySearchViewModel model, int size, int pageNum)
+        public async Task<DynamicModelResponse<PartySearchViewModel>> GetAllWithPaging(PartySearchViewModel model,
+            int size, int pageNum)
         {
-            var users =  _unitOfWork.PartyRepository.Get().Include(u => u.Role).Include(u => u.Creator).ProjectTo<PartySearchViewModel>(_mapper)
+            var users = _unitOfWork.PartyRepository.Get().Include(u => u.Role).Include(u => u.Creator)
+                .ProjectTo<PartySearchViewModel>(_mapper)
                 .DynamicFilter(model)
                 .AsQueryable().OrderByDescending(r => r.CreateDate).ThenByDescending(r => r.Email);
 
@@ -237,9 +240,9 @@ namespace kiosk_solution.Business.Services.impl
             if (listPaging.Data.ToList().Count < 1)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
-            
+
             var result = new DynamicModelResponse<PartySearchViewModel>
             {
                 Metadata = new PagingMetaData
@@ -259,34 +262,37 @@ namespace kiosk_solution.Business.Services.impl
             if (roleName.Equals(RoleConstants.ADMIN) || roleName.Equals(RoleConstants.SYSTEM))
             {
                 party = await _unitOfWork.PartyRepository
-               .Get(p => p.Id.Equals(id))
-               .Include(p => p.Role)
-               .Include(p => p.Creator)
-               .ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
+                    .Get(p => p.Id.Equals(id))
+                    .Include(p => p.Role)
+                    .Include(p => p.Creator)
+                    .ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
             }
             else if (roleName.Equals(RoleConstants.LOCATION_OWNER))
             {
                 if (!id.Equals(checkId))
                 {
                     _logger.LogInformation("You can not get another user info.");
-                    throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not get another user info.");
+                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You can not get another user info.");
                 }
+
                 party = await _unitOfWork.PartyRepository
-               .Get(p => p.Id.Equals(id))
-               .Include(p => p.Role)
-               .Include(p => p.Creator)
-               .ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
+                    .Get(p => p.Id.Equals(id))
+                    .Include(p => p.Role)
+                    .Include(p => p.Creator)
+                    .ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
             }
             else
             {
                 _logger.LogInformation("Cannot access.");
-                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Cannot access.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Cannot access.");
             }
+
             if (party == null)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
             }
+
             if (BCryptNet.Verify(DefaultConstants.DEFAULT_PASSWORD, party.Password))
             {
                 party.PasswordIsChanged = false;
@@ -295,6 +301,7 @@ namespace kiosk_solution.Business.Services.impl
             {
                 party.PasswordIsChanged = true;
             }
+
             return party;
         }
 
@@ -304,10 +311,10 @@ namespace kiosk_solution.Business.Services.impl
                 .Get(u => u.Id.Equals(partyId))
                 .FirstOrDefaultAsync();
 
-            if(user == null)
+            if (user == null)
             {
                 _logger.LogInformation("Not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Not found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Not found.");
             }
 
             user.DeviceId = string.Empty;
@@ -321,7 +328,7 @@ namespace kiosk_solution.Business.Services.impl
             catch (Exception)
             {
                 _logger.LogInformation("Invalid Data.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
             }
         }
 
@@ -335,11 +342,12 @@ namespace kiosk_solution.Business.Services.impl
             if (party.Count < 1)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
             }
-            foreach(var item in party)
+
+            foreach (var item in party)
             {
-                foreach(var kiosk in item.Kiosks)
+                foreach (var kiosk in item.Kiosks)
                 {
                     if (kiosk.Id.Equals(id))
                     {
@@ -348,8 +356,64 @@ namespace kiosk_solution.Business.Services.impl
                     }
                 }
             }
+
             _logger.LogInformation("Can not Found.");
-            throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
+        }
+
+        public async Task<bool> ForgetPassword(string email)
+        {
+            var acc = await _unitOfWork.PartyRepository.Get(p => p.Email.Equals(email)).FirstOrDefaultAsync();
+            if (acc == null)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
+            }
+
+            string subject = EmailConstants.FORGET_PASSWORD_SUBJECT;
+            string link = EmailConstants.FORGET_PASSWORD_LINK;
+            link = link.Replace("PARTY_ID", acc.Id.ToString());
+            link = link.Replace("VERIFY_CODE", acc.Password);
+            string content = EmailUtil.GetForgetPasswordContent(link);
+            await EmailUtil.SendEmail(acc.Email, subject, content);
+            return true;
+        }
+
+        public async Task<bool> ResetPassword(Guid partyId, string verifyCode)
+        {
+            var acc = await _unitOfWork.PartyRepository.Get(p => p.Id.Equals(partyId) && p.Password.Equals(verifyCode))
+                .FirstOrDefaultAsync();
+            if (acc == null)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
+            }
+
+            const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            StringBuilder res = new StringBuilder();
+            Random rnd = new Random();
+            var length = 7;
+            while (0 < length--)
+            {
+                res.Append(valid[rnd.Next(valid.Length)]);
+            }
+
+            var newPassword = res.ToString();
+            acc.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            try
+            {
+                _unitOfWork.PartyRepository.Update(acc);
+                await _unitOfWork.SaveAsync();
+                string subject = EmailConstants.RESET_PASSWORD_SUBJECT;
+                string content = EmailUtil.GetResetPasswordContent(newPassword);
+                await EmailUtil.SendEmail(acc.Email, subject, content);
+                return true;
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation(e.Message);
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, e.Message);
+            }
         }
     }
 }
