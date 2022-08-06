@@ -14,6 +14,7 @@ using kiosk_solution.Data.Responses;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.SignalR;
+using System.Collections.Generic;
 
 namespace kiosk_solution.Business.Services.impl
 {
@@ -292,6 +293,12 @@ namespace kiosk_solution.Business.Services.impl
                 .Include(x => x.Kiosk)
                 .FirstOrDefaultAsync();
 
+            if(target == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+
             if (!target.Kiosk.PartyId.Equals(partyId))
             {
                 _logger.LogInformation("You cannot update kiosk schedule template of other user.");
@@ -315,6 +322,103 @@ namespace kiosk_solution.Business.Services.impl
                 .Include(x => x.Kiosk)
                 .ProjectTo<KioskScheduleTemplateViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
+
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
+            }
+        }
+
+        public async Task<List<KioskScheduleTemplateViewModel>> ChangeStatusByTemplateId(Guid partyId, Guid templateId)
+        {
+            var listTarget = await _unitOfWork.KioskScheduleTemplateRepository
+                .Get(t => t.TemplateId.Equals(templateId))
+                .Include(a => a.Kiosk)
+                .Include(a => a.Template)
+                .ToListAsync();
+
+            if (listTarget.Count < 1)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+            if (!listTarget.First().Template.Status.Equals(StatusConstants.DELETED))
+            {
+                _logger.LogInformation("You cannot change status of this target (this template is not deleted).");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You cannot change status of this target (this template is not deleted).");
+            }
+
+            try
+            {
+                foreach (var target in listTarget)
+                {
+                    if (!target.Kiosk.PartyId.Equals(partyId))
+                    {
+                        _logger.LogInformation("You cannot update kiosk schedule template of other user.");
+                        throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You cannot update kiosk schedule template of other user.");
+                    }
+
+                    target.Status = StatusConstants.DEACTIVATE;
+                    _unitOfWork.KioskScheduleTemplateRepository.Update(target);
+                }
+                await _unitOfWork.SaveAsync();
+
+                var result = await _unitOfWork.KioskScheduleTemplateRepository
+                .Get(a => a.TemplateId.Equals(templateId))
+                .Include(x => x.Kiosk)
+                .ProjectTo<KioskScheduleTemplateViewModel>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
+            }
+        }
+
+        public async Task<List<KioskScheduleTemplateViewModel>> ChangeStatusByScheduleId(Guid partyId, Guid scheduleId)
+        {
+            var listTarget = await _unitOfWork.KioskScheduleTemplateRepository
+                .Get(t => t.ScheduleId.Equals(scheduleId))
+                .Include(a => a.Kiosk)
+                .Include(a => a.Schedule)
+                .ToListAsync();
+
+            if (listTarget.Count < 1)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+            if (!listTarget.First().Schedule.Status.Equals(StatusConstants.OFF))
+            {
+                _logger.LogInformation("You cannot change status of this target (schedule status is ON).");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You cannot change status of this target (schedule status is ON).");
+            }
+            try
+            {
+                foreach (var target in listTarget)
+                {
+                    if (!target.Kiosk.PartyId.Equals(partyId))
+                    {
+                        _logger.LogInformation("You cannot update kiosk schedule template of other user.");
+                        throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You cannot update kiosk schedule template of other user.");
+                    }
+
+                    target.Status = StatusConstants.DEACTIVATE;
+                    _unitOfWork.KioskScheduleTemplateRepository.Update(target);
+                }
+                await _unitOfWork.SaveAsync();
+
+                var result = await _unitOfWork.KioskScheduleTemplateRepository
+                .Get(a => a.ScheduleId.Equals(scheduleId))
+                .Include(x => x.Kiosk)
+                .ProjectTo<KioskScheduleTemplateViewModel>(_mapper.ConfigurationProvider)
+                .ToListAsync();
 
                 return result;
             }
