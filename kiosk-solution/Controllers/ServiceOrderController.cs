@@ -72,14 +72,24 @@ namespace kiosk_solution.Controllers
         [Authorize(Roles = "Location Owner")]
         [HttpGet("commission/monthOfYear")]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> GetCommissionByMonth([FromQuery] ServiceOrderCommissionSearchViewModel model,
-            [Required] Guid kioskId, [Required] int month, [Required] int year)
+        public async Task<IActionResult> GetCommissionByMonth([Required] Guid kioskId, [Required] int month, [Required] int year)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _serviceOrderService.GetAllCommissionByMonth(token.Id, kioskId, month, year, model);
-            return Ok(new SuccessResponse<List<ServiceOrderCommissionSearchViewModel>>((int) HttpStatusCode.OK,
-                "Search success.", result));
+            var result = await _serviceOrderService.GetAllCommissionByMonth(token.Id, kioskId, month, year);
+            return Ok(new SuccessResponse<ServiceOrderCommissionMonthViewModel>((int) HttpStatusCode.OK, "Search success.", result));
+        }
+        
+        [Authorize(Roles = "Location Owner")]
+        [HttpGet("commission/year")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetCommissionByYear([FromQuery] List<Guid>  serviceApplicationIds,
+            [Required] Guid kioskId, [Required] int year)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _serviceOrderService.GetAllCommissionByYear(token.Id, kioskId,  year, serviceApplicationIds);
+            return Ok(new SuccessResponse<ServiceOrderCommissionYearViewModel>((int) HttpStatusCode.OK, "Search success.", result));
         }
     }
 }
