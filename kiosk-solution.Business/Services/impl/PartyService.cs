@@ -369,14 +369,35 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Can not Found.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
             }
+            const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            StringBuilder res = new StringBuilder();
+            Random rnd = new Random();
+            var length = 10;
+            while (0 < length--)
+            {
+                res.Append(valid[rnd.Next(valid.Length)]);
+            }
+            acc.VerifyCode = res.ToString();
+            try
+            {
+                _unitOfWork.PartyRepository.Update(acc);
+                await _unitOfWork.SaveAsync();
+                
+                string subject = EmailConstants.FORGET_PASSWORD_SUBJECT;
+                string link = EmailConstants.FORGET_PASSWORD_LINK;
+                link = link.Replace("PARTY_ID", acc.Id.ToString());
+                link = link.Replace("VERIFY_CODE", acc.VerifyCode);
+                string content = EmailUtil.GetForgetPasswordContent(link);
+                await EmailUtil.SendEmail(acc.Email, subject, content);
+                return true;
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation(e.Message);
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, e.Message);
+            }
 
-            string subject = EmailConstants.FORGET_PASSWORD_SUBJECT;
-            string link = EmailConstants.FORGET_PASSWORD_LINK;
-            link = link.Replace("PARTY_ID", acc.Id.ToString());
-            link = link.Replace("VERIFY_CODE", acc.Password);
-            string content = EmailUtil.GetForgetPasswordContent(link);
-            await EmailUtil.SendEmail(acc.Email, subject, content);
-            return true;
+            
         }
 
         public async Task<bool> ResetPassword(Guid partyId, string verifyCode)
@@ -387,6 +408,12 @@ namespace kiosk_solution.Business.Services.impl
             {
                 _logger.LogInformation("Can not Found.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
+            }
+
+            if (!acc.VerifyCode.Equals(verifyCode))
+            {
+                _logger.LogInformation("Wrong verify code.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Wrong verify code.");
             }
 
             const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
