@@ -37,6 +37,7 @@ namespace kiosk_solution.Data.Models
         public DateTime? CreateDate { get; set; }
         public string Status { get; set; }
         public string DeviceId { get; set; }
+        public string VerifyCode { get; set; }
 
         public virtual Party Creator { get; set; }
         public virtual Role Role { get; set; }

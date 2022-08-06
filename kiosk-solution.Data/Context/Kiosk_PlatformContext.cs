@@ -291,6 +291,10 @@ namespace kiosk_solution.Data.Context
                     .HasMaxLength(20)
                     .IsUnicode(false);
 
+                entity.Property(e => e.VerifyCode)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
                 entity.HasOne(d => d.Creator)
                     .WithMany(p => p.InverseCreator)
                     .HasForeignKey(d => d.CreatorId)
