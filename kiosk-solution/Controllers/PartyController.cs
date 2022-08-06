@@ -156,7 +156,7 @@ namespace kiosk_solution.Controllers
         {
             var result = await _partyService.ResetPassword(partyId, verifyCode);
             _logger.LogInformation($"Reset password by party {partyId}");
-            return Ok(result);
+            return Ok(new SuccessResponse<PartyResetPasswordViewModel>((int)HttpStatusCode.OK, "Reset success.", result));
         }
     }
 }
