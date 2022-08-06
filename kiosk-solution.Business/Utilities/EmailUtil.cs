@@ -135,7 +135,7 @@ namespace kiosk_solution.Data.ViewModels
         }
         public static string GetResetPasswordContent(string newPassword)
         {
-            var content = EmailConstants.FORGET_PASSWORD_CONTENT.Replace("NEW_PASSWORD", newPassword);
+            var content = EmailConstants.RESET_PASSWORD_CONTENT.Replace("NEW_PASSWORD", newPassword);
             return content;
         }
     }
