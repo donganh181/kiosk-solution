@@ -126,8 +126,7 @@ namespace kiosk_solution.Business.Services.impl
             return listApp;
         }
 
-        public async Task<List<ServiceOrderCommissionSearchViewModel>> GetAllCommissionByMonth(Guid partyId,
-            Guid kioskId, int month, int year, ServiceOrderCommissionSearchViewModel model)
+        public async Task<ServiceOrderCommissionMonthViewModel> GetAllCommissionByMonth(Guid partyId, Guid kioskId, int month, int year)
         {
             var kiosk = await _kioskService.GetByIdWithParyId(kioskId, partyId);
             if (kiosk == null)
@@ -136,11 +135,16 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You can not use this feature.");
             }
 
+            var result = new ServiceOrderCommissionMonthViewModel()
+            {
+                Lables = new List<string>(),
+                Data = new List<decimal>()
+            };
             var listApp = await _unitOfWork.ServiceOrderRepository.Get(s =>
                     s.KioskId.Equals(kioskId) &&
                     s.CreateDate.Value.Month == month &&
                     s.CreateDate.Value.Year == year)
-                .ProjectTo<ServiceOrderCommissionSearchViewModel>(_mapper.ConfigurationProvider).DynamicFilter(model).ToListAsync();
+                .ProjectTo<ServiceOrderCommissionSearchViewModel>(_mapper.ConfigurationProvider).ToListAsync();
             listApp = listApp.GroupBy(o => o.ServiceApplicationId).Select(g => g.First()).ToList();
             foreach (var app in listApp)
             {
@@ -150,10 +154,110 @@ namespace kiosk_solution.Business.Services.impl
                               s.CreateDate.Value.Month == month &&
                               s.CreateDate.Value.Year == year)
                     .SumAsync(o => o.Commission);
-                app.TotalCommission = (double) commission;
+                result.Data.Add( (decimal) commission);
+                result.Lables.Add(app.ServiceApplicationName);
             }
 
-            return listApp;
+            return result;
+        }
+
+        public async Task<ServiceOrderCommissionYearViewModel> GetAllCommissionByYear(Guid partyId, Guid kioskId, int year, List<Guid> serviceApplicationIds)
+        {
+            var kiosk = await _kioskService.GetByIdWithParyId(kioskId, partyId);
+            if (kiosk == null)
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You can not use this feature.");
+            }
+            var result = new ServiceOrderCommissionYearViewModel()
+            {
+                Datas = new List<AppDataViewModel>()
+            };
+            // Get by list service app ID
+            if (serviceApplicationIds.Count != 0)
+                foreach (var serviceApplicationId in serviceApplicationIds)
+                {
+                    if (serviceApplicationId == null)
+                    {
+                        _logger.LogInformation("App id can not null.");
+                        throw new ErrorResponse((int) HttpStatusCode.BadRequest, "App id can not null.");
+                    }
+
+                    var appOrder = await _unitOfWork.ServiceOrderRepository.Get(s =>
+                            s.KioskId.Equals(kioskId) &&
+                            s.CreateDate.Value.Year == year &&
+                            s.ServiceApplicationId == serviceApplicationId)
+                        .ProjectTo<ServiceOrderCommissionSearchViewModel>(_mapper.ConfigurationProvider)
+                        .FirstOrDefaultAsync();
+                    if (appOrder == null)
+                    {
+                        var name = await _serviceApplicationService.GetNameById(serviceApplicationId);
+                        var appData = new AppDataViewModel()
+                        {
+                            Data = new List<decimal>(),
+                            ServiceApplicationId = serviceApplicationId,
+                            ServiceApplicationName = name
+                        };
+                        result.Datas.Add(appData);
+                    }
+                    else
+                    {
+                        var appData = new AppDataViewModel(){
+                            Data = new List<decimal>(),
+                            ServiceApplicationId = serviceApplicationId,
+                            ServiceApplicationName = appOrder.ServiceApplicationName
+                        };
+                        for (var i = 1; i <= 12; i++)
+                        {
+                            var month = i;
+                            var commissionByMonth = new ServiceOrderCommissionSearchViewModel()
+                            {
+                                Month = month,
+                                TotalCommission = 0,
+                                ServiceApplicationId = appOrder.ServiceApplicationId,
+                                ServiceApplicationName = appOrder.ServiceApplicationName
+                            };
+                            var commission = await _unitOfWork.ServiceOrderRepository
+                                .Get(s => s.KioskId.Equals(kioskId) &&
+                                          s.ServiceApplicationId.Equals(commissionByMonth.ServiceApplicationId) &&
+                                          s.CreateDate.Value.Month == month &&
+                                          s.CreateDate.Value.Year == year)
+                                .SumAsync(o => o.Commission);
+                            appData.Data.Add((decimal) commission);
+                        }
+                        result.Datas.Add(appData);
+                    }
+                }
+            // Get all
+            else
+            {
+                var listApp = await _unitOfWork.ServiceOrderRepository.Get(s =>
+                        s.KioskId.Equals(kioskId) &&
+                        s.CreateDate.Value.Year == year)
+                    .ProjectTo<ServiceOrderCommissionSearchViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+                listApp = listApp.GroupBy(o => o.ServiceApplicationId).Select(g => g.First()).ToList();
+                foreach (var app in listApp)
+                {
+                    var appData = new AppDataViewModel(){
+                        Data = new List<decimal>(),
+                        ServiceApplicationId = (Guid) app.ServiceApplicationId,
+                        ServiceApplicationName = app.ServiceApplicationName
+                    };
+                    for (var i = 1; i <= 12; i++)
+                    {
+                        var month = i;
+                        var commission = await _unitOfWork.ServiceOrderRepository
+                            .Get(s => s.KioskId.Equals(kioskId) &&
+                                      s.ServiceApplicationId.Equals(app.ServiceApplicationId) &&
+                                      s.CreateDate.Value.Month == month &&
+                                      s.CreateDate.Value.Year == year)
+                            .SumAsync(o => o.Commission);
+                        appData.Data.Add((decimal) commission);
+                    }
+                    result.Datas.Add(appData);
+                }
+            }
+            return result;
         }
     }
 }

@@ -14,6 +14,7 @@ namespace kiosk_solution.Business.Services
             ServiceOrderSearchViewModel model, int size, int pageNum);
 
         public Task<List<ServiceOrderCommissionSearchViewModel>> GetAllCommission(Guid partyId, Guid kioskId, ServiceOrderCommissionSearchViewModel model);
-        public Task<List<ServiceOrderCommissionSearchViewModel>> GetAllCommissionByMonth(Guid partyId, Guid kioskId, int month, int year, ServiceOrderCommissionSearchViewModel model);
+        public Task<ServiceOrderCommissionMonthViewModel> GetAllCommissionByMonth(Guid partyId, Guid kioskId, int month, int year);
+        public Task<ServiceOrderCommissionYearViewModel> GetAllCommissionByYear(Guid partyId, Guid kioskId, int year, List<Guid> serviceApplicationIds);
     }
 }
