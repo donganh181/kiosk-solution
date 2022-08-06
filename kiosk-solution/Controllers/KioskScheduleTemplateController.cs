@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace kiosk_solution.Controllers
 {
@@ -87,6 +88,36 @@ namespace kiosk_solution.Controllers
             var result = await _kioskScheduleTemplateService.ChangeStatus(token.Id, kioskScheduleTemplateId);
             _logger.LogInformation($"Change status of kiosk schedule template id {result.Id} to Status {result.Status} by party {token.Id}.");
             return Ok(new SuccessResponse<KioskScheduleTemplateViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+
+        [Authorize(Roles = "Location Owner")]
+        [HttpPatch("status-by-templateId")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> ChangeStatusByTemplateId([FromQuery] Guid templateId)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _kioskScheduleTemplateService.ChangeStatusByTemplateId(token.Id, templateId);
+            foreach(var target in result)
+            {
+                _logger.LogInformation($"Change status of kiosk schedule template id {target.Id} to Status {target.Status} by party {token.Id}.");
+            }
+            return Ok(new SuccessResponse<List<KioskScheduleTemplateViewModel>>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+
+        [Authorize(Roles = "Location Owner")]
+        [HttpPatch("status-by-scheduleId")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> ChangeStatusByScheduleId([FromQuery] Guid schedule)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _kioskScheduleTemplateService.ChangeStatusByScheduleId(token.Id, schedule);
+            foreach (var target in result)
+            {
+                _logger.LogInformation($"Change status of kiosk schedule template id {target.Id} to Status {target.Status} by party {token.Id}.");
+            }
+            return Ok(new SuccessResponse<List<KioskScheduleTemplateViewModel>>((int)HttpStatusCode.OK, "Update success.", result));
         }
     }
 }
