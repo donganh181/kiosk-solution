@@ -402,8 +402,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<bool> ResetPassword(Guid partyId, string verifyCode)
         {
-            var acc = await _unitOfWork.PartyRepository.Get(p => p.Id.Equals(partyId) && p.Password.Equals(verifyCode))
-                .FirstOrDefaultAsync();
+            var acc = await _unitOfWork.PartyRepository.Get(p => p.Id.Equals(partyId)).FirstOrDefaultAsync();
             if (acc == null)
             {
                 _logger.LogInformation("Can not Found.");
