@@ -64,7 +64,7 @@
         public static string FORGET_PASSWORD_LINK = "http://localhost:3000/verify-pass?partyId=PARTY_ID&verifyCode=VERIFY_CODE";
         public static string FORGET_PASSWORD_CONTENT = "Kính gửi quý đối tác,<br/>"+
                                                        "Bên dưới là link để giúp quý đối tác cài lại mật khẩu, nếu có thắc mắc, sai sót hãy liên hệ chúng tôi để được hỗ trợ thêm.<br/>"+
-                                                       "LINK_RESET"+
+                                                       "<a href='LINK_RESET'>Nhấn vào đây để reset mật khẩu</a>"+
                                                        "<br/><br/>Thanks and best regards," +
                                                        "<br/>Tika - Tourist Interact Kiosk Application";
         public static string RESET_PASSWORD_SUBJECT = "Cấp mật khẩu mới - Tourist Interact Kiosk Application";
