@@ -19,6 +19,6 @@ namespace kiosk_solution.Business.Services
         Task<bool> Logout(Guid partyId);
         Task<PartyByKioskIdViewModel> GetPartyByKioskId(Guid id);
         Task<bool> ForgetPassword(string email);
-        Task<bool> ResetPassword(Guid partyId, string verifyCode);
+        Task<string> ResetPassword(Guid partyId, string verifyCode);
     }
 }
