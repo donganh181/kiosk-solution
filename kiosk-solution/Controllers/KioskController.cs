@@ -159,6 +159,7 @@ namespace kiosk_solution.Controllers
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetByIdThenSendNoti([FromQuery] Guid kioskId)
         {
+            _logger.LogInformation("Get kiosk template");
             var result = await _kioskService.GetSpecificKiosk(kioskId);
             return Ok(new SuccessResponse<dynamic>((int)HttpStatusCode.OK, "Search success.", result));
         }
