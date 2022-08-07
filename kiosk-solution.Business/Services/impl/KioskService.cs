@@ -497,10 +497,47 @@ namespace kiosk_solution.Business.Services.impl
                 }
                 var result = _mapper.CreateMapper().Map<KioskViewModel>(kiosk);
                 return result;
-            }catch (DbUpdateException)
+            }catch (Exception)
             {
                 _logger.LogInformation("Invalid Data.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
+            }
+        }
+
+        public async Task<KioskViewModel> UpdateKioskName(Guid updaterId, KioskNameUpdateViewModel model)
+        {
+            var kiosk = await _unitOfWork.KioskRepository
+                .Get(k => k.Id.Equals(model.Id))
+                .FirstOrDefaultAsync();
+
+            if (kiosk == null)
+            {
+                _logger.LogInformation("Kiosk not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Kiosk not found.");
+            }
+
+            if (!kiosk.PartyId.Equals(updaterId)) // kiosk did not belong to this updater!
+            {
+                _logger.LogInformation("Your account cannot use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+            }
+
+            kiosk.Name = model.KioskName;
+            try
+            {
+                _unitOfWork.KioskRepository.Update(kiosk);
+                await _unitOfWork.SaveAsync();
+
+                var result = await _unitOfWork.KioskRepository
+                    .Get(k => k.Id.Equals(model.Id))
+                    .ProjectTo<KioskViewModel>(_mapper)
+                    .FirstOrDefaultAsync();
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid Data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
             }
         }
     }
