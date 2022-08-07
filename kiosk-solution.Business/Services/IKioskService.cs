@@ -8,9 +8,10 @@ namespace kiosk_solution.Business.Services
 {
     public interface IKioskService
     {
-        Task<KioskViewModel> UpdateStatus(Guid updaterId, Guid kioskId,bool isKioskSetup);
+        Task<KioskViewModel> UpdateStatus(Guid updaterId, Guid kioskId, bool isKioskSetup);
         Task<KioskViewModel> CreateNewKiosk(CreateKioskViewModel model);
         Task<KioskViewModel> UpdateInformation(Guid updaterId, UpdateKioskViewModel model);
+        Task<KioskViewModel> UpdateKioskName(Guid updaterId, KioskNameUpdateViewModel model);
         Task<DynamicModelResponse<KioskSearchViewModel>> GetAllWithPaging(string role, Guid id, KioskSearchViewModel model, int size, int pageNum);
         Task<KioskViewModel> GetById(Guid kioskId);
         Task<KioskViewModel> GetByIdWithParyId(Guid kioskId, Guid partyId);
