@@ -417,9 +417,11 @@ namespace kiosk_solution.Business.Services.impl
                     appCategories = appRows.Values
                 };
                 var jsonConvert = JsonConvert.SerializeObject(kioskResult);
+                _logger.LogInformation("<-------- start messaging to kiosk --------->");
                 await _eventHub.Clients.Group(kiosk.Id.ToString())
                     .SendAsync(SystemEventHub.KIOSK_CONNECTION_CHANNEL,
                         SystemEventHub.SYSTEM_BOT, jsonConvert);
+                _logger.LogInformation("<-------- end messaging to kiosk --------->");
                 return kioskResult;
             }
 
