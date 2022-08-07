@@ -1,13 +1,16 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using kiosk_solution.Business.Hubs;
 using kiosk_solution.Business.Utilities;
 using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
 using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,14 +26,17 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IMapper _mapper;
         private readonly ILogger<IKioskLocationService> _logger;
         private readonly IImageService _imageService;
+        private readonly IHubContext<SystemEventHub> _eventHub;
 
         public KioskLocationService(IUnitOfWork unitOfWork, IMapper mapper,
-            ILogger<IKioskLocationService> logger, IImageService imageService)
+            ILogger<IKioskLocationService> logger, IImageService imageService,
+            IHubContext<SystemEventHub> eventHub)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _imageService = imageService;
+            _eventHub = eventHub;
         }
 
         public async Task<KioskLocationViewModel> CreateNew(Guid partyId, CreateKioskLocationViewModel model)
@@ -174,6 +180,40 @@ namespace kiosk_solution.Business.Services.impl
             return location;
         }
 
+        public async Task<KioskLocationViewModel> GetByIdAndChangeKioskView(Guid id)
+        {
+            var location = await _unitOfWork.KioskLocationRepository
+                .Get(l => l.Id.Equals(id))
+                .Include(a => a.Owner)
+                .Include(b => b.Kiosks)
+                .FirstOrDefaultAsync();
+
+            if(location == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            var listKiosk = location.Kiosks.ToList();
+
+            if (listKiosk.Count < 1)
+            {
+                _logger.LogInformation("Can not found kiosk.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found kiosk.");
+            }
+            var result = _mapper.Map<KioskLocationViewModel>(location);
+            var jsonConvert = JsonConvert.SerializeObject(result);
+
+            foreach (var kiosk in listKiosk)
+            {
+                await _eventHub.Clients.Group(kiosk.Id.ToString())
+                    .SendAsync(SystemEventHub.RELOAD_KIOSK_CHANNEL,
+                        SystemEventHub.SYSTEM_BOT, jsonConvert);
+                _logger.LogInformation($"Send model to kiosk id: {kiosk.Id} success.");
+            }
+            return result;
+        }
+
         public async Task<KioskLocationViewModel> ReplaceImage(Guid partyId, ImageReplaceViewModel model)
         {
             var checkLocation = await _unitOfWork.KioskLocationRepository
@@ -249,8 +289,6 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<KioskLocationViewModel> UpdateInformation(Guid partyId, UpdateKioskLocationViewModel model)
         {
-            List<ImageViewModel> listLocationImage = new List<ImageViewModel>();
-
             var location = await _unitOfWork.KioskLocationRepository
                 .Get(l => l.Id.Equals(model.Id))
                 .FirstOrDefaultAsync();

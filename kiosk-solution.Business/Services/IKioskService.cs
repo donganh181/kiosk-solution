@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
 
@@ -19,5 +20,6 @@ namespace kiosk_solution.Business.Services
         Task<List<KioskDetailViewModel>> GetListSpecificKiosk();
         Task<dynamic> GetSpecificKiosk(Guid id);
         Task<DynamicModelResponse<KioskNearbyViewModel>> GetKioskNearby(KioskNearbyViewModel model, int size, int pageNum);
+        Task<List<Kiosk>> GetListKioskByKioskLocationId(Guid id);
     }
 }

@@ -28,10 +28,13 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IEventService _eventService;
         private readonly IKioskRatingService _kioskRatingService;
         private readonly IHubContext<SystemEventHub> _eventHub;
+        private readonly IPartyService _partyService;
+        private readonly IKioskLocationService _kioskLocationService;
 
         public KioskService(IMapper mapper, IUnitOfWork unitOfWork, ILogger<IKioskService> logger
             , INotiService fcmService, IEventService eventService, IKioskRatingService kioskRatingService,
-            IHubContext<SystemEventHub> eventHub)
+            IHubContext<SystemEventHub> eventHub, IPartyService partyService,
+            IKioskLocationService kioskLocationService)
         {
             _mapper = mapper.ConfigurationProvider;
             _unitOfWork = unitOfWork;
@@ -40,6 +43,8 @@ namespace kiosk_solution.Business.Services.impl
             _eventService = eventService;
             _kioskRatingService = kioskRatingService;
             _eventHub = eventHub;
+            _partyService = partyService;
+            _kioskLocationService = kioskLocationService;
         }
 
         public async Task<KioskViewModel> GetByIdWithParyId(Guid kioskId, Guid partyId)
@@ -83,11 +88,16 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<KioskViewModel> CreateNewKiosk(CreateKioskViewModel model)
         {
-            var user = await _unitOfWork.PartyRepository.Get(u => u.Id.Equals(model.PartyId)).FirstOrDefaultAsync();
+            var user = await _partyService.GetPartyById(Guid.Parse(model.PartyId + ""), RoleConstants.SYSTEM, null);
             if (user == null)
             {
                 _logger.LogInformation("Party not found.");
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Party not found.");
+            }
+            if(user.RoleName != RoleConstants.LOCATION_OWNER)
+            {
+                _logger.LogInformation("Can not add kiosk to other role.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Can not add kiosk to other role.");
             }
 
             var kiosk = _mapper.CreateMapper().Map<Kiosk>(model);
@@ -418,12 +428,22 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<KioskViewModel> UpdateInformation(Guid updaterId, UpdateKioskViewModel model)
         {
-            var kiosk = await _unitOfWork.KioskRepository.Get(k => k.Id.Equals(model.Id)).FirstOrDefaultAsync();
+            var kiosk = await _unitOfWork.KioskRepository
+                .Get(k => k.Id.Equals(model.Id))
+                .FirstOrDefaultAsync();
 
             if (!kiosk.PartyId.Equals(updaterId))
             {
-                _logger.LogInformation("Your cannot use this feature.");
-                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+                _logger.LogInformation("You cannot update kiosk which is not your.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You cannot update kiosk which is not your.");
+            }
+
+            var kioskLocation = await _kioskLocationService.GetById(model.KioskLocationId, true);
+
+            if (!kioskLocation.OwnerId.Equals(updaterId))
+            {
+                _logger.LogInformation("You cannot use location of other user.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You cannot use location of other user.");
             }
 
             kiosk.Name = model.Name;
@@ -539,6 +559,15 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Invalid Data.");
                 throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
             }
+        }
+
+        public async Task<List<Kiosk>> GetListKioskByKioskLocationId(Guid id)
+        {
+            var listKiosk = await _unitOfWork.KioskRepository
+                .Get(k => k.KioskLocationId.Equals(id))
+                .ToListAsync();
+
+            return listKiosk;
         }
     }
 }
