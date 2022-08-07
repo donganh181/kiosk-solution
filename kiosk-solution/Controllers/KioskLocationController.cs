@@ -116,5 +116,13 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Get information of location {result.Name} by guest");
             return Ok(new SuccessResponse<KioskLocationViewModel>((int)HttpStatusCode.OK, "Search success.", result));
         }
+
+        [HttpGet("async-information")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetKioskNearby([FromQuery] Guid id)
+        {
+            var result = await _kioskLocationService.GetByIdAndChangeKioskView(id);
+            return Ok(new SuccessResponse<KioskLocationViewModel>((int)HttpStatusCode.OK, "Async success.", result));
+        }
     }
 }
