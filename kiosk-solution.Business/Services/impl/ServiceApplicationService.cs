@@ -30,8 +30,10 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IPartyServiceApplicationService _partyServiceApplicationService;
 
         public ServiceApplicationService(IUnitOfWork unitOfWork, IMapper mapper,
-            ILogger<ServiceApplicationService> logger, IFileService fileService, INotificationService notificationService,
-            IServiceApplicationFeedBackService serviceApplicationFeedBackService, IPartyServiceApplicationService partyServiceApplicationService)
+            ILogger<ServiceApplicationService> logger, IFileService fileService,
+            INotificationService notificationService,
+            IServiceApplicationFeedBackService serviceApplicationFeedBackService,
+            IPartyServiceApplicationService partyServiceApplicationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -45,7 +47,6 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<DynamicModelResponse<ServiceApplicationSearchViewModel>> GetAllWithPaging(string role,
             Guid? partyId, ServiceApplicationSearchViewModel model, int size, int pageNum)
         {
-            
             IQueryable<ServiceApplicationSearchViewModel> apps = null;
             var userCounter = 0;
             if (string.IsNullOrEmpty(role) || role.Equals(RoleConstants.ADMIN))
@@ -95,12 +96,12 @@ namespace kiosk_solution.Business.Services.impl
             }
 
             var listApp = apps.ToList();
-            
 
-            foreach(var app in listApp)
+
+            foreach (var app in listApp)
             {
                 var rating = await _serviceApplicationFeedBackService.GetAverageRatingOfApp(Guid.Parse(app.Id + ""));
-                if(rating.FirstOrDefault().Value != 0)
+                if (rating.FirstOrDefault().Value != 0)
                 {
                     app.NumberOfRating = rating.FirstOrDefault().Key;
                     app.AverageRating = rating.FirstOrDefault().Value;
@@ -111,14 +112,16 @@ namespace kiosk_solution.Business.Services.impl
                     app.AverageRating = 0;
                 }
 
-                app.ListFeedback = await _serviceApplicationFeedBackService.GetListFeedbackByAppId(Guid.Parse(app.Id + ""));
+                app.ListFeedback =
+                    await _serviceApplicationFeedBackService.GetListFeedbackByAppId(Guid.Parse(app.Id + ""));
 
-                userCounter = await _partyServiceApplicationService.CountUserByAppId(Guid.Parse(app.Id+""));
+                userCounter = await _partyServiceApplicationService.CountUserByAppId(Guid.Parse(app.Id + ""));
                 app.UserInstalled = userCounter;
             }
 
             var listPaging =
-                listApp.AsQueryable().PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
+                listApp.AsQueryable().PagingIQueryable(pageNum, size, CommonConstants.LimitPaging,
+                    CommonConstants.DefaultPaging);
 
             if (listPaging.Data.ToList().Count < 1)
             {
@@ -238,30 +241,35 @@ namespace kiosk_solution.Business.Services.impl
             if (partyId == null)
             {
                 app = _unitOfWork.ServiceApplicationRepository
-                .Get(a => a.Id.Equals(id))
-                .Include(a => a.Party)
-                .Include(a => a.AppCategory)
-                .ToList()
-                .AsQueryable()
-                .ProjectTo<ServiceApplicationSpecificViewModel>(_mapper.ConfigurationProvider)
-                .FirstOrDefault();
+                    .Get(a => a.Id.Equals(id))
+                    .Include(a => a.Party)
+                    .Include(a => a.AppCategory)
+                    .ToList()
+                    .AsQueryable()
+                    .ProjectTo<ServiceApplicationSpecificViewModel>(_mapper.ConfigurationProvider)
+                    .FirstOrDefault();
             }
             else
             {
                 app = _unitOfWork.ServiceApplicationRepository
-                .Get(a => a.Id.Equals(id))
-                .Include(a => a.Party)
-                .Include(a => a.AppCategory)
-                .Include(a => a.ServiceApplicationFeedBacks.Where(x => x.PartyId.Value == partyId && x.ServiceApplicationId.Value == id))
-                .ThenInclude(b => b.Party)
-                .Include(a => a.ServiceApplicationFeedBacks.Where(x => x.PartyId.Value == partyId && x.ServiceApplicationId.Value == id))
-                .ThenInclude(b => b.ServiceApplication)
-                .ToList()
-                .AsQueryable()
-                .ProjectTo<ServiceApplicationSpecificViewModel>(_mapper.ConfigurationProvider)
-                .FirstOrDefault();
+                    .Get(a => a.Id.Equals(id))
+                    .Include(a => a.Party)
+                    .Include(a => a.AppCategory)
+                    .Include(a =>
+                        a.ServiceApplicationFeedBacks.Where(x =>
+                            x.PartyId.Value == partyId && x.ServiceApplicationId.Value == id))
+                    .ThenInclude(b => b.Party)
+                    .Include(a =>
+                        a.ServiceApplicationFeedBacks.Where(x =>
+                            x.PartyId.Value == partyId && x.ServiceApplicationId.Value == id))
+                    .ThenInclude(b => b.ServiceApplication)
+                    .ToList()
+                    .AsQueryable()
+                    .ProjectTo<ServiceApplicationSpecificViewModel>(_mapper.ConfigurationProvider)
+                    .FirstOrDefault();
             }
-            if(app != null)
+
+            if (app != null)
             {
                 var rating = await _serviceApplicationFeedBackService.GetAverageRatingOfApp(Guid.Parse(app.Id + ""));
                 if (rating.FirstOrDefault().Value != 0)
@@ -275,11 +283,13 @@ namespace kiosk_solution.Business.Services.impl
                     app.AverageRating = 0;
                 }
 
-                app.ListFeedback = await _serviceApplicationFeedBackService.GetListFeedbackByAppId(Guid.Parse(app.Id + ""));
+                app.ListFeedback =
+                    await _serviceApplicationFeedBackService.GetListFeedbackByAppId(Guid.Parse(app.Id + ""));
 
                 userCounter = await _partyServiceApplicationService.CountUserByAppId(Guid.Parse(app.Id + ""));
                 app.UserInstalled = userCounter;
             }
+
             return app;
         }
 
@@ -368,13 +378,40 @@ namespace kiosk_solution.Business.Services.impl
 
                 var result = _mapper.Map<ServiceApplicationViewModel>(app);
                 return result;
-
             }
             catch (Exception)
             {
                 _logger.LogInformation("Invalid data.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid data.");
             }
+        }
+
+        public async Task<CountViewModel> CountApps(Guid partyId, string role)
+        {
+            if (role.Equals(RoleConstants.ADMIN))
+            {
+                return new CountViewModel()
+                {
+                    total = await _unitOfWork.ServiceApplicationRepository.Get().CountAsync(),
+                    active = await _unitOfWork.ServiceApplicationRepository
+                        .Get(e => e.Status.Equals(StatusConstants.AVAILABLE))
+                        .CountAsync(),
+                    deactive = await _unitOfWork.ServiceApplicationRepository
+                        .Get(e => e.Status.Equals(StatusConstants.UNAVAILABLE))
+                        .CountAsync()
+                };
+            }
+
+            return new CountViewModel()
+            {
+                total = await _unitOfWork.ServiceApplicationRepository.Get(e => e.PartyId.Equals(partyId)).CountAsync(),
+                active = await _unitOfWork.ServiceApplicationRepository.Get(e =>
+                        e.PartyId.Equals(partyId) && e.Status.Equals(StatusConstants.AVAILABLE))
+                    .CountAsync(),
+                deactive = await _unitOfWork.ServiceApplicationRepository.Get(e =>
+                        e.PartyId.Equals(partyId) && e.Status.Equals(StatusConstants.UNAVAILABLE))
+                    .CountAsync()
+            };
         }
     }
 }

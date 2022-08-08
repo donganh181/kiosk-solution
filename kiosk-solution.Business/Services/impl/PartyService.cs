@@ -369,6 +369,7 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Can not Found.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
             }
+
             const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
             StringBuilder res = new StringBuilder();
             Random rnd = new Random();
@@ -377,12 +378,13 @@ namespace kiosk_solution.Business.Services.impl
             {
                 res.Append(valid[rnd.Next(valid.Length)]);
             }
+
             acc.VerifyCode = res.ToString();
             try
             {
                 _unitOfWork.PartyRepository.Update(acc);
                 await _unitOfWork.SaveAsync();
-                
+
                 string subject = EmailConstants.FORGET_PASSWORD_SUBJECT;
                 string link = EmailConstants.FORGET_PASSWORD_LINK;
                 link = link.Replace("PARTY_ID", acc.Id.ToString());
@@ -396,13 +398,12 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation(e.Message);
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, e.Message);
             }
-
-            
         }
 
         public async Task<PartyResetPasswordViewModel> ResetPassword(Guid partyId, string verifyCode)
         {
-            var acc = await _unitOfWork.PartyRepository.Get(p => p.Id.Equals(partyId) && p.VerifyCode != null).FirstOrDefaultAsync();
+            var acc = await _unitOfWork.PartyRepository.Get(p => p.Id.Equals(partyId) && p.VerifyCode != null)
+                .FirstOrDefaultAsync();
             if (acc == null)
             {
                 _logger.LogInformation("Can not Found.");
@@ -444,6 +445,39 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation(e.Message);
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, e.Message);
             }
+        }
+
+        public async Task<CountViewModel> CountLocationOwner()
+        {
+            return new CountViewModel()
+            {
+                total = await _unitOfWork.PartyRepository.Get(e => e.Role.Name.Equals(RoleConstants.LOCATION_OWNER))
+                    .CountAsync(),
+                active = await _unitOfWork.PartyRepository.Get(e =>
+                        e.Role.Name.Equals(RoleConstants.LOCATION_OWNER) && e.Status.Contains(StatusConstants.ACTIVATE))
+                    .CountAsync(),
+                deactive = await _unitOfWork.PartyRepository.Get(e =>
+                        e.Role.Name.Equals(RoleConstants.LOCATION_OWNER) &&
+                        e.Status.Contains(StatusConstants.DEACTIVATE))
+                    .CountAsync(),
+            };
+        }
+
+        public async Task<CountViewModel> CountServiceProvider()
+        {
+            return new CountViewModel()
+            {
+                total = await _unitOfWork.PartyRepository.Get(e => e.Role.Name.Equals(RoleConstants.SERVICE_PROVIDER))
+                    .CountAsync(),
+                active = await _unitOfWork.PartyRepository.Get(e =>
+                        e.Role.Name.Equals(RoleConstants.SERVICE_PROVIDER) &&
+                        e.Status.Contains(StatusConstants.ACTIVATE))
+                    .CountAsync(),
+                deactive = await _unitOfWork.PartyRepository.Get(e =>
+                        e.Role.Name.Equals(RoleConstants.SERVICE_PROVIDER) &&
+                        e.Status.Contains(StatusConstants.DEACTIVATE))
+                    .CountAsync(),
+            };
         }
     }
 }
