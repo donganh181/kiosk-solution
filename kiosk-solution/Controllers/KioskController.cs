@@ -52,7 +52,7 @@ namespace kiosk_solution.Controllers
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _kioskService.UpdateStatus(token.Id, id, isKioskSetup);
             _logger.LogInformation($"Update status of kiosk [{result.Id}] by party {token.Mail}");
-            return Ok(new SuccessResponse<KioskViewModel>((int) HttpStatusCode.OK, "Update success.", result));
+            return Ok(new SuccessResponse<KioskViewModel>((int)HttpStatusCode.OK, "Update success.", result));
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace kiosk_solution.Controllers
         {
             var result = await _kioskService.AddDeviceId(model);
             _logger.LogInformation($"Add DeviceId of kiosk [{result.Id}]");
-            return Ok(new SuccessResponse<KioskViewModel>((int) HttpStatusCode.OK, "Add success.", result));
+            return Ok(new SuccessResponse<KioskViewModel>((int)HttpStatusCode.OK, "Add success.", result));
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace kiosk_solution.Controllers
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
             var result = await _kioskService.CreateNewKiosk(model);
             _logger.LogInformation($"Create new Kiosk to [{result.PartyId}] by party {token.Mail}");
-            return Ok(new SuccessResponse<KioskViewModel>((int) HttpStatusCode.OK, "Create success.", result));
+            return Ok(new SuccessResponse<KioskViewModel>((int)HttpStatusCode.OK, "Create success.", result));
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace kiosk_solution.Controllers
             Guid updaterId = token.Id;
             var result = await _kioskService.UpdateInformation(updaterId, model);
             _logger.LogInformation($"Updated kiosk {result.Name} by party {token.Mail}");
-            return Ok(new SuccessResponse<KioskViewModel>((int) HttpStatusCode.OK, "Update success.", result));
+            return Ok(new SuccessResponse<KioskViewModel>((int)HttpStatusCode.OK, "Update success.", result));
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace kiosk_solution.Controllers
             string role = token.Role;
             var result = await _kioskService.GetAllWithPaging(role, id, model, size, page);
             _logger.LogInformation($"Get all Kiosks by party {token.Mail}");
-            return Ok(new SuccessResponse<DynamicModelResponse<KioskSearchViewModel>>((int) HttpStatusCode.OK,
+            return Ok(new SuccessResponse<DynamicModelResponse<KioskSearchViewModel>>((int)HttpStatusCode.OK,
                 "Search success.", result));
         }
 
@@ -133,7 +133,7 @@ namespace kiosk_solution.Controllers
         public async Task<IActionResult> GetById(Guid kioskId)
         {
             var result = await _kioskService.GetById(kioskId);
-            return Ok(new SuccessResponse<KioskViewModel>((int) HttpStatusCode.OK,
+            return Ok(new SuccessResponse<KioskViewModel>((int)HttpStatusCode.OK,
                 "Search success.", result));
         }
 
@@ -146,7 +146,7 @@ namespace kiosk_solution.Controllers
         public async Task<IActionResult> GetSpecificListKiosk()
         {
             var result = await _kioskService.GetListSpecificKiosk();
-            return Ok(new SuccessResponse<List<KioskDetailViewModel>>((int) HttpStatusCode.OK, "Search success.",
+            return Ok(new SuccessResponse<List<KioskDetailViewModel>>((int)HttpStatusCode.OK, "Search success.",
                 result));
         }
 
@@ -159,8 +159,9 @@ namespace kiosk_solution.Controllers
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetByIdThenSendNoti([FromQuery] Guid kioskId)
         {
+            _logger.LogInformation("Get kiosk template");
             var result = await _kioskService.GetSpecificKiosk(kioskId);
-            return Ok(new SuccessResponse<dynamic>((int) HttpStatusCode.OK, "Search success.", result));
+            return Ok(new SuccessResponse<dynamic>((int)HttpStatusCode.OK, "Search success.", result));
         }
 
         [HttpGet("nearby")]
@@ -170,8 +171,20 @@ namespace kiosk_solution.Controllers
         {
             var result = await _kioskService.GetKioskNearby(model, size, pageNum);
             _logger.LogInformation($"Get kiosks");
-            return Ok(new SuccessResponse<DynamicModelResponse<KioskNearbyViewModel>>((int) HttpStatusCode.OK,
+            return Ok(new SuccessResponse<DynamicModelResponse<KioskNearbyViewModel>>((int)HttpStatusCode.OK,
                 "Search success.", result));
+        }
+
+        [Authorize(Roles = "Location Owner")]
+        [HttpPatch("name")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateName([FromBody] KioskNameUpdateViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _kioskService.UpdateKioskName(token.Id, model);
+            _logger.LogInformation($"Update status of kiosk [{result.Id}] by party {token.Mail}");
+            return Ok(new SuccessResponse<KioskViewModel>((int)HttpStatusCode.OK, "Update success.", result));
         }
     }
 }
