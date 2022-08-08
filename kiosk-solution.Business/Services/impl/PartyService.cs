@@ -402,7 +402,7 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<PartyResetPasswordViewModel> ResetPassword(Guid partyId, string verifyCode)
         {
-            var acc = await _unitOfWork.PartyRepository.Get(p => p.Id.Equals(partyId)).FirstOrDefaultAsync();
+            var acc = await _unitOfWork.PartyRepository.Get(p => p.Id.Equals(partyId) && p.VerifyCode != null).FirstOrDefaultAsync();
             if (acc == null)
             {
                 _logger.LogInformation("Can not Found.");
@@ -425,6 +425,7 @@ namespace kiosk_solution.Business.Services.impl
             }
 
             var newPassword = res.ToString();
+            acc.VerifyCode = null;
             acc.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
             try
             {
