@@ -20,5 +20,9 @@ namespace kiosk_solution.Business.Services
         Task<PartyByKioskIdViewModel> GetPartyByKioskId(Guid id);
         Task<bool> ForgetPassword(string email);
         Task<PartyResetPasswordViewModel> ResetPassword(Guid partyId, string verifyCode);
+
+        Task<CountViewModel> CountLocationOwner();
+
+        Task<CountViewModel> CountServiceProvider();
     }
 }
