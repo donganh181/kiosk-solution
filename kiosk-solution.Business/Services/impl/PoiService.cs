@@ -100,6 +100,7 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Duplicated long lat");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "A POI already exists at this location");
             }
+
             poi.OpenTime = TimeSpan.Parse(model.StringOpenTime);
             poi.CloseTime = TimeSpan.Parse(model.StringCloseTime);
             poi.CreateDate = DateTime.Now;
@@ -189,6 +190,7 @@ namespace kiosk_solution.Business.Services.impl
                     throw new ErrorResponse((int) HttpStatusCode.BadRequest, "A POI already exists at this location");
                 }
             }
+
             poi.OpenTime = TimeSpan.Parse(model.StringOpenTime);
             poi.CloseTime = TimeSpan.Parse(model.StringCloseTime);
             poi.Address = address;
@@ -205,13 +207,15 @@ namespace kiosk_solution.Business.Services.impl
                 if (!string.IsNullOrEmpty(model.Thumbnail))
                 {
                     ImageUpdateViewModel updateModel =
-                        new ImageUpdateViewModel((Guid) model.ThumbnailId, poi.Name, model.Thumbnail, CommonConstants.THUMBNAIL);
+                        new ImageUpdateViewModel((Guid) model.ThumbnailId, poi.Name, model.Thumbnail,
+                            CommonConstants.THUMBNAIL);
                     result.Thumbnail = await _imageService.Update(updateModel);
                 }
                 else
                 {
                     result.Thumbnail = await _imageService.GetById((Guid) model.ThumbnailId);
                 }
+
                 return result;
             }
             catch (Exception)
@@ -412,14 +416,16 @@ namespace kiosk_solution.Business.Services.impl
             return item;
         }
 
-        public async Task<DynamicModelResponse<PoiNearbySearchViewModel>> GetLocationNearby(Guid kioskId, PoiNearbySearchViewModel model, int size, int pageNum)
+        public async Task<DynamicModelResponse<PoiNearbySearchViewModel>> GetLocationNearby(Guid kioskId,
+            PoiNearbySearchViewModel model, int size, int pageNum)
         {
             var kiosk = await _kioskService.GetById(kioskId);
-            if(kiosk == null)
+            if (kiosk == null)
             {
                 _logger.LogInformation("Kiosk not found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Kiosk not found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Kiosk not found.");
             }
+
             var pois = _unitOfWork.PoiRepository
                 .GetPoiNearBy(Guid.Parse(kiosk.PartyId + ""), model.Longtitude, model.Latitude)
                 .ProjectTo<PoiNearbySearchViewModel>(_mapper.ConfigurationProvider)
@@ -471,7 +477,7 @@ namespace kiosk_solution.Business.Services.impl
             if (listPaging.Data.ToList().Count < 1)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
 
             var result = new DynamicModelResponse<PoiNearbySearchViewModel>
@@ -538,7 +544,8 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Can not found.");
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
             }
-            if(model.RemoveFields != null)
+
+            if (model.RemoveFields != null)
             {
                 foreach (var imageId in model.RemoveFields)
                 {
@@ -546,7 +553,7 @@ namespace kiosk_solution.Business.Services.impl
                     if (!img.KeyType.Equals(CommonConstants.POI_IMAGE))
                     {
                         _logger.LogInformation("You can not delete event image.");
-                        throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You can not delete event image.");
+                        throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You can not delete event image.");
                     }
 
                     var poi = await _unitOfWork.PoiRepository
@@ -556,25 +563,25 @@ namespace kiosk_solution.Business.Services.impl
                     if (poi == null)
                     {
                         _logger.LogInformation("Can not found.");
-                        throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+                        throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
                     }
 
                     if (poi.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
                     {
                         _logger.LogInformation("You can not use this feature.");
-                        throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+                        throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");
                     }
 
                     if (poi.Type.Equals(TypeConstants.LOCAL_TYPE) && !poi.CreatorId.Equals(partyId))
                     {
                         _logger.LogInformation("You can not use this feature.");
-                        throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+                        throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You can not use this feature.");
                     }
 
                     if (img.Link.Contains(CommonConstants.THUMBNAIL))
                     {
                         _logger.LogInformation("You can not delete thumbnail. You can only change thumbnail.");
-                        throw new ErrorResponse((int)HttpStatusCode.BadRequest,
+                        throw new ErrorResponse((int) HttpStatusCode.BadRequest,
                             "You can not delete thumbnail. You can only change thumbnail.");
                     }
 
@@ -582,11 +589,12 @@ namespace kiosk_solution.Business.Services.impl
                     if (!delete)
                     {
                         _logger.LogInformation("Server Error.");
-                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
+                        throw new ErrorResponse((int) HttpStatusCode.InternalServerError, "Server Error.");
                     }
                 }
             }
-            if(model.AddFields != null)
+
+            if (model.AddFields != null)
             {
                 foreach (var image in model.AddFields)
                 {
@@ -595,6 +603,7 @@ namespace kiosk_solution.Business.Services.impl
                     var newImage = await _imageService.Create(imageModel);
                 }
             }
+
             var listImage =
                 await _imageService.GetByKeyIdAndKeyType(Guid.Parse(checkPoi.Id + ""), CommonConstants.POI_IMAGE);
             if (listImage == null)
@@ -636,6 +645,34 @@ namespace kiosk_solution.Business.Services.impl
             {
                 return true;
             }
+        }
+
+        public async Task<CountViewModel> CountPOIs(Guid partyId, string role)
+        {
+            if (role.Equals(RoleConstants.ADMIN))
+            {
+                return new CountViewModel()
+                {
+                    total = await _unitOfWork.PoiRepository.Get(e => !e.Status.Equals(StatusConstants.DELETED))
+                        .CountAsync(),
+                    active = await _unitOfWork.PoiRepository.Get(e => e.Status.Equals(StatusConstants.ACTIVATE))
+                        .CountAsync(),
+                    deactive = await _unitOfWork.PoiRepository.Get(e => e.Status.Equals(StatusConstants.DEACTIVATE))
+                        .CountAsync()
+                };
+            }
+
+            return new CountViewModel()
+            {
+                total = await _unitOfWork.PoiRepository.Get(
+                    e => e.CreatorId.Equals(partyId) && !e.Status.Equals(StatusConstants.DELETED)).CountAsync(),
+                    active = await _unitOfWork.PoiRepository.Get(e =>
+                            e.CreatorId.Equals(partyId) && e.Status.Equals(StatusConstants.ACTIVATE))
+                        .CountAsync(),
+                    deactive = await _unitOfWork.PoiRepository.Get(e =>
+                            e.CreatorId.Equals(partyId) && e.Status.Equals(StatusConstants.DEACTIVATE))
+                        .CountAsync()
+            };
         }
     }
 }

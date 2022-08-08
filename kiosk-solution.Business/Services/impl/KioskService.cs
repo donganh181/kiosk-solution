@@ -94,10 +94,11 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Party not found.");
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Party not found.");
             }
-            if(user.RoleName != RoleConstants.LOCATION_OWNER)
+
+            if (user.RoleName != RoleConstants.LOCATION_OWNER)
             {
                 _logger.LogInformation("Can not add kiosk to other role.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Can not add kiosk to other role.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not add kiosk to other role.");
             }
 
             var kiosk = _mapper.CreateMapper().Map<Kiosk>(model);
@@ -445,7 +446,7 @@ namespace kiosk_solution.Business.Services.impl
             if (!kioskLocation.OwnerId.Equals(updaterId))
             {
                 _logger.LogInformation("You cannot use location of other user.");
-                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You cannot use location of other user.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "You cannot use location of other user.");
             }
 
             kiosk.Name = model.Name;
@@ -466,7 +467,7 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<KioskViewModel> UpdateStatus(Guid updaterId, Guid kioskId,bool isKioskSetup)
+        public async Task<KioskViewModel> UpdateStatus(Guid updaterId, Guid kioskId, bool isKioskSetup)
         {
             var kiosk = await _unitOfWork.KioskRepository
                 .Get(k => k.Id.Equals(kioskId))
@@ -507,6 +508,7 @@ namespace kiosk_solution.Business.Services.impl
                     kiosk.Status = StatusConstants.ACTIVATE;
                 }
             }
+
             try
             {
                 _unitOfWork.KioskRepository.Update(kiosk);
@@ -517,9 +519,11 @@ namespace kiosk_solution.Business.Services.impl
                         .SendAsync(SystemEventHub.KIOSK_STATUS_CHANNEL,
                             SystemEventHub.SYSTEM_BOT, "CHANGE_STATUS_TO_DEACTIVATE");
                 }
+
                 var result = _mapper.CreateMapper().Map<KioskViewModel>(kiosk);
                 return result;
-            }catch (Exception)
+            }
+            catch (Exception)
             {
                 _logger.LogInformation("Invalid Data.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
@@ -535,13 +539,13 @@ namespace kiosk_solution.Business.Services.impl
             if (kiosk == null)
             {
                 _logger.LogInformation("Kiosk not found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Kiosk not found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Kiosk not found.");
             }
 
             if (!kiosk.PartyId.Equals(updaterId)) // kiosk did not belong to this updater!
             {
                 _logger.LogInformation("Your account cannot use this feature.");
-                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "Your account cannot use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.Forbidden, "Your account cannot use this feature.");
             }
 
             kiosk.Name = model.KioskName;
@@ -559,7 +563,7 @@ namespace kiosk_solution.Business.Services.impl
             catch (Exception)
             {
                 _logger.LogInformation("Invalid Data.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid Data.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
             }
         }
 
@@ -570,6 +574,34 @@ namespace kiosk_solution.Business.Services.impl
                 .ToListAsync();
 
             return listKiosk;
+        }
+
+        public async Task<CountViewModel> CountKiosks(Guid partyId, string role)
+        {
+            if (role.Equals(RoleConstants.ADMIN))
+            {
+                return new CountViewModel()
+                {
+                    total = await _unitOfWork.KioskRepository.Get().CountAsync(),
+                    active = await _unitOfWork.KioskRepository.Get(e => e.Status.Equals(StatusConstants.ACTIVATE))
+                        .CountAsync(),
+                    deactive = await _unitOfWork.KioskRepository.Get(e => e.Status.Equals(StatusConstants.DEACTIVATE))
+                        .CountAsync()
+                };
+            }
+            else
+            {
+                return new CountViewModel()
+                {
+                    total = await _unitOfWork.KioskRepository.Get(e => e.PartyId.Equals(partyId)).CountAsync(),
+                    active = await _unitOfWork.KioskRepository.Get(e =>
+                            e.PartyId.Equals(partyId) && e.Status.Equals(StatusConstants.ACTIVATE))
+                        .CountAsync(),
+                    deactive = await _unitOfWork.KioskRepository.Get(e =>
+                            e.PartyId.Equals(partyId) && e.Status.Equals(StatusConstants.DEACTIVATE))
+                        .CountAsync()
+                };
+            }
         }
     }
 }

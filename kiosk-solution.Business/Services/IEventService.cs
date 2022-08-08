@@ -22,5 +22,7 @@ namespace kiosk_solution.Business.Services
         Task<EventViewModel> ReplaceImage(Guid partyId, string roleName, ImageReplaceViewModel model);
         Task<DynamicModelResponse<EventNearbySearchViewModel>> GetEventNearby(Guid partyId, EventNearbySearchViewModel model, int size, int pageNum);
         Task<bool> ValidateStatusOfEventByDay();
+
+        Task<CountViewModel> CountEvents(Guid partyId, string role);
     }
 }
