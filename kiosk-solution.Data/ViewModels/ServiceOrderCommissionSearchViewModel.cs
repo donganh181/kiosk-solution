@@ -10,6 +10,7 @@ namespace kiosk_solution.Data.ViewModels
         public Guid? ServiceApplicationId { get; set; }
         [BindNever]
         public string ServiceApplicationName { get; set; }
+        [Skip]
         [BindNever]
         public int Month { get; set; }
         [BindNever]
