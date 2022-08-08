@@ -402,6 +402,19 @@ namespace kiosk_solution.Business.Services.impl
                 };
             }
 
+            if (role.Equals(RoleConstants.LOCATION_OWNER))
+            {
+                return new CountViewModel()
+                {
+                    total = await _unitOfWork.PartyServiceApplicationRepository.Get(e => e.PartyId.Equals(partyId)).CountAsync(),
+                    active = await _unitOfWork.PartyServiceApplicationRepository.Get(e =>
+                            e.PartyId.Equals(partyId) && e.Status.Equals(StatusConstants.INSTALLED))
+                        .CountAsync(),
+                    deactive = await _unitOfWork.PartyServiceApplicationRepository.Get(e =>
+                            e.PartyId.Equals(partyId) && e.Status.Equals(StatusConstants.UNINSTALLED))
+                        .CountAsync()
+                };
+            }
             return new CountViewModel()
             {
                 total = await _unitOfWork.ServiceApplicationRepository.Get(e => e.PartyId.Equals(partyId)).CountAsync(),
