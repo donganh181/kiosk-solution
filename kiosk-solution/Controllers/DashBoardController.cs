@@ -56,7 +56,7 @@ namespace kiosk_solution.Controllers
 
         [HttpGet("count/app")]
         [MapToApiVersion("1")]
-        [Authorize(Roles = "Admin, Service Provider")]
+        [Authorize(Roles = "Admin, Service Provider, Location Owner")]
         public async Task<IActionResult> countApplication()
         {
             var request = Request;
