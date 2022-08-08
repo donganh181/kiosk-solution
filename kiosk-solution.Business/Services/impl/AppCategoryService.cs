@@ -28,7 +28,7 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IPartyServiceApplicationService _partyServiceApplicationService;
 
         public AppCategoryService(IMapper mapper, IUnitOfWork unitOfWork, ILogger<IAppCategoryService> logger
-            ,IFileService fileService, IPartyServiceApplicationService partyServiceApplicationService)
+            , IFileService fileService, IPartyServiceApplicationService partyServiceApplicationService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -40,6 +40,13 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<AppCategoryViewModel> Create(AppCategoryCreateViewModel model)
         {
             var cate = _mapper.Map<AppCategory>(model);
+            var cateExist = await _unitOfWork.AppCategoryRepository.Get(c => c.Name.Equals(model.Name))
+                .FirstOrDefaultAsync();
+            if (cateExist != null)
+            {
+                _logger.LogInformation("Category name existed.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Category name existed.");
+            }
 
             try
             {
@@ -49,10 +56,10 @@ namespace kiosk_solution.Business.Services.impl
                 var newCate = await _unitOfWork.AppCategoryRepository
                     .Get(c => c.Id.Equals(cate.Id))
                     .FirstOrDefaultAsync();
-                
+
                 var logo = await _fileService.UploadImageToFirebase(model.Logo,
                     CommonConstants.CATE_IMAGE, cate.Name, cate.Id, "Cate");
-               
+
                 newCate.Logo = logo;
 
                 _unitOfWork.AppCategoryRepository.Update(newCate);
@@ -61,18 +68,10 @@ namespace kiosk_solution.Business.Services.impl
                 var result = _mapper.Map<AppCategoryViewModel>(newCate);
                 return result;
             }
-            catch(SqlException e)
+            catch (SqlException e)
             {
-                if (e.Number == 2601)
-                {
-                    _logger.LogInformation("Name is duplicated.");
-                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Name is duplicated.");
-                }
-                else
-                {
-                    _logger.LogInformation("Invalid Data.");
-                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
-                }
+                _logger.LogInformation(e.Message);
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, e.Message);
             }
         }
 
@@ -82,7 +81,8 @@ namespace kiosk_solution.Business.Services.impl
             if (checkExist)
             {
                 _logger.LogInformation("Already app on this category, can not delete.");
-                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Already app on this category, can not delete.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest,
+                    "Already app on this category, can not delete.");
             }
             else
             {
@@ -94,38 +94,41 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<DynamicModelResponse<AppCategorySearchViewModel>> GetAllWithPaging(Guid? id,string role, AppCategorySearchViewModel model, int size, int pageNum)
+        public async Task<DynamicModelResponse<AppCategorySearchViewModel>> GetAllWithPaging(Guid? id, string role,
+            AppCategorySearchViewModel model, int size, int pageNum)
         {
-            
             //
             IQueryable<AppCategorySearchViewModel> cates = null;
-            List<AppCategorySearchViewModel> listCate = new List<AppCategorySearchViewModel>();           
-            if(string.IsNullOrEmpty(role) || role.Equals(RoleConstants.ADMIN) || role.Equals(RoleConstants.SERVICE_PROVIDER))
+            List<AppCategorySearchViewModel> listCate = new List<AppCategorySearchViewModel>();
+            if (string.IsNullOrEmpty(role) || role.Equals(RoleConstants.ADMIN) ||
+                role.Equals(RoleConstants.SERVICE_PROVIDER))
             {
                 cates = _unitOfWork.AppCategoryRepository
-                .Get()
-                .ProjectTo<AppCategorySearchViewModel>(_mapper.ConfigurationProvider);
+                    .Get()
+                    .ProjectTo<AppCategorySearchViewModel>(_mapper.ConfigurationProvider);
                 listCate = await cates.ToListAsync();
             }
             else if (!string.IsNullOrEmpty(role) && role.Equals(RoleConstants.LOCATION_OWNER))
             {
                 cates = _unitOfWork.AppCategoryRepository
-                .Get()
-                .ProjectTo<AppCategorySearchViewModel>(_mapper.ConfigurationProvider);
+                    .Get()
+                    .ProjectTo<AppCategorySearchViewModel>(_mapper.ConfigurationProvider);
                 var listCheck = await cates.ToListAsync();
 
                 foreach (var item in listCheck)
                 {
-                    var check = await _partyServiceApplicationService.CheckAppExist(Guid.Parse(id + ""), Guid.Parse(item.Id + ""));
+                    var check = await _partyServiceApplicationService.CheckAppExist(Guid.Parse(id + ""),
+                        Guid.Parse(item.Id + ""));
                     if (check)
                     {
                         listCate.Add(item);
                     }
                 }
+
                 if (listCate.Count() < 1)
                 {
                     _logger.LogInformation("Can not Found.");
-                    throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                    throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
                 }
             }
 
@@ -133,11 +136,11 @@ namespace kiosk_solution.Business.Services.impl
 
             var listPaging = cates.PagingIQueryable(pageNum, size,
                 CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
-            
+
             if (listPaging.Data.ToList().Count < 1)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
 
             var result = new DynamicModelResponse<AppCategorySearchViewModel>
@@ -159,11 +162,12 @@ namespace kiosk_solution.Business.Services.impl
                 .Get(c => c.Id.Equals(id))
                 .ProjectTo<AppCategoryViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
-            if(cate == null)
+            if (cate == null)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found");
             }
+
             return cate;
         }
 
@@ -173,10 +177,18 @@ namespace kiosk_solution.Business.Services.impl
                 .Get(c => c.Id.Equals(model.Id))
                 .FirstOrDefaultAsync();
 
-            if(cate == null)
+            if (cate == null)
             {
                 _logger.LogInformation("Can not Found.");
-                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found.");
+            }
+
+            var cateExist = await _unitOfWork.AppCategoryRepository.Get(c => c.Name.Equals(model.Name))
+                .FirstOrDefaultAsync();
+            if (cateExist != null)
+            {
+                _logger.LogInformation("Category name existed.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Category name existed.");
             }
 
             cate.Name = model.Name;
@@ -185,20 +197,20 @@ namespace kiosk_solution.Business.Services.impl
                 if (!cate.Logo.Equals(model.Logo))
                 {
                     var newLogo = await _fileService.UploadImageToFirebase(model.Logo,
-                    CommonConstants.CATE_IMAGE, cate.Name, cate.Id, "Cate");
+                        CommonConstants.CATE_IMAGE, cate.Name, cate.Id, "Cate");
                     cate.Logo = newLogo;
                 }
-                
+
                 _unitOfWork.AppCategoryRepository.Update(cate);
                 await _unitOfWork.SaveAsync();
 
                 var result = _mapper.Map<AppCategoryViewModel>(cate);
                 return result;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                _logger.LogInformation("Invalid data.");
-                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
+                _logger.LogInformation(e.Message);
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, e.Message);
             }
         }
     }
