@@ -37,6 +37,14 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<PoicategoryViewModel> Create(PoiCategoryCreateViewModel model)
         {
             var cate = _mapper.Map<Poicategory>(model);
+            var cateExist = await _unitOfWork.PoicategoryRepository.Get(c => c.Name.Equals(model.Name))
+                .FirstOrDefaultAsync();
+            if (cateExist != null)
+            {
+                _logger.LogInformation("Category name existed.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Category name existed.");
+            }
+
             cate.Logo = "123";
             try
             {
@@ -56,26 +64,27 @@ namespace kiosk_solution.Business.Services.impl
             }
             catch (SqlException e)
             {
-                if (e.Number == 2601)
-                {
-                    _logger.LogInformation("Name is duplicated.");
-                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Name is duplicated.");
-                }
-                else
-                {
-                    _logger.LogInformation("Invalid Data.");
-                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
-                }
+                _logger.LogInformation(e.Message);
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, e.Message);
             }
         }
 
         public async Task<PoicategoryViewModel> Update(PoiCategoryUpdateViewModel model)
         {
             var cate = await _unitOfWork.PoicategoryRepository.Get(c => c.Id.Equals(model.Id)).FirstOrDefaultAsync();
+
             if (cate == null)
             {
                 _logger.LogInformation("Can not Found.");
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found.");
+            }
+
+            var cateExist = await _unitOfWork.PoicategoryRepository.Get(c => c.Name.Equals(model.Name))
+                .FirstOrDefaultAsync();
+            if (cateExist != null)
+            {
+                _logger.LogInformation("Category name existed.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Category name existed.");
             }
 
             cate.Name = model.Name;
@@ -96,16 +105,8 @@ namespace kiosk_solution.Business.Services.impl
             }
             catch (SqlException e)
             {
-                if (e.Number == 2601)
-                {
-                    _logger.LogInformation("Name is duplicated.");
-                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Name is duplicated.");
-                }
-                else
-                {
-                    _logger.LogInformation("Invalid Data.");
-                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
-                }
+                _logger.LogInformation(e.Message);
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, e.Message);
             }
         }
 
@@ -123,8 +124,10 @@ namespace kiosk_solution.Business.Services.impl
             if (existPoi)
             {
                 _logger.LogInformation("Already poi on this category, can not delete.");
-                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Already poi on this category, can not delete.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest,
+                    "Already poi on this category, can not delete.");
             }
+
             try
             {
                 _unitOfWork.PoicategoryRepository.Delete(cate);
