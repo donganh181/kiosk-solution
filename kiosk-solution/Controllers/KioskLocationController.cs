@@ -119,7 +119,7 @@ namespace kiosk_solution.Controllers
 
         [HttpGet("async-information")]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> GetKioskNearby([FromQuery] Guid id)
+        public async Task<IActionResult> AsyncInformation([FromQuery] Guid id)
         {
             var result = await _kioskLocationService.GetByIdAndChangeKioskView(id);
             return Ok(new SuccessResponse<KioskLocationViewModel>((int)HttpStatusCode.OK, "Async success.", result));
