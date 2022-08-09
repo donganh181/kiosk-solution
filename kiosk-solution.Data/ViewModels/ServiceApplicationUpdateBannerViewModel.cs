@@ -7,7 +7,6 @@ namespace kiosk_solution.Data.ViewModels
     {
         [Required]
         public Guid ServiceApplicationId { get; set; }
-        [Required]
         public string Banner { get; set; }
     }
 }

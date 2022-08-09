@@ -243,22 +243,20 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Can not found.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
             }
-
-            if (model.Banner.Equals(poiUpdate.Banner))
+            if (string.IsNullOrEmpty(model.Banner))
+            {
+                poiUpdate.Banner = null;
+            }else if(model.Banner.Equals(poiUpdate.Banner))
             {
                 _logger.LogInformation("Do not thing.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Do not thing.");
+            }else
+            {
+                var link = await _fileService.UploadImageToFirebase(model.Banner,CommonConstants.BANNER_IMAGE, CommonConstants.BANNER_POI, poiUpdate.Id, poiUpdate.Name);
+                poiUpdate.Banner = link;
             }
             try
             {
-                if (string.IsNullOrEmpty(model.Banner))
-                {
-                    poiUpdate.Banner = null;
-                }else
-                {
-                    var link = await _fileService.UploadImageToFirebase(model.Banner,CommonConstants.BANNER_IMAGE, CommonConstants.BANNER_POI, poiUpdate.Id, poiUpdate.Name);
-                    poiUpdate.Banner = link;
-                }
                 _unitOfWork.PoiRepository.Update(poiUpdate);
                 await _unitOfWork.SaveAsync();
                 var result = _mapper.Map<PoiViewModel>(poiUpdate);
