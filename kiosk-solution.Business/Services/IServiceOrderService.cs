@@ -14,7 +14,13 @@ namespace kiosk_solution.Business.Services
             ServiceOrderSearchViewModel model, int size, int pageNum);
 
         public Task<List<ServiceOrderCommissionSearchViewModel>> GetAllCommission(Guid partyId, Guid kioskId, ServiceOrderCommissionSearchViewModel model);
-        public Task<ServiceOrderCommissionMonthViewModel> GetAllCommissionByMonth(Guid partyId, Guid kioskId, int month, int year);
-        public Task<ServiceOrderCommissionYearViewModel> GetAllCommissionByYear(Guid partyId, Guid kioskId, int year, List<Guid> serviceApplicationIds);
+        public Task<ServiceOrderCommissionPieChartViewModel> GetAllCommissionParty(Guid partyId, Guid serviceApplicationId);
+        public Task<ServiceOrderCommissionPieChartViewModel> GetAllCommissionPartyByMonth(Guid partyId, Guid serviceApplicationId , int month, int year);
+        public Task<ServiceOrderCommissionPieChartViewModel> GetAllCommissionPartyByYear(Guid partyId, Guid serviceApplicationId , int year);
+        public Task<ServiceOrderCommissionPieChartViewModel> GetAllCommissionKiosk(Guid partyId, Guid kioskId);
+        public Task<ServiceOrderCommissionPieChartViewModel> GetAllCommissionKioskByMonth(Guid partyId, Guid kioskId, int month, int year);
+        public Task<ServiceOrderCommissionPieChartViewModel> GetAllCommissionKioskByYear(Guid partyId, Guid kioskId, int year);
+        public Task<ServiceOrderCommissionLineChartViewModel> GetAllCommissionKioskByMonthOfYear(Guid partyId, Guid kioskId, int year, List<Guid> serviceApplicationIds);
+        public Task<ServiceOrderCommissionLineChartViewModel> GetAllCommissionKioskByDayOfMonth(Guid partyId, Guid kioskId,int month, int year, List<Guid> serviceApplicationIds);
     }
 }

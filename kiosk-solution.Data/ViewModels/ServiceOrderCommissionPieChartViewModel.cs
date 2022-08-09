@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace kiosk_solution.Data.ViewModels
 {
-    public class ServiceOrderCommissionMonthViewModel
+    public class ServiceOrderCommissionPieChartViewModel
     {
-        public List<string> Lables { get; set; }
-        public List<decimal> Data { get; set; }
+        public List<string> Labels { get; set; }
+        public List<decimal> Datasets { get; set; }
     }
 }

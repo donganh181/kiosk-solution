@@ -126,7 +126,22 @@ namespace kiosk_solution.Business.Services.impl
             return listApp;
         }
 
-        public async Task<ServiceOrderCommissionMonthViewModel> GetAllCommissionByMonth(Guid partyId, Guid kioskId, int month, int year)
+        public async Task<ServiceOrderCommissionPieChartViewModel> GetAllCommissionParty(Guid partyId, Guid serviceApplicationId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ServiceOrderCommissionPieChartViewModel> GetAllCommissionPartyByMonth(Guid partyId, Guid serviceApplicationId, int month, int year)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ServiceOrderCommissionPieChartViewModel> GetAllCommissionPartyByYear(Guid partyId, Guid serviceApplicationId, int year)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ServiceOrderCommissionPieChartViewModel> GetAllCommissionKiosk(Guid partyId, Guid kioskId)
         {
             var kiosk = await _kioskService.GetByIdWithParyId(kioskId, partyId);
             if (kiosk == null)
@@ -135,10 +150,41 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You can not use this feature.");
             }
 
-            var result = new ServiceOrderCommissionMonthViewModel()
+            var result = new ServiceOrderCommissionPieChartViewModel()
             {
-                Lables = new List<string>(),
-                Data = new List<decimal>()
+                Labels = new List<string>(),
+                Datasets = new List<decimal>()
+            };
+            var listApp = await _unitOfWork.ServiceOrderRepository.Get(s => s.KioskId.Equals(kioskId))
+                .ProjectTo<ServiceOrderCommissionSearchViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+            listApp = listApp.GroupBy(o => o.ServiceApplicationId).Select(g => g.First()).ToList();
+            foreach (var app in listApp)
+            {
+                var commission = await _unitOfWork.ServiceOrderRepository
+                    .Get(s => s.KioskId.Equals(kioskId) &&
+                              s.ServiceApplicationId.Equals(app.ServiceApplicationId))
+                    .SumAsync(o => o.Commission);
+                result.Datasets.Add((decimal) commission);
+                result.Labels.Add(app.ServiceApplicationName);
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceOrderCommissionPieChartViewModel> GetAllCommissionKioskByMonth(Guid partyId, Guid kioskId,
+            int month, int year)
+        {
+            var kiosk = await _kioskService.GetByIdWithParyId(kioskId, partyId);
+            if (kiosk == null)
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You can not use this feature.");
+            }
+
+            var result = new ServiceOrderCommissionPieChartViewModel()
+            {
+                Labels = new List<string>(),
+                Datasets = new List<decimal>()
             };
             var listApp = await _unitOfWork.ServiceOrderRepository.Get(s =>
                     s.KioskId.Equals(kioskId) &&
@@ -154,14 +200,15 @@ namespace kiosk_solution.Business.Services.impl
                               s.CreateDate.Value.Month == month &&
                               s.CreateDate.Value.Year == year)
                     .SumAsync(o => o.Commission);
-                result.Data.Add( (decimal) commission);
-                result.Lables.Add(app.ServiceApplicationName);
+                result.Datasets.Add((decimal) commission);
+                result.Labels.Add(app.ServiceApplicationName);
             }
 
             return result;
         }
 
-        public async Task<ServiceOrderCommissionYearViewModel> GetAllCommissionByYear(Guid partyId, Guid kioskId, int year, List<Guid> serviceApplicationIds)
+        public async Task<ServiceOrderCommissionPieChartViewModel> GetAllCommissionKioskByYear(Guid partyId, Guid kioskId,
+            int year)
         {
             var kiosk = await _kioskService.GetByIdWithParyId(kioskId, partyId);
             if (kiosk == null)
@@ -169,7 +216,42 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("You can not use this feature.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You can not use this feature.");
             }
-            var result = new ServiceOrderCommissionYearViewModel()
+
+            var result = new ServiceOrderCommissionPieChartViewModel()
+            {
+                Labels = new List<string>(),
+                Datasets = new List<decimal>()
+            };
+            var listApp = await _unitOfWork.ServiceOrderRepository.Get(s =>
+                    s.KioskId.Equals(kioskId) &&
+                    s.CreateDate.Value.Year == year)
+                .ProjectTo<ServiceOrderCommissionSearchViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+            listApp = listApp.GroupBy(o => o.ServiceApplicationId).Select(g => g.First()).ToList();
+            foreach (var app in listApp)
+            {
+                var commission = await _unitOfWork.ServiceOrderRepository
+                    .Get(s => s.KioskId.Equals(kioskId) &&
+                              s.ServiceApplicationId.Equals(app.ServiceApplicationId) &&
+                              s.CreateDate.Value.Year == year)
+                    .SumAsync(o => o.Commission);
+                result.Datasets.Add((decimal) commission);
+                result.Labels.Add(app.ServiceApplicationName);
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceOrderCommissionLineChartViewModel> GetAllCommissionKioskByMonthOfYear(Guid partyId,
+            Guid kioskId, int year, List<Guid> serviceApplicationIds)
+        {
+            var kiosk = await _kioskService.GetByIdWithParyId(kioskId, partyId);
+            if (kiosk == null)
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You can not use this feature.");
+            }
+
+            var result = new ServiceOrderCommissionLineChartViewModel()
             {
                 Datas = new List<AppDataViewModel>()
             };
@@ -194,7 +276,7 @@ namespace kiosk_solution.Business.Services.impl
                         var name = await _serviceApplicationService.GetNameById(serviceApplicationId);
                         var appData = new AppDataViewModel()
                         {
-                            Data = new List<decimal>(),
+                            Datasets = new List<decimal>(),
                             ServiceApplicationId = serviceApplicationId,
                             ServiceApplicationName = name
                         };
@@ -202,8 +284,9 @@ namespace kiosk_solution.Business.Services.impl
                     }
                     else
                     {
-                        var appData = new AppDataViewModel(){
-                            Data = new List<decimal>(),
+                        var appData = new AppDataViewModel()
+                        {
+                            Datasets = new List<decimal>(),
                             ServiceApplicationId = serviceApplicationId,
                             ServiceApplicationName = appOrder.ServiceApplicationName
                         };
@@ -212,7 +295,6 @@ namespace kiosk_solution.Business.Services.impl
                             var month = i;
                             var commissionByMonth = new ServiceOrderCommissionSearchViewModel()
                             {
-                                Month = month,
                                 TotalCommission = 0,
                                 ServiceApplicationId = appOrder.ServiceApplicationId,
                                 ServiceApplicationName = appOrder.ServiceApplicationName
@@ -223,8 +305,9 @@ namespace kiosk_solution.Business.Services.impl
                                           s.CreateDate.Value.Month == month &&
                                           s.CreateDate.Value.Year == year)
                                 .SumAsync(o => o.Commission);
-                            appData.Data.Add((decimal) commission);
+                            appData.Datasets.Add((decimal) commission);
                         }
+
                         result.Datas.Add(appData);
                     }
                 }
@@ -238,8 +321,9 @@ namespace kiosk_solution.Business.Services.impl
                 listApp = listApp.GroupBy(o => o.ServiceApplicationId).Select(g => g.First()).ToList();
                 foreach (var app in listApp)
                 {
-                    var appData = new AppDataViewModel(){
-                        Data = new List<decimal>(),
+                    var appData = new AppDataViewModel()
+                    {
+                        Datasets = new List<decimal>(),
                         ServiceApplicationId = (Guid) app.ServiceApplicationId,
                         ServiceApplicationName = app.ServiceApplicationName
                     };
@@ -252,7 +336,108 @@ namespace kiosk_solution.Business.Services.impl
                                       s.CreateDate.Value.Month == month &&
                                       s.CreateDate.Value.Year == year)
                             .SumAsync(o => o.Commission);
-                        appData.Data.Add((decimal) commission);
+                        appData.Datasets.Add((decimal) commission);
+                    }
+
+                    result.Datas.Add(appData);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceOrderCommissionLineChartViewModel> GetAllCommissionKioskByDayOfMonth(Guid partyId,
+            Guid kioskId,int month, int year, List<Guid> serviceApplicationIds)
+        {
+            var kiosk = await _kioskService.GetByIdWithParyId(kioskId, partyId);
+            if (kiosk == null)
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You can not use this feature.");
+            }
+            var startDate = new DateTime(year, month, 1);
+            var endDate = startDate.AddMonths(1);
+            var result = new ServiceOrderCommissionLineChartViewModel()
+            {
+                Datas = new List<AppDataViewModel>()
+            };
+            // Get by list service app ID
+            if (serviceApplicationIds.Count != 0)
+                foreach (var serviceApplicationId in serviceApplicationIds)
+                {
+                    if (serviceApplicationId == null)
+                    {
+                        _logger.LogInformation("App id can not null.");
+                        throw new ErrorResponse((int) HttpStatusCode.BadRequest, "App id can not null.");
+                    }
+
+                    var appOrder = await _unitOfWork.ServiceOrderRepository.Get(s =>
+                            s.KioskId.Equals(kioskId) &&
+                            s.CreateDate.Value.Month == month &&
+                            s.CreateDate.Value.Year == year &&
+                            s.ServiceApplicationId == serviceApplicationId)
+                        .ProjectTo<ServiceOrderCommissionSearchViewModel>(_mapper.ConfigurationProvider)
+                        .FirstOrDefaultAsync();
+                    if (appOrder == null)
+                    {
+                        var name = await _serviceApplicationService.GetNameById(serviceApplicationId);
+                        var appData = new AppDataViewModel()
+                        {
+                            Datasets = new List<decimal>(),
+                            ServiceApplicationId = serviceApplicationId,
+                            ServiceApplicationName = name
+                        };
+                        result.Datas.Add(appData);
+                    }
+                    else
+                    {
+                        var appData = new AppDataViewModel()
+                        {
+                            Datasets = new List<decimal>(),
+                            ServiceApplicationId = serviceApplicationId,
+                            ServiceApplicationName = appOrder.ServiceApplicationName
+                        };
+                        for (DateTime dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+                        {
+                            var commission = await _unitOfWork.ServiceOrderRepository
+                                .Get(s => s.KioskId.Equals(kioskId) &&
+                                          s.ServiceApplicationId.Equals(appOrder.ServiceApplicationId) &&
+                                          s.CreateDate.Value.Day == dt.Day &&
+                                          s.CreateDate.Value.Month == month &&
+                                          s.CreateDate.Value.Year == year)
+                                .SumAsync(o => o.Commission);
+                            appData.Datasets.Add((decimal) commission);
+                        }
+                        result.Datas.Add(appData);
+                    }
+                }
+            // Get all
+            else
+            {
+                var listApp = await _unitOfWork.ServiceOrderRepository.Get(s =>
+                        s.KioskId.Equals(kioskId) &&
+                        s.CreateDate.Value.Month == month &&
+                        s.CreateDate.Value.Year == year)
+                    .ProjectTo<ServiceOrderCommissionSearchViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+                listApp = listApp.GroupBy(o => o.ServiceApplicationId).Select(g => g.First()).ToList();
+                foreach (var app in listApp)
+                {
+                    var appData = new AppDataViewModel()
+                    {
+                        Datasets = new List<decimal>(),
+                        ServiceApplicationId = (Guid) app.ServiceApplicationId,
+                        ServiceApplicationName = app.ServiceApplicationName
+                    };
+                    for (DateTime dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+                    {
+                        var commission = await _unitOfWork.ServiceOrderRepository
+                            .Get(s => s.KioskId.Equals(kioskId) &&
+                                      s.ServiceApplicationId.Equals(app.ServiceApplicationId) &&
+                                      s.CreateDate.Value.Day == dt.Day &&
+                                      s.CreateDate.Value.Month == month &&
+                                      s.CreateDate.Value.Year == year)
+                            .SumAsync(o => o.Commission);
+                        appData.Datasets.Add((decimal) commission);
                     }
                     result.Datas.Add(appData);
                 }
