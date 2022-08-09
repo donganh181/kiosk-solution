@@ -267,7 +267,7 @@ namespace kiosk_solution.Business.Services.impl
                     .Include(p => p.Creator)
                     .ProjectTo<PartyViewModel>(_mapper).FirstOrDefaultAsync();
             }
-            else if (roleName.Equals(RoleConstants.LOCATION_OWNER))
+            else if (roleName.Equals(RoleConstants.LOCATION_OWNER)||roleName.Equals(RoleConstants.SERVICE_PROVIDER))
             {
                 if (!id.Equals(checkId))
                 {

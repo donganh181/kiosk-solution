@@ -123,7 +123,7 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<DynamicModelResponse<PartySearchViewModel>>((int) HttpStatusCode.OK,
                 "Search success.", result));
         }
-        
+        [Authorize(Roles = "Location Owner, Admin, Service Provider")]
         [HttpGet("{id}")]
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetPartyById(Guid id)
