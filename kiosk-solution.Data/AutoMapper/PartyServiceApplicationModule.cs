@@ -27,6 +27,10 @@ namespace kiosk_solution.Data.AutoMapper
             mc.CreateMap<PartyServiceApplication, PartyServiceApplicationCreateViewModel>();
             mc.CreateMap<PartyServiceApplicationCreateViewModel, PartyServiceApplication>();
 
+            mc.CreateMap<PartyServiceApplication, MyAppViewModel>()
+                .ForMember(src => src.ServiceAppModel, opt => opt.MapFrom(des => des.ServiceApplication));
+            mc.CreateMap<MyAppViewModel, PartyServiceApplication>();
+
             mc.CreateMap<PartyServiceApplication, PartyServiceApplicationSearchViewModel>()
                 .ForMember(src => src.PartyName, opt => opt.MapFrom(des => des.Party.FirstName))
                 .ForMember(src => src.PartyEmail, opt => opt.MapFrom(des => des.Party.Email))

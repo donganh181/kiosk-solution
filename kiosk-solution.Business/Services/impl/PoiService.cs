@@ -708,5 +708,109 @@ namespace kiosk_solution.Business.Services.impl
                         .CountAsync()
             };
         }
+
+        public async Task<List<PoiViewModel>> GetListPoiByPartyId(Guid partyId)
+        {
+            var listPoi = await _unitOfWork.PoiRepository
+                .Get(p => p.Status.Equals(StatusConstants.ACTIVATE)
+                    && (p.Type.Equals(TypeConstants.SERVER_TYPE) 
+                    || (p.Type.Equals(TypeConstants.LOCAL_TYPE) && p.CreatorId.Equals(partyId)))
+                    && !String.IsNullOrEmpty(p.Banner))
+                .Include(a => a.Poicategory)
+                .ProjectTo<PoiViewModel>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            if (listPoi.Count < 1)
+            {
+                return listPoi;
+            }
+            else
+            {
+                foreach(var item in listPoi)
+                {
+                    var listImage = await _imageService
+                                    .GetByKeyIdAndKeyType(Guid.Parse(item.Id + ""), CommonConstants.POI_IMAGE);
+                    if (listImage == null)
+                    {
+                        _logger.LogInformation($"{item.Name} has lost image.");
+                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                    }
+
+                    var listSourceImage = new List<ImageViewModel>();
+                    foreach (var img in listImage)
+                    {
+                        if (img.Link == null)
+                        {
+                            _logger.LogInformation($"{item.Name} has lost image.");
+                            throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                        }
+
+                        if (img.Link.Contains(CommonConstants.THUMBNAIL))
+                        {
+                            item.Thumbnail = img;
+                        }
+                        else if (img.Link.Contains(CommonConstants.SOURCE_IMAGE))
+                        {
+                            listSourceImage.Add(img);
+                        }
+                    }
+
+                    item.ListImage = _mapper.Map<List<PoiImageDetailViewModel>>(listSourceImage);
+                }
+                return listPoi;
+            }
+        }
+
+        public async Task<PoiViewModel> UpdateStatus(Guid partyId, string roleName, Guid poiId)
+        {
+            var poi = await _unitOfWork.PoiRepository
+                .Get(p => p.Id.Equals(poiId))
+                .FirstOrDefaultAsync();
+
+            if (poi == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            if (poi.Type.Equals(TypeConstants.SERVER_TYPE) && !roleName.Equals(RoleConstants.ADMIN))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+
+            if (poi.Type.Equals(TypeConstants.LOCAL_TYPE) && !poi.CreatorId.Equals(partyId))
+            {
+                _logger.LogInformation("You can not use this feature.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You can not use this feature.");
+            }
+
+            if (poi.Status.Equals(StatusConstants.ACTIVATE))
+            {
+                poi.Status = StatusConstants.DEACTIVATE;
+            }
+            else
+            {
+                poi.Status = StatusConstants.ACTIVATE;
+            }
+            try
+            {
+                _unitOfWork.PoiRepository.Update(poi);
+                await _unitOfWork.SaveAsync();
+                var result = await _unitOfWork.PoiRepository
+                    .Get(p => p.Id.Equals(poi.Id))
+                    .Include(p => p.Creator)
+                    .Include(p => p.Poicategory)
+                    .ProjectTo<PoiViewModel>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync();
+
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
+            }
+        }
     }
 }

@@ -923,5 +923,64 @@ namespace kiosk_solution.Business.Services.impl
                     .CountAsync()
             };
         }
+
+        public async Task<List<EventViewModel>> GetListEventByPartyId(Guid id)
+        {
+            var now = DateTime.Now;
+
+            var listEvent = await _unitOfWork.EventRepository
+                .Get(e => !e.Status.Equals(StatusConstants.END) && !e.Status.Equals(StatusConstants.DELETED)
+                                                                && !String.IsNullOrEmpty(e.Banner)
+                                                                && DateTime.Compare(now, (DateTime)e.TimeEnd) < 0
+                                                                && (e.Type.Equals(TypeConstants.SERVER_TYPE) || (e.Type.Equals(TypeConstants.LOCAL_TYPE) && e.CreatorId.Equals(id))))
+                .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            if (listEvent.Count < 1)
+            {
+                return listEvent;
+            }
+            else
+            {
+                foreach(var myEvent in listEvent)
+                {
+                    
+                    if (DateTime.Compare((DateTime)myEvent.TimeStart, now) < 0 &&
+                        DateTime.Compare(now, (DateTime)myEvent.TimeEnd) < 0)
+                    {
+                        myEvent.Status = StatusConstants.ON_GOING;
+                    }
+
+                    var listImage = await _imageService.GetByKeyIdAndKeyType(id, CommonConstants.EVENT_IMAGE);
+                    if (listImage == null)
+                    {
+                        _logger.LogInformation($"{myEvent.Name} has lost image.");
+                        throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                    }
+
+                    var listSourceImage = new List<ImageViewModel>();
+                    foreach (var img in listImage)
+                    {
+                        if (img.Link == null)
+                        {
+                            _logger.LogInformation($"{myEvent.Name} has lost image.");
+                            throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                        }
+
+                        if (img.Link.Contains(CommonConstants.THUMBNAIL))
+                        {
+                            myEvent.Thumbnail = img;
+                        }
+                        else if (img.Link.Contains(CommonConstants.SOURCE_IMAGE))
+                        {
+                            listSourceImage.Add(img);
+                        }
+                    }
+
+                    myEvent.ListImage = _mapper.Map<List<EventImageDetailViewModel>>(listSourceImage);
+                }
+                return listEvent;
+            }
+        }
     }
 }
