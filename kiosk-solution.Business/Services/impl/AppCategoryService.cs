@@ -27,13 +27,15 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IServiceApplicationService _serviceApplicationService;
         private readonly IPartyServiceApplicationService _partyServiceApplicationService;
 
-        public AppCategoryService(IMapper mapper, IUnitOfWork unitOfWork, ILogger<IAppCategoryService> logger
-            , IFileService fileService, IPartyServiceApplicationService partyServiceApplicationService)
+        public AppCategoryService(IMapper mapper, IUnitOfWork unitOfWork, ILogger<IAppCategoryService> logger,
+            IFileService fileService, IServiceApplicationService serviceApplicationService,
+            IPartyServiceApplicationService partyServiceApplicationService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _fileService = fileService;
+            _serviceApplicationService = serviceApplicationService;
             _partyServiceApplicationService = partyServiceApplicationService;
         }
 

@@ -203,5 +203,18 @@ namespace kiosk_solution.Business.Services.impl
             var result = apps.Count;
             return result;
         }
+
+        public async Task<List<MyAppViewModel>> GetListAppByPartyId(Guid partyId)
+        {
+            var apps = await _unitOfWork.PartyServiceApplicationRepository
+                .Get(a => a.PartyId.Equals(partyId) 
+                    && a.Status.Equals(StatusConstants.INSTALLED)
+                    && !String.IsNullOrEmpty(a.ServiceApplication.Banner))
+                .Include(x => x.ServiceApplication)
+                .ProjectTo<MyAppViewModel>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            return apps;
+        }
     }
 }
