@@ -323,6 +323,13 @@ namespace kiosk_solution.Business.Services.impl
                 _unitOfWork.ServiceApplicationPublishRequestRepository.Update(target);
                 await _unitOfWork.SaveAsync();
 
+                var check = await _appService.SetStatus(Guid.Parse(target.ServiceApplicationId + ""),
+                        StatusConstants.UNAVAILABLE);
+                if (!check)
+                {
+                    _logger.LogInformation("Server Error.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Server Error.");
+                }
                 var result = await _unitOfWork.ServiceApplicationPublishRequestRepository
                 .Get(r => r.Id.Equals(ticketId))
                 .Include(a => a.Creator)
