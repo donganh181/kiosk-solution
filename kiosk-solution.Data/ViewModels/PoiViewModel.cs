@@ -27,5 +27,6 @@ namespace kiosk_solution.Data.ViewModels
         public string PoicategoryName { get; set; }
         public string Type { get; set; }
         public List<PoiImageDetailViewModel> ListImage { get; set; }
+        public string? Banner { get; set; }
     }
 }

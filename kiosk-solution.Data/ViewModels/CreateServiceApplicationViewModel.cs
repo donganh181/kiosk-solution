@@ -10,5 +10,6 @@ namespace kiosk_solution.Data.ViewModels
         public string Logo { get; set; }
         public Guid? AppCategoryId { get; set; }
         public bool? IsAffiliate { get; set; }
+        public string? Banner { get; set; }
     }
 }
