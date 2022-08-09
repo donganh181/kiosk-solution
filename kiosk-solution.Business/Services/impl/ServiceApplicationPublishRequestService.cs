@@ -291,5 +291,52 @@ namespace kiosk_solution.Business.Services.impl
 
             return publishRequest;
         }
+
+        public async Task<ServiceApplicationPublishRequestViewModel> UpdateStatusByOwner(Guid ownerId, Guid ticketId)
+        {
+            var target = await _unitOfWork.ServiceApplicationPublishRequestRepository
+                .Get(r => r.Id.Equals(ticketId))
+                .FirstOrDefaultAsync();
+
+            if (target == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            if (!target.CreatorId.Equals(ownerId))
+            {
+                _logger.LogInformation("You cannot cancel ticket of other user.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You cannot cancel ticket of other user.");
+            }
+
+            if (!target.Status.Equals(StatusConstants.IN_PROGRESS))
+            {
+                _logger.LogInformation("You cannot cancel request which is completed.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You cannot cancel request which is completed.");
+            }
+
+            target.Status = StatusConstants.CANCELED;
+            
+            try
+            {
+                _unitOfWork.ServiceApplicationPublishRequestRepository.Update(target);
+                await _unitOfWork.SaveAsync();
+
+                var result = await _unitOfWork.ServiceApplicationPublishRequestRepository
+                .Get(r => r.Id.Equals(ticketId))
+                .Include(a => a.Creator)
+                .Include(a => a.Handler)
+                .Include(a => a.ServiceApplication)
+                .ProjectTo<ServiceApplicationPublishRequestViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+                return result;
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
+            }
+        }
     }
 }

@@ -114,5 +114,18 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<ServiceApplicationPublishRequestViewModel>((int) HttpStatusCode.OK,
                 "Get success.", result));
         }
+
+        [Authorize(Roles = "Service Provider")]
+        [HttpPatch("status")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> CancelRequest([FromBody] Guid ticketId)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _requestPublishService.UpdateStatusByOwner(token.Id, ticketId);
+            _logger.LogInformation($"Cancel publish request by party {token.Mail}");
+            return Ok(new SuccessResponse<ServiceApplicationPublishRequestViewModel>((int)HttpStatusCode.OK,
+                "Cancel success.", result));
+        }
     }
 }

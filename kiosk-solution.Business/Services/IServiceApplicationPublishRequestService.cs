@@ -10,11 +10,13 @@ namespace kiosk_solution.Business.Services
 {
     public interface IServiceApplicationPublishRequestService
     {
-        public Task<ServiceApplicationPublishRequestViewModel> Create(Guid creatorId, ServiceApplicationPublishRequestCreateViewModel model);
-        public Task<ServiceApplicationPublishRequestViewModel> Update(Guid handlerId,
+        Task<ServiceApplicationPublishRequestViewModel> Create(Guid creatorId, ServiceApplicationPublishRequestCreateViewModel model);
+        Task<ServiceApplicationPublishRequestViewModel> Update(Guid handlerId,
             UpdateServiceApplicationPublishRequestViewModel model);
         Task<DynamicModelResponse<ServiceApplicationPublishRequestSearchViewModel>> GetAllWithPaging(string role, Guid id, ServiceApplicationPublishRequestSearchViewModel model, int size, int pageNum);
-        public Task<ServiceApplicationPublishRequestViewModel> GetById(Guid partyId, string role, Guid requestId);
-        public Task<ServiceApplicationPublishRequestViewModel> GetInprogressByAppId(Guid appId);
+        Task<ServiceApplicationPublishRequestViewModel> GetById(Guid partyId, string role, Guid requestId);
+        Task<ServiceApplicationPublishRequestViewModel> GetInprogressByAppId(Guid appId);
+        Task<ServiceApplicationPublishRequestViewModel> UpdateStatusByOwner(Guid ownerId, Guid ticketId);
+        
     }
 }
