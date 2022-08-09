@@ -47,10 +47,22 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Can not found.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
             }
+            if (model.Banner.Equals(eventUpdate.Banner))
+            {
+                _logger.LogInformation("Do not thing.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Do not thing.");
+            }
             try
             {
-                var link = await _fileService.UploadImageToFirebase(model.Banner,CommonConstants.BANNER_IMAGE, CommonConstants.BANNER_EVENT, eventUpdate.Id, eventUpdate.Name);
-                eventUpdate.Banner = link;
+                if (string.IsNullOrEmpty(model.Banner))
+                {
+                    eventUpdate.Banner = null;
+                }
+                else
+                {
+                    var link = await _fileService.UploadImageToFirebase(model.Banner,CommonConstants.BANNER_IMAGE, CommonConstants.BANNER_EVENT, eventUpdate.Id, eventUpdate.Name);
+                    eventUpdate.Banner = link;
+                }
                 _unitOfWork.EventRepository.Update(eventUpdate);
                 await _unitOfWork.SaveAsync();
                 var result = _mapper.Map<EventViewModel>(eventUpdate);
