@@ -92,7 +92,19 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Update event by party {token.Mail}");
             return Ok(new SuccessResponse<EventViewModel>((int)HttpStatusCode.OK, "Update success.", result));
         }
-
+        
+        [Authorize(Roles = "Admin, Location Owner")]
+        [HttpPatch("banner")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateBanner([FromBody] EventUpdateBannerViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _eventService.UpdateBanner(token.Id, model);
+            _logger.LogInformation($"Update event banner success by party {token.Mail}");
+            return Ok(new SuccessResponse<EventViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+        
         /// <summary>
         /// Add new image to event by admin or its own location owner
         /// </summary>

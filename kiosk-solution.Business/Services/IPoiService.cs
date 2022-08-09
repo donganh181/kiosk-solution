@@ -10,6 +10,7 @@ namespace kiosk_solution.Business.Services
     {
         public Task<PoiViewModel> Create(Guid partyId, string roleName, PoiCreateViewModel model);
         public Task<PoiViewModel> UpdateInformation(Guid partyId, string roleName, PoiInfomationUpdateViewModel model);
+        public Task<PoiViewModel> UpdateBanner(Guid partyId, PoiUpdateBannerViewModel model);
         public Task<DynamicModelResponse<PoiSearchViewModel>> GetAllWithPaging(Guid partyId, string role, PoiSearchViewModel model, int size, int pageNum);
         public Task<PoiSearchViewModel> GetById(Guid id);
         public Task<PoiImageViewModel> AddImageToPoi(Guid partyId, string roleName, PoiAddImageViewModel model);

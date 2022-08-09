@@ -38,6 +38,31 @@ namespace kiosk_solution.Business.Services.impl
             _fileService = fileService;
         }
 
+        public async Task<EventViewModel> UpdateBanner(Guid partyId, EventUpdateBannerViewModel model)
+        {
+            var eventUpdate = await _unitOfWork.EventRepository
+                .Get(e => e.Id.Equals(model.EventId) && e.CreatorId.Equals(partyId)).FirstOrDefaultAsync();
+            if (eventUpdate == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
+            }
+            try
+            {
+                var link = await _fileService.UploadImageToFirebase(model.Banner,CommonConstants.BANNER_IMAGE, CommonConstants.BANNER_EVENT, eventUpdate.Id, eventUpdate.Name);
+                eventUpdate.Banner = link;
+                _unitOfWork.EventRepository.Update(eventUpdate);
+                await _unitOfWork.SaveAsync();
+                var result = _mapper.Map<EventViewModel>(eventUpdate);
+                return result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation(e.Message);
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, e.Message);
+            }
+        }
+
         public async Task<EventImageViewModel> AddImageToEvent(Guid partyId, string roleName,
             EventAddImageViewModel model)
         {

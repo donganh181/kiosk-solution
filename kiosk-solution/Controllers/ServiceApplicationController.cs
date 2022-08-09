@@ -40,6 +40,18 @@ namespace kiosk_solution.Controllers
             return Ok(new SuccessResponse<ServiceApplicationViewModel>((int)HttpStatusCode.OK, "Create success.", result));
         }
 
+        [Authorize(Roles = "Service Provider")]
+        [HttpPatch("banner")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateBanner([FromBody] ServiceApplicationUpdateBannerViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _serviceApplicationService.UpdateBanner(token.Id, model);
+            _logger.LogInformation($"Update app banner success by party {token.Mail}");
+            return Ok(new SuccessResponse<ServiceApplicationViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
+        
         /// <summary>
         /// Update information by service provider
         /// </summary>

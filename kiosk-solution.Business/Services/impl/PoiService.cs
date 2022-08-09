@@ -234,6 +234,31 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
+        public async Task<PoiViewModel> UpdateBanner(Guid partyId, PoiUpdateBannerViewModel model)
+        {
+            var poiUpdate = await _unitOfWork.PoiRepository
+                .Get(e => e.Id.Equals(model.PoiId) && e.CreatorId.Equals(partyId)).FirstOrDefaultAsync();
+            if (poiUpdate == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
+            }
+            try
+            {
+                var link = await _fileService.UploadImageToFirebase(model.Banner,CommonConstants.BANNER_IMAGE, CommonConstants.BANNER_POI, poiUpdate.Id, poiUpdate.Name);
+                poiUpdate.Banner = link;
+                _unitOfWork.PoiRepository.Update(poiUpdate);
+                await _unitOfWork.SaveAsync();
+                var result = _mapper.Map<PoiViewModel>(poiUpdate);
+                return result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation(e.Message);
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, e.Message);
+            }
+        }
+
         public async Task<PoiViewModel> DeleteImageFromPoi(Guid partyId, string roleName, Guid imageId)
         {
             var image = await _imageService.GetById(imageId);

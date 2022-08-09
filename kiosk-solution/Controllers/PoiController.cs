@@ -138,6 +138,18 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Update poi info success by party {token.Mail}");
             return Ok(new SuccessResponse<PoiViewModel>((int)HttpStatusCode.OK, "Update success.", result));
         }
+        
+        [Authorize(Roles = "Admin, Location Owner")]
+        [HttpPatch("banner")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> UpdateBanner([FromBody] PoiUpdateBannerViewModel model)
+        {
+            var request = Request;
+            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
+            var result = await _poiService.UpdateBanner(token.Id, model);
+            _logger.LogInformation($"Update poi banner success by party {token.Mail}");
+            return Ok(new SuccessResponse<PoiViewModel>((int)HttpStatusCode.OK, "Update success.", result));
+        }
 
         /// <summary>
         /// Replace image (add or delete) by admin or location owner
