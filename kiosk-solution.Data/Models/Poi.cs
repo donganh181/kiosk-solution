@@ -24,6 +24,7 @@ namespace kiosk_solution.Data.Models
         public string Status { get; set; }
         public Guid? PoicategoryId { get; set; }
         public string Type { get; set; }
+        public string Banner { get; set; }
 
         public virtual Party Creator { get; set; }
         public virtual Poicategory Poicategory { get; set; }

@@ -393,6 +393,9 @@ namespace kiosk_solution.Data.Context
             {
                 entity.ToTable("POICategory");
 
+                entity.HasIndex(e => e.Name, "poi_cate_name")
+                    .IsUnique();
+
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
 
                 entity.Property(e => e.Logo).IsUnicode(false);

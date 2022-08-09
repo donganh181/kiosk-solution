@@ -198,11 +198,16 @@ namespace kiosk_solution.Business.Services.impl
             serviceApplication.PartyId = partyId;
             serviceApplication.Status = StatusConstants.INCOMPLETE;
             serviceApplication.CreateDate = DateTime.Now;
+            serviceApplication.Banner = null;
             try
             {
                 await _unitOfWork.ServiceApplicationRepository.InsertAsync(serviceApplication);
                 await _unitOfWork.SaveAsync();
-
+                if (model.Banner != null && model.Banner.Length > 0)
+                {
+                    var link = await _fileService.UploadImageToFirebase(model.Banner,CommonConstants.BANNER_IMAGE, CommonConstants.BANNER_APP, serviceApplication.Id, serviceApplication.Name);
+                    serviceApplication.Banner = link;
+                }
                 var serviceApplicationNew = await _unitOfWork.ServiceApplicationRepository
                     .Get(a => a.Id.Equals(serviceApplication.Id))
                     .Include(a => a.AppCategory)

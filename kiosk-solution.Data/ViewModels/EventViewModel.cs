@@ -27,5 +27,6 @@ namespace kiosk_solution.Data.ViewModels
         public string Type { get; set; }
         public string Status { get; set; }
         public List<EventImageDetailViewModel> ListImage { get; set; }
+        public string? Banner { get; set; }
     }
 }

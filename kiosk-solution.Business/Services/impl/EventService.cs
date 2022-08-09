@@ -24,16 +24,18 @@ namespace kiosk_solution.Business.Services.impl
         private readonly ILogger<IEventService> _logger;
         private readonly IImageService _imageService;
         private readonly IMapService _mapService;
+        private readonly IFileService _fileService;
 
         public EventService(IUnitOfWork unitOfWork, IMapper mapper,
             ILogger<IEventService> logger, IImageService imageService,
-            IMapService mapService)
+            IMapService mapService, IFileService fileService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _imageService = imageService;
             _mapService = mapService;
+            _fileService = fileService;
         }
 
         public async Task<EventImageViewModel> AddImageToEvent(Guid partyId, string roleName,
@@ -139,11 +141,21 @@ namespace kiosk_solution.Business.Services.impl
             newEvent.Longtitude = geoCodeing.GeoMetries[0].Lng;
             newEvent.Latitude = geoCodeing.GeoMetries[0].Lat;
             newEvent.CreateDate = now;
+            newEvent.Banner = null;
             try
             {
+                
                 await _unitOfWork.EventRepository.InsertAsync(newEvent);
                 await _unitOfWork.SaveAsync();
-
+                
+                if (model.Banner != null && model.Banner.Length > 0)
+                {
+                    var link = await _fileService.UploadImageToFirebase(model.Banner,CommonConstants.BANNER_IMAGE, CommonConstants.BANNER_EVENT, newEvent.Id, newEvent.Name);
+                    newEvent.Banner = link;
+                    _unitOfWork.EventRepository.Update(newEvent);
+                    await _unitOfWork.SaveAsync();
+                }
+                
                 ImageCreateViewModel thumbnailModel = new ImageCreateViewModel(newEvent.Name,
                     model.Thumbnail, newEvent.Id, CommonConstants.EVENT_IMAGE, CommonConstants.THUMBNAIL);
 

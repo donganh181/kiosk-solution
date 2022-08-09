@@ -25,10 +25,11 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IMapService _mapService;
         private readonly IImageService _imageService;
         private readonly IKioskService _kioskService;
+        private readonly IFileService _fileService;
 
         public PoiService(IUnitOfWork unitOfWork, IMapper mapper,
             ILogger<IPoiService> logger, IMapService mapService, IImageService imageService,
-            IKioskService kioskService)
+            IKioskService kioskService, IFileService fileService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -36,6 +37,7 @@ namespace kiosk_solution.Business.Services.impl
             _mapService = mapService;
             _imageService = imageService;
             _kioskService = kioskService;
+            _fileService = fileService;
         }
 
         public async Task<PoiImageViewModel> AddImageToPoi(Guid partyId, string roleName, PoiAddImageViewModel model)
@@ -106,6 +108,7 @@ namespace kiosk_solution.Business.Services.impl
             poi.CreateDate = DateTime.Now;
             poi.CreatorId = partyId;
             poi.Status = StatusConstants.ACTIVATE;
+            poi.Banner = null;
             if (roleName.Equals(RoleConstants.ADMIN))
                 poi.Type = TypeConstants.SERVER_TYPE;
             else
@@ -114,7 +117,13 @@ namespace kiosk_solution.Business.Services.impl
             {
                 await _unitOfWork.PoiRepository.InsertAsync(poi);
                 await _unitOfWork.SaveAsync();
-
+                if (model.Banner != null && model.Banner.Length > 0)
+                {
+                    var link = await _fileService.UploadImageToFirebase(model.Banner,CommonConstants.BANNER_IMAGE, CommonConstants.BANNER_POI, poi.Id, poi.Name);
+                    poi.Banner = link;
+                    _unitOfWork.PoiRepository.Update(poi);
+                    await _unitOfWork.SaveAsync();
+                }
                 ImageCreateViewModel thumbnailModel = new ImageCreateViewModel(poi.Name,
                     model.Thumbnail, poi.Id, CommonConstants.POI_IMAGE, CommonConstants.THUMBNAIL);
 

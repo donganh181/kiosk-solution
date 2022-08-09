@@ -27,6 +27,7 @@ namespace kiosk_solution.Data.Models
         public string Type { get; set; }
         public string Status { get; set; }
         public DateTime? CreateDate { get; set; }
+        public string Banner { get; set; }
 
         public virtual Party Creator { get; set; }
         public virtual ICollection<EventPosition> EventPositions { get; set; }

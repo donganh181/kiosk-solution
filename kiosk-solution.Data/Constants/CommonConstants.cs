@@ -24,6 +24,12 @@ namespace kiosk_solution.Data.Constants
         public static string POI_IMAGE = "poi_image";
         public static string POI_CATE_IMAGE = "poi_cate_image";
         public static string LOCATION_IMAGE = "location_image";
+        public static string BANNER_IMAGE = "banner_image";
+        public static string BANNER_EVENT = "events";
+        public static string BANNER_POI = "pois";
+        public static string BANNER_APP = "apps";
+
+        
 
         public static string THUMBNAIL = "thumbnail";
         public static string SOURCE_IMAGE = "source_image";

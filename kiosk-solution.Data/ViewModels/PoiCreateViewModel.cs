@@ -17,6 +17,7 @@ namespace kiosk_solution.Data.ViewModels
         public Guid? PoicategoryId { get; set; }
         public string Thumbnail { get; set; }
         public List<string> ListImage { get; set; }
+        public string? Banner { get; set; }
 
     }
 }
