@@ -396,7 +396,7 @@ namespace kiosk_solution.Business.Services.impl
                     }
                 }
 
-                var appRows = new Dictionary<int, List<AppCategoryPositionSpecificViewModel>>();
+                var appRows = new SortedDictionary<int, List<AppCategoryPositionSpecificViewModel>>();
                 foreach (var appPost in kiosk.KioskScheduleTemplate.Template.ListAppCatePosition)
                 {
                     if (appRows.ContainsKey((appPost.RowIndex)))
