@@ -36,6 +36,7 @@ namespace kiosk_solution.Controllers
         [MapToApiVersion("1")]
         public async Task<IActionResult> Create([FromBody] ServiceOrderCreateViewModel model)
         {
+            _logger.LogInformation("Start to create order.");
             var result = await _serviceOrderService.Create(model);
             _logger.LogInformation(
                 $"Create order of application {model.ServiceApplicationId} at kiosk {model.KioskId} success");
