@@ -44,6 +44,31 @@ namespace kiosk_solution.Business.Services.impl
             _partyServiceApplicationService = partyServiceApplicationService;
         }
 
+        public async Task<ServiceApplicationViewModel> UpdateBanner(Guid partyId, ServiceApplicationUpdateBannerViewModel model)
+        {
+            var appUpdate = await _unitOfWork.ServiceApplicationRepository
+                .Get(e => e.Id.Equals(model.ServiceApplicationId) && e.PartyId.Equals(partyId)).FirstOrDefaultAsync();
+            if (appUpdate == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
+            }
+            try
+            {
+                var link = await _fileService.UploadImageToFirebase(model.Banner,CommonConstants.BANNER_IMAGE, CommonConstants.BANNER_APP, appUpdate.Id, appUpdate.Name);
+                appUpdate.Banner = link;
+                _unitOfWork.ServiceApplicationRepository.Update(appUpdate);
+                await _unitOfWork.SaveAsync();
+                var result = _mapper.Map<ServiceApplicationViewModel>(appUpdate);
+                return result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation(e.Message);
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, e.Message);
+            }
+        }
+
         public async Task<DynamicModelResponse<ServiceApplicationSearchViewModel>> GetAllWithPaging(string role,
             Guid? partyId, ServiceApplicationSearchViewModel model, int size, int pageNum)
         {

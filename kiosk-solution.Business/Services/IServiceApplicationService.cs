@@ -11,6 +11,7 @@ namespace kiosk_solution.Business.Services
     public interface IServiceApplicationService
     {
         Task<ServiceApplicationViewModel> UpdateInformation(Guid updaterId, UpdateServiceApplicationViewModel model);
+        Task<ServiceApplicationViewModel> UpdateBanner(Guid partyId, ServiceApplicationUpdateBannerViewModel model);
         Task<DynamicModelResponse<ServiceApplicationSearchViewModel>> GetAllWithPaging(string role, Guid? id, ServiceApplicationSearchViewModel model, int size, int pageNum);
         Task<ServiceApplicationViewModel> Create(Guid partyId, CreateServiceApplicationViewModel model);
         Task<ServiceApplicationSpecificViewModel> GetById(Guid? partyId, Guid id);
