@@ -42,7 +42,7 @@ namespace kiosk_solution.Business.Services.impl
             if (cateExist != null)
             {
                 _logger.LogInformation("Category name existed.");
-                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Category name existed.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Category name existed.");
             }
 
             cate.Logo = "123";
@@ -84,7 +84,7 @@ namespace kiosk_solution.Business.Services.impl
             if (cateExist != null)
             {
                 _logger.LogInformation("Category name existed.");
-                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Category name existed.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Category name existed.");
             }
 
             cate.Name = model.Name;
