@@ -28,6 +28,7 @@ namespace kiosk_solution.Data.ViewModels
         [String] public string CreatorEmail { get; set; }
         [String] public string Type { get; set; }
         [String] public string Status { get; set; }
+        [BindNever] public string Banner { get; set; }
         [BindNever] public DateTime? CreateDate { get; set; }
         [BindNever] public List<EventImageDetailViewModel> ListImage { get; set; }
     }

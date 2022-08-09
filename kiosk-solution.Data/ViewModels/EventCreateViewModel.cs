@@ -28,6 +28,6 @@ namespace kiosk_solution.Data.ViewModels
         public string Address { get; set; }
         [Required]
         public List<string> ListImage { get; set; }
-        public string? Banner { get; set; }
+        public string Banner { get; set; }
     }
 }
