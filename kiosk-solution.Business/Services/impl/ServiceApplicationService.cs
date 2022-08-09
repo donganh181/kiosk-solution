@@ -202,6 +202,7 @@ namespace kiosk_solution.Business.Services.impl
             app.Description = model.Description;
             app.Link = model.Link;
             app.AppCategoryId = model.AppCategoryId;
+            app.IsAffiliate = model.IsAffiliate;
 
             try
             {
