@@ -25,5 +25,6 @@ namespace kiosk_solution.Data.ViewModels
         public ServiceApplicationFeedBackViewModel MyFeedback { get; set; }
         public int? UserInstalled { get; set; }
         public bool? IsAffiliate { get; set; }
+        public string Banner { get; set; }
     }
 }

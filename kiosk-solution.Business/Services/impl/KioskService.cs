@@ -379,7 +379,7 @@ namespace kiosk_solution.Business.Services.impl
                     eventPos.EventThumbnail = myEvent.Thumbnail;
                 }
 
-                var eventRows = new Dictionary<int, List<EventPositionSpecificViewModel>>();
+                var eventRows = new SortedDictionary<int, List<EventPositionSpecificViewModel>>();
                 foreach (var eventPos in kiosk.KioskScheduleTemplate.Template.ListEventPosition)
                 {
                     if (eventRows.ContainsKey((eventPos.RowIndex)))
