@@ -32,43 +32,35 @@ namespace kiosk_solution.Business.Services.impl
 
             var listApp = await _appService.GetListAppByPartyId(partyId);
 
-            if (listApp.Count >= 2)
+            if (listApp.Count >= 1)
             {
-                for(int i = 0; i <= 1; i ++)
-                {
-                    var slide = new SlideViewModel();
-                    slide.Link = listApp[i].ServiceAppModel.Banner;
-                    slide.KeyId = listApp[i].Id;
-                    slide.KeyType = CommonConstants.APP_IMAGE;
-                    listSlide.Add(slide);
-                }
+                var slide = new SlideViewModel();
+                slide.Link = listApp[0].ServiceAppModel.Banner;
+                slide.KeyId = listApp[0].Id;
+                slide.KeyType = CommonConstants.APP_IMAGE;
+                listSlide.Add(slide);
             }
 
             var listEvent = await _eventService.GetListEventByPartyId(partyId);
-            if (listEvent.Count >= 2)
+            if (listEvent.Count >= 1)
             {
-                for (int i = 0; i <= 1; i++)
-                {
-                    var slide = new SlideViewModel();
-                    slide.Link = listEvent[i].Banner;
-                    slide.KeyId = listEvent[i].Id;
-                    slide.KeyType = CommonConstants.EVENT_IMAGE;
-                    listSlide.Add(slide);
-                }
+                var slide = new SlideViewModel();
+                slide.Link = listEvent[0].Banner;
+                slide.KeyId = listEvent[0].Id;
+                slide.KeyType = CommonConstants.EVENT_IMAGE;
+                listSlide.Add(slide);
             }
 
             var listPoi = await _poiService.GetListPoiByPartyId(partyId);
-            if (listPoi.Count >= 2)
+            if (listPoi.Count >= 1)
             {
-                for (int i = 0; i <= 1; i++)
-                {
-                    var slide = new SlideViewModel();
-                    slide.Link = listPoi[i].Banner;
-                    slide.KeyId = listPoi[i].Id;
-                    slide.KeyType = CommonConstants.POI_IMAGE;
-                    listSlide.Add(slide);
-                }
+                var slide = new SlideViewModel();
+                slide.Link = listPoi[0].Banner;
+                slide.KeyId = listPoi[0].Id;
+                slide.KeyType = CommonConstants.POI_IMAGE;
+                listSlide.Add(slide);
             }
+
             return listSlide;
         }
     }
