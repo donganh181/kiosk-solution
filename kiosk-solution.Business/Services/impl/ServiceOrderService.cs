@@ -101,24 +101,21 @@ namespace kiosk_solution.Business.Services.impl
             return result;
         }
 
-        public async Task<List<ServiceOrderCommissionSearchViewModel>> GetAllCommission(Guid partyId, Guid kioskId,
-            ServiceOrderCommissionSearchViewModel model)
+        public async Task<List<ServiceOrderCommissionSearchViewModel>> GetAllCommission(Guid partyId, ServiceOrderCommissionSearchViewModel model)
         {
-            var kiosk = await _kioskService.GetByIdWithParyId(kioskId, partyId);
-            if (kiosk == null)
-            {
-                _logger.LogInformation("You can not use this feature.");
-                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "You can not use this feature.");
-            }
-
-            var listApp = await _unitOfWork.ServiceOrderRepository.Get(s => s.KioskId.Equals(kioskId))
+            var listApp = await _unitOfWork.ServiceOrderRepository.Get(s => s.Kiosk.PartyId.Equals(partyId))
                 .ProjectTo<ServiceOrderCommissionSearchViewModel>(_mapper.ConfigurationProvider).DynamicFilter(model)
                 .ToListAsync();
+            if (listApp == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
+            }
             listApp = listApp.GroupBy(o => o.ServiceApplicationId).Select(g => g.First()).ToList();
             foreach (var app in listApp)
             {
                 var commission = await _unitOfWork.ServiceOrderRepository
-                    .Get(s => s.KioskId.Equals(kioskId) && s.ServiceApplicationId.Equals(app.ServiceApplicationId))
+                    .Get(s => s.Kiosk.PartyId.Equals(partyId) && s.ServiceApplicationId.Equals(app.ServiceApplicationId))
                     .SumAsync(o => o.Commission);
                 app.TotalCommission = (double) commission;
             }

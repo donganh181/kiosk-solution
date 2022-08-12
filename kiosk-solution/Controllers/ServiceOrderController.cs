@@ -60,12 +60,11 @@ namespace kiosk_solution.Controllers
         [Authorize(Roles = "Location Owner")]
         [HttpGet("commission")]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> GetCommission([FromQuery] ServiceOrderCommissionSearchViewModel model,
-            [Required] Guid kioskId)
+        public async Task<IActionResult> GetCommission([FromQuery] ServiceOrderCommissionSearchViewModel model)
         {
             var request = Request;
             TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _serviceOrderService.GetAllCommission(token.Id, kioskId, model);
+            var result = await _serviceOrderService.GetAllCommission(token.Id,  model);
             return Ok(new SuccessResponse<List<ServiceOrderCommissionSearchViewModel>>((int) HttpStatusCode.OK,
                 "Search success.", result));
         }
