@@ -934,7 +934,7 @@ namespace kiosk_solution.Business.Services.impl
             };
         }
 
-        public async Task<List<EventViewModel>> GetListEventByPartyId(Guid id)
+        public async Task<List<EventViewModel>> GetListEventByPartyId(Guid id, double longitude, double latitude)
         {
             var now = DateTime.Now;
 
@@ -943,6 +943,9 @@ namespace kiosk_solution.Business.Services.impl
                                                                 && !String.IsNullOrEmpty(e.Banner)
                                                                 && DateTime.Compare(now, (DateTime)e.TimeEnd) < 0
                                                                 && (e.Type.Equals(TypeConstants.SERVER_TYPE) || (e.Type.Equals(TypeConstants.LOCAL_TYPE) && e.CreatorId.Equals(id))))
+                .OrderBy(x =>
+                            (Math.Sqrt(Math.Pow(69.1 * (latitude - (double)x.Latitude), 2) +
+                            Math.Pow(69.1 * (double)(x.Longtitude - longitude) * Math.Cos(latitude / 57.3), 2))) * 1.609344)
                 .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 

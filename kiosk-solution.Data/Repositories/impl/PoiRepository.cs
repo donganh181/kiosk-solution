@@ -23,7 +23,7 @@ namespace kiosk_solution.Data.Repositories.impl
                             && x.Status.Equals(StatusConstants.ACTIVATE)
                             && (x.Type.Equals(TypeConstants.SERVER_TYPE) || (x.Type.Equals(TypeConstants.LOCAL_TYPE) && x.CreatorId.Equals(partyId))))
               
-                        .OrderByDescending(x => 
+                        .OrderBy(x => 
                             (Math.Sqrt(Math.Pow(69.1 * (latitude - (double)x.Latitude), 2) +
                             Math.Pow(69.1 * (double)(x.Longtitude - longitude) * Math.Cos(latitude / 57.3), 2))) * 1.609344);
 

@@ -11,8 +11,8 @@ namespace kiosk_solution.Data.ViewModels
         public Guid? PartyId { get; set; }
         public Guid? KioskLocationId { get; set; }
         public string Status { get; set; }
-        public string Longtitude { get; set; }
-        public string Latitude { get; set; }
+        public double Longtitude { get; set; }
+        public double Latitude { get; set; }
         public string DeviceId { get; set; }
         public List<KioskRatingViewModel> ListFeedback { get; set; }
         public double? AverageRating { get; set; }
