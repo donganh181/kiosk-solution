@@ -209,10 +209,10 @@ namespace kiosk_solution.Business.Services.impl
                 var result = _mapper.Map<AppCategoryViewModel>(cate);
                 return result;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                _logger.LogInformation(e.Message);
-                throw new ErrorResponse((int) HttpStatusCode.BadRequest, e.Message);
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
             }
         }
     }

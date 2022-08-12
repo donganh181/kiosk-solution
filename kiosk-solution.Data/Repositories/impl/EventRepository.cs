@@ -24,7 +24,7 @@ namespace kiosk_solution.Data.Repositories.impl
                             && (x.Status.Equals(StatusConstants.ON_GOING) || x.Status.Equals(StatusConstants.COMING_SOON))
                             && !x.Status.Equals(StatusConstants.DELETED) && !x.Status.Equals(StatusConstants.END))
 
-                        .OrderByDescending(x =>
+                        .OrderBy(x =>
                             (Math.Sqrt(Math.Pow(69.1 * (latitude - (double)x.Latitude), 2) +
                             Math.Pow(69.1 * (double)(x.Longtitude - longitude) * Math.Cos(latitude / 57.3), 2))) * 1.609344);
 

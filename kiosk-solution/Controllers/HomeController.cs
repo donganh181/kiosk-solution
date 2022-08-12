@@ -31,15 +31,12 @@ namespace kiosk_solution.Controllers
             _configuration = configuration;
         }
 
-        [Authorize(Roles = "Location Owner")]
         [HttpGet]
         [MapToApiVersion("1")]
-        public async Task<IActionResult> GetListSlideShow()
+        public async Task<IActionResult> GetListSlideShow([FromQuery] Guid partyId, [FromQuery] Guid kioskId)
         {
-            var request = Request;
-            TokenViewModel token = HttpContextUtil.getTokenModelFromRequest(request, _configuration);
-            var result = await _homeService.GetListHomeImage(token.Id);
-            _logger.LogInformation($"Get list slide show by {token.Mail}");
+            var result = await _homeService.GetListHomeImage(partyId, kioskId);
+            _logger.LogInformation($"Get list slide show in kioskId {kioskId}");
             return Ok(new SuccessResponse<List<SlideViewModel>>((int)HttpStatusCode.OK,
                     "Get success.", result));
         }

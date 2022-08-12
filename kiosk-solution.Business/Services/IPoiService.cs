@@ -19,7 +19,7 @@ namespace kiosk_solution.Business.Services
         Task<bool> IsExistPoiInCategory(Guid poiCategoryId);
         Task<CountViewModel> CountPOIs(Guid partyId, string role);
         Task<PoiViewModel> UpdateStatus(Guid partyId, string roleName, Guid poiId);
-        Task<List<PoiViewModel>> GetListPoiByPartyId(Guid partyId);
+        Task<List<PoiViewModel>> GetListPoiByPartyId(Guid partyId, double longitude, double latitude);
         Task<PoiViewModel> Create(Guid partyId, string roleName, PoiCreateViewModel model);
         Task<PoiViewModel> UpdateBanner(Guid partyId, PoiUpdateBannerViewModel model);
     }

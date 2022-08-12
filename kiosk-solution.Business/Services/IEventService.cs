@@ -20,7 +20,7 @@ namespace kiosk_solution.Business.Services
         Task<EventViewModel> DeleteImageFromEvent(Guid partyId, string roleName, Guid imageId);
         Task<EventViewModel> Delete(Guid partyId, string roleName, Guid eventId);
         Task<EventViewModel> GetById(Guid id);
-        Task<List<EventViewModel>> GetListEventByPartyId(Guid id);
+        Task<List<EventViewModel>> GetListEventByPartyId(Guid id, double longitude, double latitude);
         Task<EventViewModel> ReplaceImage(Guid partyId, string roleName, ImageReplaceViewModel model);
         Task<DynamicModelResponse<EventNearbySearchViewModel>> GetEventNearby(Guid partyId, EventNearbySearchViewModel model, int size, int pageNum);
         Task<bool> ValidateStatusOfEventByDay();

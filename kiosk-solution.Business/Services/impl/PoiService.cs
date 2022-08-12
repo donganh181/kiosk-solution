@@ -719,13 +719,16 @@ namespace kiosk_solution.Business.Services.impl
             };
         }
 
-        public async Task<List<PoiViewModel>> GetListPoiByPartyId(Guid partyId)
+        public async Task<List<PoiViewModel>> GetListPoiByPartyId(Guid partyId, double longitude, double latitude)
         {
             var listPoi = await _unitOfWork.PoiRepository
                 .Get(p => p.Status.Equals(StatusConstants.ACTIVATE)
                     && (p.Type.Equals(TypeConstants.SERVER_TYPE) 
                     || (p.Type.Equals(TypeConstants.LOCAL_TYPE) && p.CreatorId.Equals(partyId)))
                     && !String.IsNullOrEmpty(p.Banner))
+                .OrderBy(x =>
+                            (Math.Sqrt(Math.Pow(69.1 * (latitude - (double)x.Latitude), 2) +
+                            Math.Pow(69.1 * (double)(x.Longtitude - longitude) * Math.Cos(latitude / 57.3), 2))) * 1.609344)
                 .Include(a => a.Poicategory)
                 .ProjectTo<PoiViewModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();

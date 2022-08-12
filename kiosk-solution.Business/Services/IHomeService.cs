@@ -9,6 +9,6 @@ namespace kiosk_solution.Business.Services
 {
     public interface IHomeService
     {
-        Task<List<SlideViewModel>> GetListHomeImage(Guid partyId);
+        Task<List<SlideViewModel>> GetListHomeImage(Guid partyId, Guid kioskId);
     }
 }
