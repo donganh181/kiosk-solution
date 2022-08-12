@@ -13,7 +13,7 @@ namespace kiosk_solution.Business.Services
         public Task<DynamicModelResponse<ServiceOrderSearchViewModel>> GetAllWithPaging(Guid partyId,
             ServiceOrderSearchViewModel model, int size, int pageNum);
 
-        public Task<List<ServiceOrderCommissionSearchViewModel>> GetAllCommission(Guid partyId, Guid kioskId, ServiceOrderCommissionSearchViewModel model);
+        public Task<List<ServiceOrderCommissionSearchViewModel>> GetAllCommission(Guid partyId, ServiceOrderCommissionSearchViewModel model);
         public Task<ServiceOrderCommissionPieChartViewModel> GetAllCommissionParty(Guid partyId, Guid serviceApplicationId);
         public Task<ServiceOrderCommissionPieChartViewModel> GetAllCommissionPartyByMonth(Guid partyId, Guid serviceApplicationId , int month, int year);
         public Task<ServiceOrderCommissionPieChartViewModel> GetAllCommissionPartyByYear(Guid partyId, Guid serviceApplicationId , int year);
