@@ -25,10 +25,12 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IImageService _imageService;
         private readonly IMapService _mapService;
         private readonly IFileService _fileService;
+        private readonly ITemplateService _templateService;
 
         public EventService(IUnitOfWork unitOfWork, IMapper mapper,
             ILogger<IEventService> logger, IImageService imageService,
-            IMapService mapService, IFileService fileService)
+            IMapService mapService, IFileService fileService,
+            ITemplateService templateService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -36,6 +38,7 @@ namespace kiosk_solution.Business.Services.impl
             _imageService = imageService;
             _mapService = mapService;
             _fileService = fileService;
+            _templateService = templateService;
         }
 
         public async Task<EventViewModel> UpdateBanner(Guid partyId, EventUpdateBannerViewModel model)
@@ -994,6 +997,27 @@ namespace kiosk_solution.Business.Services.impl
                 }
                 return listEvent;
             }
+        }
+
+        public async Task<List<EventByTemplateViewModel>> GetListEventByTemplateId(Guid templateId)
+        {
+            List<EventByTemplateViewModel> listEvent = new List<EventByTemplateViewModel>();
+            var template = await _templateService.GetDetailById(templateId);
+
+            if (template.ListEventPosition.Count < 1)
+            {
+                return listEvent;
+            }
+
+            foreach(var item in template.ListEventPosition)
+            {
+                EventByTemplateViewModel newEvent = new EventByTemplateViewModel();
+                newEvent.Id = item.EventId;
+                newEvent.Name = item.EventName;
+                newEvent.Thumbnail = await _imageService.GetThumbnailByKeyIdAndKeyType(item.EventId, CommonConstants.EVENT_IMAGE);
+                listEvent.Add(newEvent);
+            }
+            return listEvent;
         }
     }
 }

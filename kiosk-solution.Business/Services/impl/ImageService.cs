@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
 using kiosk_solution.Data.Responses;
@@ -71,11 +72,6 @@ namespace kiosk_solution.Business.Services.impl
             }
         }
 
-        public async Task<DynamicModelResponse<ImageSearchViewModel>> GetAllWithPaging(ImageSearchViewModel model)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<ImageViewModel> GetById(Guid id)
         {
             var result = await _unitOfWork.ImageRepository
@@ -100,6 +96,27 @@ namespace kiosk_solution.Business.Services.impl
             {
                 _logger.LogInformation("Cannot found.");
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Cannot found.");
+            }
+            return result;
+        }
+
+        public async Task<string> GetThumbnailByKeyIdAndKeyType(Guid keyId, string keyType)
+        {
+            var image = await _unitOfWork.ImageRepository
+                .Get(i => i.KeyType.Equals(keyType) && keyId.Equals(keyId) && i.Link.Contains(CommonConstants.THUMBNAIL))
+                .FirstOrDefaultAsync();
+            
+            if (image == null)
+            {
+                _logger.LogInformation("Cannot found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Cannot found.");
+            }
+
+            var result = image.Link;
+            if(string.IsNullOrEmpty(result))
+            {
+                _logger.LogInformation("Missing Data.");
+                throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
             }
             return result;
         }
