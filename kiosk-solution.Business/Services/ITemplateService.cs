@@ -14,5 +14,6 @@ namespace kiosk_solution.Business.Services
         Task<TemplateViewModel> UpdateStatus(Guid updaterId, Guid templateId);
         Task<TemplateViewModel> GetById(Guid templateId);
         Task<bool> UpdateStatusToComplete(Guid updaterId, Guid templateId);
+        Task<TemplateDetailViewModel> GetDetailById(Guid templateId);
     }
 }

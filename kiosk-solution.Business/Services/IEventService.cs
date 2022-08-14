@@ -25,5 +25,6 @@ namespace kiosk_solution.Business.Services
         Task<DynamicModelResponse<EventNearbySearchViewModel>> GetEventNearby(Guid partyId, EventNearbySearchViewModel model, int size, int pageNum);
         Task<bool> ValidateStatusOfEventByDay();
         Task<CountViewModel> CountEvents(Guid partyId, string role);
+        Task<List<EventByTemplateViewModel>> GetListEventByTemplateId(Guid templateId);
     }
 }

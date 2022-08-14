@@ -18,6 +18,6 @@ namespace kiosk_solution.Data.ViewModels
         public string Address { get; set; }
         public int RowIndex { get; set; }
         public int ColumnIndex { get; set; }
-        public string Status { get; set; }
+        public string EventStatus { get; set; }
     }
 }

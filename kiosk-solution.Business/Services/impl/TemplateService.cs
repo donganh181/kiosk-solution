@@ -187,5 +187,29 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
             }
         }
+
+        public async Task<TemplateDetailViewModel> GetDetailById(Guid templateId)
+        {
+            var template = await _unitOfWork.TemplateRepository
+                .Get(t => t.Id.Equals(templateId))
+                .Include(x => x.AppCategoryPositions)
+                .Include(x => x.EventPositions)
+                .ProjectTo<TemplateDetailViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+
+
+            if (template == null)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not Found.");
+            }
+            if (template.Status.Equals(StatusConstants.DELETED))
+            {
+                _logger.LogInformation("Template Deleted.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Template Deleted.");
+            }
+
+            return template;
+        }
     }
 }
