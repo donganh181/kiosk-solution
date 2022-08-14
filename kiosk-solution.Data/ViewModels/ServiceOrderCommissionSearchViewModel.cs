@@ -11,8 +11,9 @@ namespace kiosk_solution.Data.ViewModels
         [BindNever]
         public string ServiceApplicationName { get; set; }
         [BindNever]
-        [Skip]
-        public DateTime CreateDate { get; set; }
+        public Guid? KioskId { get; set; }
+        [BindNever]
+        public string KioskName { get; set; }
         [BindNever]
         [Skip]
         public double TotalCommission { get; set; }

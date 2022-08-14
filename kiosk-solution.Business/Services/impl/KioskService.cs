@@ -603,5 +603,11 @@ namespace kiosk_solution.Business.Services.impl
                 };
             }
         }
+
+        public async Task<string> GetNameById(Guid kioskId)
+        {
+            var kiosk = await _unitOfWork.KioskRepository.Get(k => k.Id.Equals(kioskId)).FirstOrDefaultAsync();
+            return kiosk.Name;
+        }
     }
 }

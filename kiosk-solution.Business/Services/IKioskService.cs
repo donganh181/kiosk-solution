@@ -28,5 +28,6 @@ namespace kiosk_solution.Business.Services
 
         Task<List<Kiosk>> GetListKioskByKioskLocationId(Guid id);
         Task<CountViewModel> CountKiosks(Guid partyId, string role);
+        Task<string> GetNameById(Guid kioskId);
     }
 }
