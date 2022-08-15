@@ -194,6 +194,7 @@ namespace kiosk_solution.Business.Services.impl
             }
 
             cate.Name = model.Name;
+            cate.CommissionPercentage = model.CommissionPercentage;
             try
             {
                 if (!cate.Logo.Equals(model.Logo))
