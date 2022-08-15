@@ -79,7 +79,7 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found.");
             }
 
-            var cateExist = await _unitOfWork.PoicategoryRepository.Get(c => c.Name.Equals(model.Name))
+            var cateExist = await _unitOfWork.PoicategoryRepository.Get(c => c.Name.Equals(model.Name) && !c.Id.Equals(model.Id))
                 .FirstOrDefaultAsync();
             if (cateExist != null)
             {
