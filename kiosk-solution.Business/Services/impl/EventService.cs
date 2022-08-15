@@ -1019,5 +1019,55 @@ namespace kiosk_solution.Business.Services.impl
             }
             return listEvent;
         }
+
+        public async Task<EventViewModel> GetByIdIncludeDeletedStatus(Guid id)
+        {
+            var now = DateTime.Now;
+            var myEvent = await _unitOfWork.EventRepository
+                .Get(e => e.Id.Equals(id))
+                .ProjectTo<EventViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+
+            if (myEvent == null)
+            {
+                _logger.LogInformation("Can not found.");
+                throw new ErrorResponse((int)HttpStatusCode.NotFound, "Can not found.");
+            }
+
+            if (DateTime.Compare((DateTime)myEvent.TimeStart, now) < 0 &&
+                DateTime.Compare(now, (DateTime)myEvent.TimeEnd) < 0)
+            {
+                myEvent.Status = StatusConstants.ON_GOING;
+            }
+
+            var listImage = await _imageService.GetByKeyIdAndKeyType(id, CommonConstants.EVENT_IMAGE);
+            if (listImage == null)
+            {
+                _logger.LogInformation($"{myEvent.Name} has lost image.");
+                throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+            }
+
+            var listSourceImage = new List<ImageViewModel>();
+            foreach (var img in listImage)
+            {
+                if (img.Link == null)
+                {
+                    _logger.LogInformation($"{myEvent.Name} has lost image.");
+                    throw new ErrorResponse((int)HttpStatusCode.InternalServerError, "Missing Data.");
+                }
+
+                if (img.Link.Contains(CommonConstants.THUMBNAIL))
+                {
+                    myEvent.Thumbnail = img;
+                }
+                else if (img.Link.Contains(CommonConstants.SOURCE_IMAGE))
+                {
+                    listSourceImage.Add(img);
+                }
+            }
+
+            myEvent.ListImage = _mapper.Map<List<EventImageDetailViewModel>>(listSourceImage);
+            return myEvent;
+        }
     }
 }

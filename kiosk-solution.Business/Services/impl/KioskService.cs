@@ -375,7 +375,7 @@ namespace kiosk_solution.Business.Services.impl
             {
                 foreach (var eventPos in kiosk.KioskScheduleTemplate.Template.ListEventPosition)
                 {
-                    var myEvent = await _eventService.GetById(eventPos.EventId);
+                    var myEvent = await _eventService.GetByIdIncludeDeletedStatus(eventPos.EventId);
                     eventPos.EventThumbnail = myEvent.Thumbnail;
                 }
 
