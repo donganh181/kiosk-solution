@@ -485,6 +485,7 @@ namespace kiosk_solution.Business.Services.impl
                     }
 
                     var appOrder = await _unitOfWork.ServiceOrderRepository.Get(s =>
+                            s.Kiosk.PartyId.Equals(partyId) &&
                             s.KioskId.Equals(kioskId) &&
                             s.CreateDate.Value.Year == year)
                         .ProjectTo<ServiceOrderCommissionSearchViewModel>(_mapper.ConfigurationProvider)
@@ -506,13 +507,14 @@ namespace kiosk_solution.Business.Services.impl
                         {
                             Datasets = new List<decimal>(),
                             KioskId = kioskId,
-                            KioskName = appOrder.ServiceApplicationName
+                            KioskName = appOrder.KioskName
                         };
                         for (var i = 1; i <= 12; i++)
                         {
                             var month = i;
                             var commission = await _unitOfWork.ServiceOrderRepository
                                 .Get(s => s.KioskId.Equals(kioskId) &&
+                                          s.Kiosk.PartyId.Equals(partyId) &&
                                           s.CreateDate.Value.Month == month &&
                                           s.CreateDate.Value.Year == year)
                                 .SumAsync(o => o.Commission);
@@ -525,7 +527,8 @@ namespace kiosk_solution.Business.Services.impl
             // Get all
             else
             {
-                var list = await _unitOfWork.ServiceOrderRepository.Get(s => s.CreateDate.Value.Year == year)
+                var list = await _unitOfWork.ServiceOrderRepository
+                    .Get(s => s.CreateDate.Value.Year == year && s.Kiosk.PartyId.Equals(partyId))
                     .ProjectTo<ServiceOrderCommissionSearchViewModel>(_mapper.ConfigurationProvider).ToListAsync();
                 list = list.GroupBy(o => o.KioskId).Select(g => g.First()).ToList();
                 foreach (var order in list)
@@ -541,6 +544,7 @@ namespace kiosk_solution.Business.Services.impl
                         var month = i;
                         var commission = await _unitOfWork.ServiceOrderRepository
                             .Get(s => s.KioskId.Equals(order.KioskId) &&
+                                      s.Kiosk.PartyId.Equals(partyId) &&
                                       s.CreateDate.Value.Month == month &&
                                       s.CreateDate.Value.Year == year)
                             .SumAsync(o => o.Commission);
@@ -574,6 +578,7 @@ namespace kiosk_solution.Business.Services.impl
                     }
 
                     var kioskOrder = await _unitOfWork.ServiceOrderRepository.Get(s =>
+                            s.Kiosk.PartyId.Equals(partyId) &&
                             s.KioskId.Equals(kioskId) &&
                             s.CreateDate.Value.Month == month &&
                             s.CreateDate.Value.Year == year &&
@@ -603,6 +608,7 @@ namespace kiosk_solution.Business.Services.impl
                         {
                             var commission = await _unitOfWork.ServiceOrderRepository
                                 .Get(s => s.KioskId.Equals(kioskId) &&
+                                          s.Kiosk.PartyId.Equals(partyId) &&
                                           s.CreateDate.Value.Day == dt.Day &&
                                           s.CreateDate.Value.Month == month &&
                                           s.CreateDate.Value.Year == year)
@@ -617,6 +623,7 @@ namespace kiosk_solution.Business.Services.impl
             else
             {
                 var list = await _unitOfWork.ServiceOrderRepository.Get(s =>
+                        s.Kiosk.PartyId.Equals(partyId) &&
                         s.CreateDate.Value.Month == month &&
                         s.CreateDate.Value.Year == year)
                     .ProjectTo<ServiceOrderCommissionSearchViewModel>(_mapper.ConfigurationProvider).ToListAsync();
@@ -633,6 +640,7 @@ namespace kiosk_solution.Business.Services.impl
                     {
                         var commission = await _unitOfWork.ServiceOrderRepository
                             .Get(s => s.KioskId.Equals(order.KioskId) &&
+                                      s.Kiosk.PartyId.Equals(partyId) &&
                                       s.CreateDate.Value.Day == dt.Day &&
                                       s.CreateDate.Value.Month == month &&
                                       s.CreateDate.Value.Year == year)
@@ -699,7 +707,8 @@ namespace kiosk_solution.Business.Services.impl
             return result;
         }
 
-        public async Task<ServiceOrderCommissionLineChartViewModel> GetAllCommissionSystemByMonthOfYear(int year, List<Guid> serviceApplicationIds)
+        public async Task<ServiceOrderCommissionLineChartViewModel> GetAllCommissionSystemByMonthOfYear(int year,
+            List<Guid> serviceApplicationIds)
         {
             var result = new ServiceOrderCommissionLineChartViewModel()
             {
