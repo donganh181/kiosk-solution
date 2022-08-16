@@ -72,10 +72,10 @@ namespace kiosk_solution.Business.Services.impl
                 var result = _mapper.Map<ServiceApplicationViewModel>(appUpdate);
                 return result;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                _logger.LogInformation(e.Message);
-                throw new ErrorResponse((int) HttpStatusCode.BadRequest, e.Message);
+                _logger.LogInformation("Invalid data.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Invalid data.");
             }
         }
 
@@ -221,7 +221,7 @@ namespace kiosk_solution.Business.Services.impl
                 var result = _mapper.Map<ServiceApplicationViewModel>(app);
                 return result;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 _logger.LogInformation("Invalid data.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid data.");
@@ -260,18 +260,10 @@ namespace kiosk_solution.Business.Services.impl
                 var result = _mapper.Map<ServiceApplicationViewModel>(serviceApplicationNew);
                 return result;
             }
-            catch (SqlException e)
+            catch (Exception e)
             {
-                if (e.Number == 2601)
-                {
-                    _logger.LogInformation("Name is duplicated.");
-                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Name is duplicated.");
-                }
-                else
-                {
-                    _logger.LogInformation("Invalid Data.");
-                    throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
-                }
+                _logger.LogInformation("Invalid Data.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Invalid Data.");
             }
         }
 
