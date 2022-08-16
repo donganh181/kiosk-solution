@@ -79,6 +79,13 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<AppCategoryViewModel> Delete(AppCategoryDeleteViewModel model)
         {
+            var cate = await _unitOfWork.AppCategoryRepository.Get(c => c.Id.Equals(model.Id))
+                .FirstOrDefaultAsync();
+            if (cate == null)
+            {
+                _logger.LogInformation("Can not Found.");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not Found.");
+            }
             var checkExist = await _serviceApplicationService.HasApplicationOnCategory(model.Id);
             if (checkExist)
             {
@@ -91,6 +98,7 @@ namespace kiosk_solution.Business.Services.impl
                 var appCate = await _unitOfWork.AppCategoryRepository.Get(a => a.Id.Equals(model.Id))
                     .FirstOrDefaultAsync();
                 _unitOfWork.AppCategoryRepository.Delete(appCate);
+                await _unitOfWork.SaveAsync();
                 var result = _mapper.Map<AppCategoryViewModel>(appCate);
                 return result;
             }
