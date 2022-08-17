@@ -61,7 +61,7 @@
                                                 "<br/>Tika - Tourist Interact Kiosk Application";
 
         public static string FORGET_PASSWORD_SUBJECT = "Quên mật khẩu - Tourist Interact Kiosk Application";
-        public static string FORGET_PASSWORD_LINK = "http://localhost:3000/verify-pass?partyId=PARTY_ID&verifyCode=VERIFY_CODE";
+        public static string FORGET_PASSWORD_LINK = "https://tikap.cf:9930/verify-pass?partyId=PARTY_ID&verifyCode=VERIFY_CODE";
         public static string FORGET_PASSWORD_CONTENT = "Kính gửi quý đối tác,<br/>"+
                                                        "Bên dưới là link để giúp quý đối tác cài lại mật khẩu, nếu có thắc mắc, sai sót hãy liên hệ chúng tôi để được hỗ trợ thêm.<br/>"+
                                                        "<a href='LINK_RESET'>Nhấn vào đây để reset mật khẩu</a>"+
