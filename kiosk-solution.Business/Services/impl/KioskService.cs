@@ -365,11 +365,7 @@ namespace kiosk_solution.Business.Services.impl
 
             if (kiosk.KioskScheduleTemplate == null)
             {
-                var check = await _fcmService.SendNotificationToUser(kiosk.DeviceId);
-                if (check)
-                {
-                    _logger.LogInformation($"Send Notification to change default template of kiosk {kiosk.Id}");
-                }
+                return null;
             }
             else
             {
@@ -414,6 +410,7 @@ namespace kiosk_solution.Business.Services.impl
 
                 var kioskResult = new
                 {
+                    templateId = kiosk.KioskScheduleTemplate.Template.Id,
                     events = eventRows.Values,
                     appCategories = appRows.Values
                 };
