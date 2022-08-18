@@ -239,6 +239,7 @@ namespace kiosk_solution.Business.Services.impl
                     {
                         Id = app.ServiceApplication.Id,
                         Name = app.ServiceApplication.Name,
+                        Link = app.ServiceApplication.Link,
                         Logo = app.ServiceApplication.Logo,
                         Status = app.ServiceApplication.Status
                     };
