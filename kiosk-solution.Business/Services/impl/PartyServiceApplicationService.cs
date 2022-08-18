@@ -22,13 +22,15 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IMapper _mapper;
         private readonly ILogger<IPartyServiceApplicationService> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ITemplateService _templateService;
 
         public PartyServiceApplicationService(IMapper mapper, ILogger<IPartyServiceApplicationService> logger,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork, ITemplateService templateService)
         {
             _mapper = mapper;
             _logger = logger;
             _unitOfWork = unitOfWork;
+            _templateService = templateService;
         }
 
         public async Task<bool> CheckAppExist(Guid partyId, Guid cateId)
@@ -215,6 +217,30 @@ namespace kiosk_solution.Business.Services.impl
                 .ToListAsync();
 
             return apps;
+        }
+
+        public async Task<List<PartyServiceApplicationViewModel>> GetListAppByTemplateId(Guid templateId)
+        {
+            List<PartyServiceApplicationViewModel> listResult = new List<PartyServiceApplicationViewModel>();
+
+            var template = await _templateService.GetDetailById(templateId);
+
+            foreach(var category in template.ListAppCatePosition)
+            {
+                var app = await _unitOfWork.PartyServiceApplicationRepository
+                    .Get(a => a.ServiceApplication.AppCategoryId.Equals(category.AppCategoryId) && a.Status.Equals(StatusConstants.INSTALLED))
+                    .Include(a => a.Party)
+                    .Include(a => a.ServiceApplication)
+                    .ThenInclude(b => b.AppCategory)
+                    .ProjectTo<PartyServiceApplicationViewModel>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync();
+                if(app != null)
+                {
+                    listResult.Add(app);
+                }
+            }
+
+            return listResult;
         }
     }
 }
