@@ -219,9 +219,9 @@ namespace kiosk_solution.Business.Services.impl
             return apps;
         }
 
-        public async Task<List<PartyServiceApplicationViewModel>> GetListAppByTemplateId(Guid templateId)
+        public async Task<List<dynamic>> GetListAppByTemplateId(Guid templateId)
         {
-            List<PartyServiceApplicationViewModel> listResult = new List<PartyServiceApplicationViewModel>();
+            List<dynamic> listResult = new List<dynamic>();
 
             var template = await _templateService.GetDetailById(templateId);
 
@@ -232,11 +232,18 @@ namespace kiosk_solution.Business.Services.impl
                     .Include(a => a.Party)
                     .Include(a => a.ServiceApplication)
                     .ThenInclude(b => b.AppCategory)
-                    .ProjectTo<PartyServiceApplicationViewModel>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync();
                 if(app != null)
                 {
-                    listResult.Add(app);
+                    var appResult = new
+                    {
+                        Id = app.ServiceApplication.Id,
+                        Name = app.ServiceApplication.Name,
+                        Link = app.ServiceApplication.Link,
+                        Logo = app.ServiceApplication.Logo,
+                        Status = app.ServiceApplication.Status
+                    };
+                    listResult.Add(appResult);
                 }
             }
 
