@@ -66,7 +66,7 @@ namespace kiosk_solution.Controllers
         {
             var result = await _partyServiceApplicationService.GetListAppByTemplateId(templateId);
             _logger.LogInformation("Get list installed applications by templateId by guest");
-            return Ok(new SuccessResponse<List<PartyServiceApplicationViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+            return Ok(new SuccessResponse<List<dynamic>>((int)HttpStatusCode.OK, "Search success.", result));
         }
 
         [Authorize(Roles = "Location Owner")]
