@@ -17,5 +17,6 @@ namespace kiosk_solution.Business.Services
         Task<PartyServiceApplicationViewModel> UpdateStatus(Guid partyId, PartyServiceApplicationUpdateViewModel model);
         Task<int> CountUserByAppId(Guid appId);
         Task<List<MyAppViewModel>> GetListAppByPartyId(Guid partyId);
+        Task<List<PartyServiceApplicationViewModel>> GetListAppByTemplateId(Guid templateId);
     }
 }

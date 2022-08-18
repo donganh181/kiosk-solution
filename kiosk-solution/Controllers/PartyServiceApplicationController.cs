@@ -59,7 +59,16 @@ namespace kiosk_solution.Controllers
             _logger.LogInformation($"Get installed applications by party {token.Mail}");
             return Ok(new SuccessResponse<DynamicModelResponse<PartyServiceApplicationSearchViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
         }
-        
+
+        [HttpGet("template")]
+        [MapToApiVersion("1")]
+        public async Task<IActionResult> GetListAppByTemplateId([FromQuery] Guid templateId)
+        {
+            var result = await _partyServiceApplicationService.GetListAppByTemplateId(templateId);
+            _logger.LogInformation("Get list installed applications by templateId by guest");
+            return Ok(new SuccessResponse<List<PartyServiceApplicationViewModel>>((int)HttpStatusCode.OK, "Search success.", result));
+        }
+
         [Authorize(Roles = "Location Owner")]
         [HttpPatch("status")]
         [MapToApiVersion("1")]

@@ -20,7 +20,6 @@ namespace kiosk_solution.Business.Services
         Task<bool> SetStatus(Guid id, string status);
         Task<bool> HasApplicationOnCategory(Guid appCategoryId);
         Task<ServiceApplicationViewModel> UpdateStatus(ServiceApplicationUpdateStatusViewModel model);
-
         Task<CountViewModel> CountApps(Guid partyId, string role);
     }
 }
