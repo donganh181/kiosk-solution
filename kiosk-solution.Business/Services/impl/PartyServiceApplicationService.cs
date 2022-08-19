@@ -227,26 +227,55 @@ namespace kiosk_solution.Business.Services.impl
 
             foreach(var category in template.ListAppCatePosition)
             {
-                var app = await _unitOfWork.PartyServiceApplicationRepository
+                var apps = await _unitOfWork.PartyServiceApplicationRepository
                     .Get(a => a.ServiceApplication.AppCategoryId.Equals(category.AppCategoryId) && a.Status.Equals(StatusConstants.INSTALLED))
                     .Include(a => a.Party)
                     .Include(a => a.ServiceApplication)
                     .ThenInclude(b => b.AppCategory)
-                    .FirstOrDefaultAsync();
-                if(app != null)
+                    .ToListAsync();
+                if(apps != null)
                 {
-                    var appResult = new
+                    foreach(var app in apps)
                     {
-                        Id = app.ServiceApplication.Id,
-                        Name = app.ServiceApplication.Name,
-                        Link = app.ServiceApplication.Link,
-                        Logo = app.ServiceApplication.Logo,
-                        Status = app.ServiceApplication.Status
-                    };
-                    listResult.Add(appResult);
+                        var appResult = new
+                        {
+                            Id = app.ServiceApplication.Id,
+                            Name = app.ServiceApplication.Name,
+                            Link = app.ServiceApplication.Link,
+                            Logo = app.ServiceApplication.Logo,
+                            Status = app.ServiceApplication.Status
+                        };
+                        listResult.Add(appResult);
+                    }
                 }
             }
 
+            return listResult;
+        }
+
+        public async Task<List<dynamic>> GetListAppByAppcategoryIdAndPartyId(Guid cateId, Guid partyId)
+        {
+            List<dynamic> listResult = new List<dynamic>();
+            
+            var apps = await _unitOfWork.PartyServiceApplicationRepository
+                .Get(a => a.ServiceApplication.AppCategoryId.Equals(cateId) && a.Status.Equals(StatusConstants.INSTALLED))
+                .Include(a => a.Party)
+                .Include(a => a.ServiceApplication)
+                .ThenInclude(b => b.AppCategory)
+                .ToListAsync();
+
+            foreach(var app in apps)
+            {
+                var appResult = new
+                {
+                    Id = app.ServiceApplication.Id,
+                    Name = app.ServiceApplication.Name,
+                    Link = app.ServiceApplication.Link,
+                    Logo = app.ServiceApplication.Logo,
+                    Status = app.ServiceApplication.Status
+                };
+                listResult.Add(appResult);
+            }
             return listResult;
         }
     }
