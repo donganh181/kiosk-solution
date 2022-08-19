@@ -73,7 +73,7 @@ namespace kiosk_solution.Controllers
         [MapToApiVersion("1")]
         public async Task<IActionResult> GetListAppByAppCategoryIdAndPartyId(Guid categoryId, Guid partyId)
         {
-            var result = await _partyServiceApplicationService.GetListAppByAppcategoryIdAndPartyId(cateId, partyId);
+            var result = await _partyServiceApplicationService.GetListAppByAppcategoryIdAndPartyId(categoryId, partyId);
             _logger.LogInformation("Get list installed applications by category id and party id by guest");
             return Ok(new SuccessResponse<List<dynamic>>((int)HttpStatusCode.OK, "Search success.", result));
         }
