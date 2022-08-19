@@ -18,5 +18,6 @@ namespace kiosk_solution.Business.Services
         Task<int> CountUserByAppId(Guid appId);
         Task<List<MyAppViewModel>> GetListAppByPartyId(Guid partyId);
         Task<List<dynamic>> GetListAppByTemplateId(Guid templateId);
+        Task<List<dynamic>> GetListAppByAppcategoryIdAndPartyId(Guid cateId, Guid partyId);
     }
 }
