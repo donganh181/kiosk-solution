@@ -53,6 +53,12 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int)HttpStatusCode.BadRequest, "You has already created this location.");
             }
 
+            if(model.ListImage == null)
+            {
+                _logger.LogInformation("Must have at least 1 image.");
+                throw new ErrorResponse((int)HttpStatusCode.BadRequest, "Must have at least 1 image.");
+            }
+
             var location = _mapper.Map<KioskLocation>(model);
             location.OwnerId = partyId;
             location.CreateDate = DateTime.Now;
@@ -66,11 +72,6 @@ namespace kiosk_solution.Business.Services.impl
                     .Include(a => a.Owner)
                     .ProjectTo<KioskLocationViewModel>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync();
-
-                if (model.ListImage == null)
-                {
-                    return result;
-                }
 
                 foreach (var img in model.ListImage)
                 {
@@ -298,7 +299,11 @@ namespace kiosk_solution.Business.Services.impl
                 _logger.LogInformation("Cannot found.");
                 throw new ErrorResponse((int)HttpStatusCode.NotFound, "Cannot found.");
             }
-
+            if (!location.OwnerId.Equals(partyId))
+            {
+                _logger.LogInformation("You cannot update kiosk location of another user.");
+                throw new ErrorResponse((int)HttpStatusCode.Forbidden, "You cannot update kiosk location of another user.");
+            }
             location.Name = model.Name;
             location.Description = model.Description;
             location.HotLine = model.HotLine;
