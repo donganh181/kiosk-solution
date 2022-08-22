@@ -209,7 +209,8 @@ namespace kiosk_solution.Business.Services.impl
         public async Task<List<MyAppViewModel>> GetListAppByPartyId(Guid partyId)
         {
             var apps = await _unitOfWork.PartyServiceApplicationRepository
-                .Get(a => a.PartyId.Equals(partyId) 
+                .Get(a => a.PartyId.Equals(partyId)
+                    && a.ServiceApplication.Status.Equals(StatusConstants.AVAILABLE)
                     && a.Status.Equals(StatusConstants.INSTALLED)
                     && !String.IsNullOrEmpty(a.ServiceApplication.Banner))
                 .Include(x => x.ServiceApplication)
@@ -228,7 +229,7 @@ namespace kiosk_solution.Business.Services.impl
             foreach(var category in template.ListAppCatePosition)
             {
                 var apps = await _unitOfWork.PartyServiceApplicationRepository
-                    .Get(a => a.ServiceApplication.AppCategoryId.Equals(category.AppCategoryId) && a.Status.Equals(StatusConstants.INSTALLED))
+                    .Get(a => a.ServiceApplication.AppCategoryId.Equals(category.AppCategoryId) && a.Status.Equals(StatusConstants.INSTALLED) && a.ServiceApplication.Status.Equals(StatusConstants.AVAILABLE))
                     .Include(a => a.Party)
                     .Include(a => a.ServiceApplication)
                     .ThenInclude(b => b.AppCategory)
@@ -258,7 +259,7 @@ namespace kiosk_solution.Business.Services.impl
             List<dynamic> listResult = new List<dynamic>();
             
             var apps = await _unitOfWork.PartyServiceApplicationRepository
-                .Get(a => a.ServiceApplication.AppCategoryId.Equals(cateId) && a.Status.Equals(StatusConstants.INSTALLED))
+                .Get(a => a.ServiceApplication.AppCategoryId.Equals(cateId) && a.Status.Equals(StatusConstants.INSTALLED) && a.ServiceApplication.Status.Equals(StatusConstants.AVAILABLE))
                 .Include(a => a.Party)
                 .Include(a => a.ServiceApplication)
                 .ThenInclude(b => b.AppCategory)
