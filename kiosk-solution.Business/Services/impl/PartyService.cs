@@ -379,7 +379,8 @@ namespace kiosk_solution.Business.Services.impl
                 res.Append(valid[rnd.Next(valid.Length)]);
             }
 
-            acc.VerifyCode = res.ToString();
+            acc.VerifyCode = res + "-" + DateTime.Now;
+
             try
             {
                 _unitOfWork.PartyRepository.Update(acc);
@@ -410,12 +411,19 @@ namespace kiosk_solution.Business.Services.impl
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Can not found.");
             }
 
-            if (!acc.VerifyCode.Equals(verifyCode))
+            if (!acc.VerifyCode.Split("-")[0].Equals(verifyCode))
             {
                 _logger.LogInformation("Wrong verify code.");
                 throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Wrong verify code.");
             }
 
+            var timeCode = DateTime.Parse(acc.VerifyCode.Split("-")[1]);
+            var timeNow = DateTime.Now;
+            if (DateTime.Compare(timeCode.AddMinutes(5), timeNow) < 0)
+            {
+                _logger.LogInformation("Code has expired.");
+                throw new ErrorResponse((int) HttpStatusCode.BadRequest, "Code has expired, please get another code and try again.");
+            }
             const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
             StringBuilder res = new StringBuilder();
             Random rnd = new Random();
