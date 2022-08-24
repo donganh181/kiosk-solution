@@ -92,8 +92,8 @@ namespace kiosk_solution.Business.Services.impl
                 list.PagingIQueryable(pageNum, size, CommonConstants.LimitPaging, CommonConstants.DefaultPaging);
             if (listPaging.Data.ToList().Count < 1)
             {
-                _logger.LogInformation("Can not found");
-                throw new ErrorResponse((int) HttpStatusCode.NotFound, "Can not found.");
+                _logger.LogInformation("Cannot found");
+                throw new ErrorResponse((int) HttpStatusCode.NotFound, "You don't have any schedule.");
             }
 
             var result = new DynamicModelResponse<ScheduleViewModel>
