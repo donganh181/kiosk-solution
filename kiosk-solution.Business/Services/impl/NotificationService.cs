@@ -1,12 +1,15 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using kiosk_solution.Business.Hubs;
 using kiosk_solution.Data.Constants;
 using kiosk_solution.Data.Models;
 using kiosk_solution.Data.Repositories;
 using kiosk_solution.Data.Responses;
 using kiosk_solution.Data.ViewModels;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,10 +27,11 @@ namespace kiosk_solution.Business.Services.impl
         private readonly IPartyNotificationService _partyNotiService;
         private readonly INotiService _fcmService;
         private readonly IPartyService _partyService;
+        private readonly IHubContext<SystemEventHub> _eventHub;
 
         public NotificationService(IUnitOfWork unitOfWork, IMapper mapper,
             ILogger<INotificationService> logger, IPartyNotificationService partyNotiService,
-            INotiService fcmService, IPartyService partyService)
+            INotiService fcmService, IPartyService partyService, IHubContext<SystemEventHub> eventHub)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -35,6 +39,7 @@ namespace kiosk_solution.Business.Services.impl
             _partyNotiService = partyNotiService;
             _fcmService = fcmService;
             _partyService = partyService;
+            _eventHub = eventHub;
         }
 
         public async Task<NotificationViewModel> Create(NotificationCreateViewModel model)
@@ -55,6 +60,16 @@ namespace kiosk_solution.Business.Services.impl
                 var partyNoti = await _partyNotiService.Create(partyNotiModel);
 
                 var party = await _partyService.GetPartyById(Guid.Parse(model.PartyId + ""), RoleConstants.SYSTEM, null);
+
+                var listNoti = await _partyNotiService.Get(model.PartyId, 0, 0);
+
+                var jsonConvert = JsonConvert.SerializeObject(listNoti);
+
+                _logger.LogInformation("<-------- start messaging to web portal --------->");
+                await _eventHub.Clients.Group(model.PartyId.ToString())
+                    .SendAsync(SystemEventHub.PARTY_NOTIFICATION_CONNECTION_CHANNEL,
+                        SystemEventHub.SYSTEM_BOT, jsonConvert);
+                _logger.LogInformation("<-------- end messaging to web portal --------->");
 
                 var deviceId = party.DeviceId;
                 if (!string.IsNullOrEmpty(deviceId))
