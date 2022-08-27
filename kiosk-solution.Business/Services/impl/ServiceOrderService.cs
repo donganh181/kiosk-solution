@@ -47,9 +47,33 @@ namespace kiosk_solution.Business.Services.impl
             }
 
             var appCate = await _serviceApplicationService.GetCommissionById(model.ServiceApplicationId);
-            serviceOrder.Commission =
-                serviceOrder.Total * Decimal.Parse((appCate.CommissionPercentage - 1) + "") / 100;
-            serviceOrder.SystemCommission = serviceOrder.Total * 1 / 100;
+            var totalCommission = serviceOrder.Total * Decimal.Parse(appCate.CommissionPercentage + "") / 100;
+            
+
+            if (appCate.CommissionPercentage > 1)
+            {
+                if (totalCommission > 70000)
+                {
+                    serviceOrder.Commission = 70000 * Decimal.Parse(((appCate.CommissionPercentage - 1)/appCate.CommissionPercentage) + "");
+                    serviceOrder.SystemCommission = 70000 - serviceOrder.Commission;
+                }
+                else
+                {
+                    serviceOrder.Commission =
+                        serviceOrder.Total * Decimal.Parse((appCate.CommissionPercentage - 1) + "") / 100;
+                    serviceOrder.SystemCommission = serviceOrder.Total * 1 / 100;
+                }
+            }
+            else
+            {
+                serviceOrder.Commission = 0;
+                if (totalCommission > 70000)
+                    serviceOrder.SystemCommission = 70000;
+                else
+                    serviceOrder.SystemCommission =
+                        serviceOrder.Total * Decimal.Parse(appCate.CommissionPercentage + "") / 100;
+            }
+            
             serviceOrder.KioskId = model.KioskId;
             serviceOrder.ServiceApplicationId = model.ServiceApplicationId;
             serviceOrder.CreateDate = DateTime.Now;
