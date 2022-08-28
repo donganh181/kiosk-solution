@@ -67,7 +67,7 @@ namespace kiosk_solution.Business.Services.impl
                     }
                     var slide = new SlideViewModel();
                     slide.Link = listAppByRating[i].ServiceAppModel.Banner;
-                    slide.KeyId = listAppByRating[i].Id;
+                    slide.KeyId = Guid.Parse(listAppByRating[i].ServiceApplicationId+"");
                     slide.KeyType = CommonConstants.APP_IMAGE;
                     listSlide.Add(slide);
                 }
