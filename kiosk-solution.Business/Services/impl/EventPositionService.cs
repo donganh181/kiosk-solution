@@ -191,10 +191,8 @@ namespace kiosk_solution.Business.Services.impl
                     .ProjectTo<EventPositionDetailGetViewModel>(_mapper.ConfigurationProvider).AsQueryable()
                     .OrderBy(p => p.ColumnIndex)
                     .ToListAsync();
-                if (components.Count == 0)
-                    break;
                 listPosition.Add(new EventPositionByRowViewModel(rowIndex, components));
-            } while (true);
+            } while (rowIndex < 2);
 
             if (listPosition == null)
             {
