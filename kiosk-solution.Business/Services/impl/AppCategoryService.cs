@@ -121,7 +121,7 @@ namespace kiosk_solution.Business.Services.impl
             else if (!string.IsNullOrEmpty(role) && role.Equals(RoleConstants.LOCATION_OWNER))
             {
                 cates = _unitOfWork.AppCategoryRepository
-                    .Get()
+                    .Get(c=>!c.Name.Equals("Transport") && !c.Name.Equals("Food"))
                     .ProjectTo<AppCategorySearchViewModel>(_mapper.ConfigurationProvider);
                 var listCheck = await cates.ToListAsync();
 
