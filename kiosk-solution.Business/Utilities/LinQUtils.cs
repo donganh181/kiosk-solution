@@ -31,7 +31,7 @@ namespace kiosk_solution.Business.Utilities
                     var array = (IList) propertyVal;
                     source = source.Where($"{item.Name}.Any(a=> @0.Contains(a))", array);
                 }
-                else if (item.CustomAttributes.Any(a => a.AttributeType == typeof(StringAttribute)) && item.Name.Equals("Status"))
+                else if (item.CustomAttributes.Any(a => a.AttributeType == typeof(StringAttribute)) && (item.Name.Equals("Status") || (item.Name.Equals("ServiceApplicationStatus"))))
                 {
                     if(source == null)
                     {
