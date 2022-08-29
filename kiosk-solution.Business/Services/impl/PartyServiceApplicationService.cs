@@ -259,7 +259,7 @@ namespace kiosk_solution.Business.Services.impl
             List<dynamic> listResult = new List<dynamic>();
             
             var apps = await _unitOfWork.PartyServiceApplicationRepository
-                .Get(a => a.ServiceApplication.AppCategoryId.Equals(cateId) && a.Status.Equals(StatusConstants.INSTALLED) && a.ServiceApplication.Status.Equals(StatusConstants.AVAILABLE))
+                .Get(a => a.PartyId.Equals(partyId) && a.ServiceApplication.AppCategoryId.Equals(cateId) && a.Status.Equals(StatusConstants.INSTALLED) && a.ServiceApplication.Status.Equals(StatusConstants.AVAILABLE))
                 .Include(a => a.Party)
                 .Include(a => a.ServiceApplication)
                 .ThenInclude(b => b.AppCategory)
