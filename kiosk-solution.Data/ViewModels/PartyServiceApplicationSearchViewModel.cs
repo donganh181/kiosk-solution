@@ -24,6 +24,6 @@ namespace kiosk_solution.Data.ViewModels
         [String] public string AppcategoryName { get; set; }
         [String] public string Status { get; set; }
 
-        [BindNever] public string ServiceApplicationStatus { get; set; }
+        [String] public string ServiceApplicationStatus { get; set; }
     }
 }
