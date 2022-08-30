@@ -21,5 +21,6 @@ namespace kiosk_solution.Business.Services
         Task<bool> HasApplicationOnCategory(Guid appCategoryId);
         Task<ServiceApplicationViewModel> UpdateStatus(ServiceApplicationUpdateStatusViewModel model);
         Task<CountViewModel> CountApps(Guid partyId, string role);
+        Task<bool> GetAffiliateByAppId(Guid appId);
     }
 }
