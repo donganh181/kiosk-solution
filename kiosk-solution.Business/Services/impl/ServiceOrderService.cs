@@ -38,7 +38,16 @@ namespace kiosk_solution.Business.Services.impl
 
         public async Task<ServiceOrderViewModel> Create(ServiceOrderCreateViewModel model)
         {
+
+            var isAffiliate = await _serviceApplicationService.GetAffiliateByAppId(model.ServiceApplicationId);
+            if (!isAffiliate)
+            {
+                return null;
+            }
+
             var serviceOrder = _mapper.Map<ServiceOrder>(model);
+
+
             dynamic order = JObject.Parse(model.OrderDetail);
             serviceOrder.Total = 0;
             foreach (var item in order.items)

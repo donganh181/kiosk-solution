@@ -459,5 +459,18 @@ namespace kiosk_solution.Business.Services.impl
                     .CountAsync()
             };
         }
+
+        public async Task<bool> GetAffiliateByAppId(Guid appId)
+        {
+            var app = await _unitOfWork.ServiceApplicationRepository.Get(a => a.Id.Equals(appId)).FirstOrDefaultAsync();
+
+            if(app == null)
+            {
+                return false;
+            }else
+            {
+                return bool.Parse(app.IsAffiliate+"");
+            }
+        }
     }
 }
