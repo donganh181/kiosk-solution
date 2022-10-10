@@ -16,6 +16,7 @@ COPY ["kiosk-solution.Business/kiosk-solution.Business.csproj", "kiosk-solution.
 RUN dotnet restore "kiosk-solution/kiosk-solution.API.csproj"
 COPY . .
 WORKDIR "/src/kiosk-solution"
+RUN dotnet clean "kiosk-solution.API.csproj"
 RUN dotnet build "kiosk-solution.API.csproj" -c Release -o /app/build
 
 FROM build AS publish

@@ -17,6 +17,7 @@ namespace kiosk_solution.Data.Models
         public string Description { get; set; }
         public string Logo { get; set; }
         public string Status { get; set; }
+        public string Type { get; set; }
 
         public virtual ICollection<ServiceApplication> ServiceApplications { get; set; }
     }

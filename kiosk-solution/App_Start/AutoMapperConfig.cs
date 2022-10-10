@@ -16,6 +16,26 @@ namespace kiosk_solution.App_Start
             {
                 mc.ConfigPartyModule();
                 mc.ConfigRoleModule();
+                mc.ConfigKioskModule();
+                mc.ConfigKioskLocationModule();
+                mc.ConfigScheduleModule();
+                mc.ConfigKioskScheduleTemplateModule();
+                mc.ConfigServiceApplicationModule();
+                mc.ConfigServiceApplicationPublishRequestModule();
+                mc.ConfigTemplateModule();
+                mc.ConfigEventModule();
+                mc.ConfigPartyServiceApplicationModule();
+                mc.ConfigPoiModule();
+                mc.ConfigAppCategoryModule();
+                mc.ConfigImageModule();
+                mc.ConfigAppCategoryPositionModule();
+                mc.ConfigEventPositionModule();
+                mc.ConfigPoicategoryModule();
+                mc.ConfigNotificationModule();
+                mc.ConfigPartyNotificationModule();
+                mc.ConfigServiceApplicationFeedBackModule();
+                mc.ConfigServiceOrderModule();
+                mc.ConfigKioskRatingModule();
             });
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);

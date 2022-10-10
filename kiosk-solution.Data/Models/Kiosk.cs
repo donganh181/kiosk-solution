@@ -9,8 +9,9 @@ namespace kiosk_solution.Data.Models
     {
         public Kiosk()
         {
-            Orders = new HashSet<Order>();
-            Schedules = new HashSet<Schedule>();
+            KioskRatings = new HashSet<KioskRating>();
+            KioskScheduleTemplates = new HashSet<KioskScheduleTemplate>();
+            ServiceOrders = new HashSet<ServiceOrder>();
         }
 
         public Guid Id { get; set; }
@@ -19,10 +20,14 @@ namespace kiosk_solution.Data.Models
         public Guid? PartyId { get; set; }
         public Guid? KioskLocationId { get; set; }
         public string Status { get; set; }
+        public double? Longtitude { get; set; }
+        public double? Latitude { get; set; }
+        public string DeviceId { get; set; }
 
         public virtual KioskLocation KioskLocation { get; set; }
         public virtual Party Party { get; set; }
-        public virtual ICollection<Order> Orders { get; set; }
-        public virtual ICollection<Schedule> Schedules { get; set; }
+        public virtual ICollection<KioskRating> KioskRatings { get; set; }
+        public virtual ICollection<KioskScheduleTemplate> KioskScheduleTemplates { get; set; }
+        public virtual ICollection<ServiceOrder> ServiceOrders { get; set; }
     }
 }

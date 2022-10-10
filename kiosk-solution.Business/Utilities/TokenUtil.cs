@@ -40,7 +40,7 @@ namespace kiosk_solution.Business.Utilities
             var token = new JwtSecurityToken("",
                 "",
                 claims,
-                expires: DateTime.Now.AddHours(2),
+                expires: DateTime.Now.AddMonths(2),
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);

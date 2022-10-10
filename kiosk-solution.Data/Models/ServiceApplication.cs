@@ -9,9 +9,10 @@ namespace kiosk_solution.Data.Models
     {
         public ServiceApplication()
         {
-            Orders = new HashSet<Order>();
             PartyServiceApplications = new HashSet<PartyServiceApplication>();
-            Positions = new HashSet<Position>();
+            ServiceApplicationFeedBacks = new HashSet<ServiceApplicationFeedBack>();
+            ServiceApplicationPublishRequests = new HashSet<ServiceApplicationPublishRequest>();
+            ServiceOrders = new HashSet<ServiceOrder>();
         }
 
         public Guid Id { get; set; }
@@ -21,14 +22,16 @@ namespace kiosk_solution.Data.Models
         public string Link { get; set; }
         public Guid? PartyId { get; set; }
         public Guid? AppCategoryId { get; set; }
-        public Guid? ApplicationMarketId { get; set; }
         public string Status { get; set; }
+        public DateTime? CreateDate { get; set; }
+        public bool? IsAffiliate { get; set; }
+        public string Banner { get; set; }
 
         public virtual AppCategory AppCategory { get; set; }
-        public virtual ApplicationMarket ApplicationMarket { get; set; }
         public virtual Party Party { get; set; }
-        public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<PartyServiceApplication> PartyServiceApplications { get; set; }
-        public virtual ICollection<Position> Positions { get; set; }
+        public virtual ICollection<ServiceApplicationFeedBack> ServiceApplicationFeedBacks { get; set; }
+        public virtual ICollection<ServiceApplicationPublishRequest> ServiceApplicationPublishRequests { get; set; }
+        public virtual ICollection<ServiceOrder> ServiceOrders { get; set; }
     }
 }

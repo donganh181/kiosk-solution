@@ -26,16 +26,16 @@ namespace kiosk_solution.Data.ViewModels
         [BindNever]
         public DateTime? DateOfBirth { get; set; }
         [BindNever]
-        public string Password { get; set; }
-        [BindNever]
         public Guid? CreatorId { get; set; }
+        [String]
+        public string CreatorMail { get; set; }
         [BindNever]
         public Guid? RoleId { get; set; }
         [BindNever]
         public DateTime? CreateDate { get; set; }
-        [BindNever]
+        [String]
         public string Status { get; set; }
-        [BindNever]
+        [String]
         public string RoleName { get; set; }
     }
 }

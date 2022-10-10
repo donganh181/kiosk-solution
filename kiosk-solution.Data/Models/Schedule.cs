@@ -9,20 +9,18 @@ namespace kiosk_solution.Data.Models
     {
         public Schedule()
         {
-            ScheduleTemplates = new HashSet<ScheduleTemplate>();
+            KioskScheduleTemplates = new HashSet<KioskScheduleTemplate>();
         }
 
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public DateTime? TimeStart { get; set; }
-        public DateTime? TimeEnd { get; set; }
+        public TimeSpan? TimeStart { get; set; }
+        public TimeSpan? TimeEnd { get; set; }
         public string DayOfWeek { get; set; }
-        public Guid? KioskId { get; set; }
         public Guid? PartyId { get; set; }
         public string Status { get; set; }
 
-        public virtual Kiosk Kiosk { get; set; }
         public virtual Party Party { get; set; }
-        public virtual ICollection<ScheduleTemplate> ScheduleTemplates { get; set; }
+        public virtual ICollection<KioskScheduleTemplate> KioskScheduleTemplates { get; set; }
     }
 }
